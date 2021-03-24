@@ -1,0 +1,10 @@
+POSTGRES_HOST=database
+POSTGRES_PORT=5432
+POSTGRES_DB=migasfree
+POSTGRES_USER=migasfree
+POSTGRES_CRON="00 00 * * *"
+
+http_proxy=
+https_proxy=
+
+

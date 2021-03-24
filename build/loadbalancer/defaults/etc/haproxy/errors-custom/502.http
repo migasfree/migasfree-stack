@@ -1,0 +1,48 @@
+HTTP/1.0 502 Bad Gateway
+Cache-Control: no-cache
+Connection: close
+Content-Type: text/html
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>502- Bad Gateway</title>
+        <style>
+            body {
+                width: 35em;
+                margin: 0 auto;
+                font-family: Tahoma, Verdana, Arial, sans-serif;
+            }
+            .center-div
+            {
+                position: absolute;
+                margin: auto;
+                top: -50%;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                width: 600px;
+                height: 125px;
+                #background-color: #fd0000;
+                border-radius: 40px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="center-div">
+            <p> </p>
+            <p> </p>
+            <div align="center">
+                <div align="center"  style="font-size:32px">
+                    502 - Bad Gateway
+                </div>
+                <div align="center">
+                    load balancer
+               </div>
+            </div>
+            <div align="right"><img src="/services-static/img/spoon-error.svg"  alt="" title="load balancer" height="200%" width="200%"></div>
+        </div>
+    </body>
+</html>
+

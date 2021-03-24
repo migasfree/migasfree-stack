@@ -1,0 +1,202 @@
+version: "3.7"
+
+services:
+
+    pms-apt:
+        image: migasfree/pms-apt:${PMS_APT_TAG}
+        deploy:
+            replicas: 1
+        env_file:
+            - ../config/env/globals
+            - ../config/env/swarm
+        depends_on:
+            - backend
+            - datastore
+        secrets:
+            - source: password_backend
+        volumes:
+            - keys:/var/lib/migasfree-backend/keys
+            - public:/var/migasfree/public
+        networks:
+            - mf_network
+
+
+    public:
+        image: migasfree/public:${PUBLIC_TAG}
+        deploy:
+            replicas: 1
+        env_file:
+            - ../config/env/globals
+            - ../config/env/swarm
+        volumes:
+#            - "/var/lib/migasfree/${FQDN}/public:/var/migasfree/public:ro"
+            - public:/var/migasfree/public:ro
+        networks:
+            - mf_network
+
+    frontend:
+        image: migasfree/frontend:${FRONTEND_TAG}
+        deploy:
+            replicas: 1
+        env_file:
+            - ../config/env/globals
+            - ../config/env/swarm
+        depends_on:
+            - backend
+
+        networks:
+            - mf_network
+
+    nfs-server:
+        image: itsthenetwork/nfs-server-alpine
+        environment:
+            SHARED_DIRECTORY: /migasfree
+        deploy:
+            replicas: 1
+        volumes:
+            - "/exports/migasfree/:/migasfree"
+        networks:
+            - mf_network
+
+    backend:
+        image: migasfree/backend:${BACKEND_TAG}
+        env_file:
+            - ../config/env/globals
+            - ../config/env/backend
+            - ../config/env/swarm
+        deploy:
+            replicas: 1
+        secrets:
+            - source: password_database
+        depends_on:
+            - database
+            - datastore
+            - public
+        volumes:
+ #           - "/var/lib/migasfree/${FQDN}/conf:/etc/migasfree-server"
+ #           - conf:/etc/migasfree-server
+            - conf:/var/lib/migasfree-backend/conf
+
+ #           - "/var/lib/migasfree/${FQDN}/public:/var/migasfree/repo"
+            - public:/var/lib/migasfree-backend/public
+
+#           - "/var/lib/migasfree/${FQDN}/keys:/usr/share/migasfree-server"
+            - keys:/var/lib/migasfree-backend/keys
+
+            #- "/usr/share/ca-certificates/192.168.1.201.crt:/usr/share/ca-certificates/192.168.1.201.crt"
+
+        networks:
+            - mf_network
+
+
+    database:
+        image: migasfree/database:${DATABASE_TAG}
+        env_file:
+            - ../config/env/globals
+            - ../config/env/backend
+            - ../config/env/swarm
+        environment:
+            - POSTGRES_PASSWORD_FILE=/run/secrets/password_database
+        secrets:
+            - source: password_database
+        deploy:
+            replicas: 1
+        volumes:
+
+            - type: tmpfs
+              target: /dev/shm
+              tmpfs:
+                size: 1024000000 # (this means 1GB)
+
+
+#            - "/var/lib/migasfree/${FQDN}/conf:/etc/migasfree-server"
+            - conf:/etc/migasfree-server
+
+#            - "/var/lib/migasfree/${FQDN}/data:/var/lib/postgresql/data"
+            - database:/var/lib/postgresql/data
+
+#            - "/var/lib/migasfree/${FQDN}/dump:/var/migasfree/dump"
+            - dump:/var/migasfree/dump
+        
+        #ELIMINAR EN PRO, DEJAR SOLO PARA MIGRACION DE BD
+        ports:
+            - "5432:5432"
+
+        networks:
+            - mf_network
+
+
+    datastore:
+        image: migasfree/datastore:${DATASTORE_TAG}
+        env_file:
+            - ../config/env/globals
+            - ../config/env/backend
+            - ../config/env/swarm
+        environment:
+            - POSTGRES_PASSWORD_FILE=/run/secrets/password_database
+        secrets:
+            - source: password_database
+        deploy:
+            replicas: 1
+        volumes:
+#            - "/var/lib/migasfree/${FQDN}/datastore:/var/lib/postgresql/datastore"
+            - datastore:/data
+
+        networks:
+            - mf_network
+
+
+networks:
+    mf_network:
+        external: true
+
+
+secrets:
+    password_database:
+        file: ../config/secrets/password_database
+    password_backend:
+        file: ../config/secrets/password_backend
+
+
+volumes:
+    conf:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=nfs-server,rw
+            device: :/conf
+    database:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=nfs-server,rw
+            device: :/database
+
+    datastore:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=nfs-server,rw
+            device: :/datastore
+
+    dump:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=nfs-server,rw
+            device: :/dump
+
+    public:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=nfs-server,rw
+            device: :/public
+
+    keys:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=nfs-server,rw
+            device: :/keys
+    

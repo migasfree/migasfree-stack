@@ -1,0 +1,5 @@
+NODE={{.Node.Hostname}}
+SERVICE={{.Service.Name}}
+
+
+

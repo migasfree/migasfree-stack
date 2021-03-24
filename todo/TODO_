@@ -1,0 +1,61 @@
+
+
+Obtener las ip de un servicio.
+==============================
+dig tasks.mf_frontend +noall +answer | awk '{print $5}'
+
+
+
+
+
+
+dentro de un contenedor obtener el nombre del stack, del servicio y tarea
+=========================================================================
+(require: apk add bind-tools)
+nslookup $(hostname -i)|grep name|awk -F " = " '{print $2}' |awk -F "." '{print $1"."$2"."$3}'
+
+
+
+
+SECRETS
+=======
+https://blog.viktoradam.net/2018/02/28/swarm-secrets-made-easy/
+
+
+
+
+ARQUITECTURA
+============
+https://es.slideshare.net/ramisayar/advanced-django-architecture
+
+
+
+
+TZ
+==
+Poner el TZ en todos los contenedores
+
+
+VOLUMENES
+=========
+
+OPCION 1
+https://github.com/ContainX/docker-volume-netshare
+https://github.com/ContainX/docker-volume-netshare/releases/tag/v0.35
+
+    instalacion
+    -----------
+    wget https://github.com/ContainX/docker-volume-netshare/releases/download/v0.36/docker-volume-netshare_0.36_amd64.deb
+    dpkg -i docker-volume-netshare_0.36_amd64.deb
+    service docker-volume-netshare start
+    # config in:  /etc/default/docker-volume-netshare
+
+
+    Uso
+    ---
+    docker run -i -t --volume-driver=nfs -v /data:/data alpine:3.10 /bin/sh
+
+
+OPCION 2
+
+docker volume create --driver local --opt type=nfs  --opt o=addr=192.168.1.200,rw --opt device=:/ midata

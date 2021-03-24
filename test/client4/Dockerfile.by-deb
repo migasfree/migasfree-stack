@@ -1,0 +1,19 @@
+FROM ubuntu:focal
+LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
+
+ENV TERM=xterm \
+    DEBIAN_FRONTEND=noninteractive 
+    
+
+RUN apt update && \
+    apt-get install -y --no-install-recommends curl nano git ca-certificates python3-pip python3-netifaces python3-magic python3-distro python3-stdeb python3-jwcrypto gnupg2 wget && \
+    wget -O - http://migasfree.org/pub/install-client | bash
+
+
+# CA
+# ==
+COPY defaults/usr/share/ca-certificates/ca.crt /usr/share/ca-certificates/ca.crt
+
+RUN ln -s /usr/share/ca-certificates/ca.crt /usr/local/share/ca-certificates/ca.crt && \
+    update-ca-certificates -f
+

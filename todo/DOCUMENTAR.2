@@ -1,0 +1,27 @@
+
+SSL
+===
+
+CERTIFICADO AUTO FIRMADO DE SERVIDOR
+====================================
+
+
+Cambios en el migasfree-sdk 
+-------------------------------------------
+1.- añadir una propiedad "verify_crt" (True por defecto) a la clase apiToken 
+2.- en todas las llamadas requests (post, get, etc) añadir:   verify=self.verify_crt
+3.- "protocol" debe añadirse como parametro en el init:
+
+Ejemplo de uso: 
+    user = "reader"
+    api = ApiToken(user=user, protocol='https', verify_crt=False)
+
+
+
+Cambios en el cliente
+--------------------------------
+Añadir  PROTOCOL a /etc/migasfree.conf (por defecto http). ¡¡¡¡¡Puedes tener http en el puerto 82 y https en el 9000!!!
+Añadir VERIFY_CRT a /etc/migasfree.conf (por defecto True)
+en url_request.py añadir verify=self.verify_crt
+
+

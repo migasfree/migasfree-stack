@@ -1,0 +1,169 @@
+
+
+
+SSL
+===
+
+CERTIFICADO AUTO FIRMADO DE SERVIDOR
+====================================
+
+
+
+EN EL CLIENTE
+=============
+Si haces uso de un certificado SSL auto firmado (self-signed SSL certificate) en el servidor, debes
+configurar el cliente para que pueda trabajar con normalidad.
+
+
+
+
+
+1.- Error al ejecutar migasfree-cient
+Info: Error de curl: server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
+
+Solucion:
+En el ordenador cliente debes instalar el certificado y configurar
+el ajuste SSL_Cert en /etc/migasfree.conf
+
+p.e:
+SSL_Cert = /usr/share/migasfree-certs/cert.pem
+SSL_Cert = /usr/share/migasfree-certs/certiticate.crt
+
+obtener certificado via web desde bash:
+mkdir /usr/share/migasfree-certs
+cd /usr/share/migasfree-certs
+echo | openssl s_client -servername 192.168.1.105 -connect 192.168.1.105:443 |  sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /usr/share/migasfree-certs/certificate.crt
+
+
+
+2.- Error de verificación en PMS
+
+P.e. error en APT:
+Certificate verification failed: The certificate is NOT trusted.
+The certificate issuer is unknown. The name in the certificate does not match the expected.
+Could not handshake: Error in the certificate verification.
+
+
+Para apt puedes crear el fichero /etc/apt/apt.conf.d/80-ssl-exceptions
+con el siguiente contenido e  incluirlo en tu paquete de configuracion "acme-migasfree-client":
+
+Acquire::https::192.168.1.200::Verify-Peer "false";
+Acquire::https::192.168.1.200::Verify-Host "false";
+
+
+3.- Migasfree-play
+
+añadir "--ignore-certificate-errors" a los parámetros de chromium (chromium-args)
+en el fichero /usr/share/migasfree/package.json
+
+
+
+4.-  nano  /usr/lib/python2.7/dist-packages/migasfree_client/curl.py
+nano  /usr/lib/python2.7/dist-packages/migasfree_client/curl.py
+
+
+
+
+        if self.url.startswith('https://'):  # server over SSL
+            self.curl.setopt(pycurl.SSL_VERIFYPEER, False)  # do not check the server's cert
+            self.curl.setopt(pycurl.SSL_VERIFYHOST, False)
+
+            # Set certificate path and verifications
+            if cert is not None and os.path.exists(cert):
+                self.curl.setopt(pycurl.SSLCERT, cert)
+                self.curl.setopt(pycurl.SSL_VERIFYPEER, 0)              <<<<<<<<<<     ¿AÑADIR PARAMETRO IGNORE-CERTIFICATES?
+                self.curl.setopt(pycurl.SSL_VERIFYHOST, 0)              <<<<<<<<<<     ¿AÑADIR PARAMETRO IGNORE-CERTIFICATES?
+
+
+
+
+Por otro lado estos valores pycurl.SSL_VERIFYHOST son Long y precisamente 1L ya no está soportado:
+            Traceback (most recent call last):
+              File "/usr/bin/migasfree", line 17, in <module>
+                migasfree_client.client.main()
+              File "/usr/lib/python2.7/dist-packages/migasfree_client/client.py", line 983, in main
+                mfc.run()
+              File "/usr/lib/python2.7/dist-packages/migasfree_client/client.py", line 960, in run
+                self._update_system()
+              File "/usr/lib/python2.7/dist-packages/migasfree_client/client.py", line 552, in _update_system
+                if self._send_message(_('Connecting to migasfree server...')):
+              File "/usr/lib/python2.7/dist-packages/migasfree_client/client.py", line 176, in _send_message
+                exit_on_error=False
+              File "/usr/lib/python2.7/dist-packages/migasfree_client/url_request.py", line 151, in run
+                cert=self._cert,
+              File "/usr/lib/python2.7/dist-packages/migasfree_client/curl.py", line 103, in __init__
+                self.curl.setopt(pycurl.SSL_VERIFYHOST, True)
+            pycurl.error: (43, 'CURLOPT_SSL_VERIFYHOST no longer supports 1 as value!')
+
+
+
+
+
+
+
+
+
+
+
+
+ROOT CA
+=======
+
+
+
+1.- En el cliente:
+
+cp ca.cert.pem /usr/share/ca-certificates/ca.cert.pem
+ln -s /usr/share/ca-certificates/ca.cert.pem /usr/local/share/ca-certificates/ca.crt
+
+update-ca-certificates
+
+
+
+
+
+2.- En migasfree-play (añadir ca.cert.pem en pakage.json):
+
+o bien:
+  "additional_trust_anchors": [
+    "-----BEGIN CERTIFICATE-----\n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\nFZT6rNU=\n-----END CERTIFICATE-----\n"
+  ],
+
+o bien:
+
+en /usr/share/migasfree-play/package.json añadir --ignore-certificate-errors
+  "chromium-args": "--ignore-certificate-errors" 
+
+
+
+3.- Para firefox y chromium:
+    https://thomas-leister.de/en/how-to-import-ca-root-certificate/
+
+
+
+
+
+
+
+
+# DOCKER
+=========
+
+
+Ver error del servicio sin truncar
+---------------------------------------------------
+docker service ps --no-trunc mf_database
+
+
+
+
+
+
+EMPEZAR DE NUEVO
+=================
+docker stack rm mf core
+docker stop nfsserver
+docker rm nfsserver
+echo "y"| docker system prune
+docker volume rm mf_conf mf_data mf_dump mf_keys mf_public
+rm -rf /exports/migasfree

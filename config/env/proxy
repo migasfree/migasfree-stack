@@ -1,0 +1,10 @@
+
+# letsencript
+# ==========
+EMAIL=vitalinux@educa.aragon.es
+DOMAINS=migasfreetest.catedu.es
+OPTIONS=""
+KEY_SIZE=4096
+RENEW_CRON='0 4 * * *'
+
+

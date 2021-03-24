@@ -1,0 +1,19 @@
+db:
+  image: migasfree/db:${MIGASFREE_VERSION_DB}
+  container_name: ${FQDN}-db
+  environment:
+    - POSTGRES_CRON=${POSTGRES_CRON}
+    - POSTGRES_HOST=${FQDN}
+    - POSTGRES_PORT=${POSTGRES_PORT}
+    - POSTGRES_DB=${POSTGRES_DB}
+    - POSTGRES_USER=${POSTGRES_USER}
+    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    - POSTGRES_ALLOW_HOSTS=${POSTGRES_ALLOW_HOSTS}
+    - TZ=${TZ}
+  restart: always
+  ports:
+    - "${POSTGRES_PORT}:5432"
+  volumes:
+    - "/var/lib/migasfree/old/conf:/etc/migasfree-server"
+    - "/var/lib/migasfree/old/data:/var/lib/postgresql/data"
+    - "/var/lib/migasfree/old/dump:/var/migasfree/dump"

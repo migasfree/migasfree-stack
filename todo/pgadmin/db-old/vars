@@ -1,0 +1,20 @@
+
+#!/bin/bash
+
+#export FQDN=migasfree.mydomain.com
+export FQDN=$(ip route get 8.8.8.8| grep src| sed 's/.*src \(.*\)$/\1/g' | cut -d ' ' -f 1)
+
+export MIGASFREE_VERSION_DB=0.5
+
+export POSTGRES_PORT=5555
+
+export POSTGRES_DB=migasfree
+export POSTGRES_USER=migasfree
+export POSTGRES_PASSWORD=migasfree
+
+export POSTGRES_CRON="00 00 * * *"
+
+#export POSTGRES_ALLOW_HOSTS="192.168.1.0/24"
+export POSTGRES_ALLOW_HOSTS="192.168.1.105/24"
+
+export TZ=Europe/Madrid

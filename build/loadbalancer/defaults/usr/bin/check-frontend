@@ -1,0 +1,18 @@
+#!/bin/bash
+# http://www.loadbalancer.org/blog/how-to-write-an-external-custom-healthcheck-for-haproxy/
+# http://cbonte.github.io/haproxy-dconv/1.6/configuration.html#4.2-external-check%20command
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+VIP=$1
+VPT=$2
+RIP=$3
+if [ -z "$4" ]; then   # check if $4 empty (Ie. a Multport VIP)
+    RPT=$VPT  # We are multiport - use the check port or VIP first port
+else
+    RPT=$4
+fi
+
+
+CHECK_STRING="Migasfree Frontend"
+curl --connect-timeout .5 -X GET  http://${RIP}:${RPT}/index.html 2>/dev/null | grep -q "${CHECK_STRING}"
+exit $?

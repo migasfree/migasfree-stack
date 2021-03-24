@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+
+    loadbalancer:
+
+        image: migasfree/loadbalancer:${LOADBALANCER_TAG}
+
+        ports:
+            - 80:80
+            - 443:443
+
+    #    links:
+    #        - letsencrypt
+        env_file:
+            - ../config/env/globals
+            - ../config/env/proxy
+       
+        deploy:
+            replicas: 1
+
+        networks:
+            - mf_network
+
+        volumes:
+            - "../config/certs:/certs"
+     #       - certificates:/etc/letsencrypt
+     #       - certificates:/var/lib/letsencrypt
+
+
+networks:
+    mf_network:
+        external: true
+
+
