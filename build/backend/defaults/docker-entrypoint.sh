@@ -285,4 +285,4 @@ gunicorn --forwarded-allow-ips="loadbalancer,pms-apt,frontend,public,backend" \
          --worker-tmp-dir=/dev/shm \
          --workers=$((2* $(nproc) + 1 ))  --worker-connections=1000 \
          --bind=0.0.0.0:8080 \
-         migasfree.wsgi
+         migasfree.asgi:application -k uvicorn.workers.UvicornWorker
