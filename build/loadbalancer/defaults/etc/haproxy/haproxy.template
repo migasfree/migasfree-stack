@@ -52,8 +52,9 @@ frontend http
 
     acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/
     
-    # api v4
-    acl url_backend  path_beg /get_key_repositories /get_properties
+    # api v4 COMPATIBILITY
+    acl url_backend  path_beg /get_key_repositories /get_properties /get_computer_info
+    http-request replace-path /admin/server/computer/(.*)/change /computers/results/\1    # migasfree-play 1.x 
 
 
 
