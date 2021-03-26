@@ -13,7 +13,7 @@ services:
             - backend
             - datastore
         secrets:
-            - source: password_backend
+            - source: password_admin
         volumes:
             - keys:/var/lib/migasfree-backend/keys
             - public:/var/migasfree/public
@@ -154,8 +154,8 @@ networks:
 secrets:
     password_database:
         file: ../config/secrets/password_database
-    password_backend:
-        file: ../config/secrets/password_backend
+    password_admin:
+        file: ../config/secrets/password_admin
 
 
 volumes:
