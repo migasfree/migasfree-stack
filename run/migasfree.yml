@@ -163,40 +163,40 @@ volumes:
         driver: local
         driver_opts:
             type: nfs4
-            o: addr=nfs-server,rw
+            o: addr=${NFS_SERVER},rw
             device: :/conf
     database:
         driver: local
         driver_opts:
             type: nfs4
-            o: addr=nfs-server,rw
+            o: addr=${NFS_SERVER},rw
             device: :/database
 
     datastore:
         driver: local
         driver_opts:
             type: nfs4
-            o: addr=nfs-server,rw
+            o: addr=${NFS_SERVER},rw
             device: :/datastore
 
     dump:
         driver: local
         driver_opts:
             type: nfs4
-            o: addr=nfs-server,rw
+            o: addr=${NFS_SERVER},rw
             device: :/dump
 
     public:
         driver: local
         driver_opts:
             type: nfs4
-            o: addr=nfs-server,rw
+            o: addr=${NFS_SERVER},rw
             device: :/public
 
     keys:
         driver: local
         driver_opts:
             type: nfs4
-            o: addr=nfs-server,rw
+            o: addr=${NFS_SERVER},rw
             device: :/keys
     

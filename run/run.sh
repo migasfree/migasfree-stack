@@ -2,7 +2,7 @@
 
 export FQDN
 
-#export NFS_SERVER=localhost
+export NFS_SERVER
 
 export STACK=mf
 
