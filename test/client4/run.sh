@@ -1,3 +1,4 @@
+cp ../../config/certs/ca.crt defaults/usr/share/ca-certificates/ca.crt
 docker build . -t migasfree/client:4.20
 docker run --rm \
 	-e TZ="Europe/Madrid" \
