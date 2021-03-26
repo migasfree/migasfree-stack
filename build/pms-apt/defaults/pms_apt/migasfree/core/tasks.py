@@ -31,7 +31,7 @@ con=redis.Redis(host='datastore', port=6379, db=0)
 
 def get_secret_pass():
     password = ""
-    with open("/run/secrets/password_backend","r") as f:
+    with open("/run/secrets/password_admin","r") as f:
         password = f.read()
     return password
 
