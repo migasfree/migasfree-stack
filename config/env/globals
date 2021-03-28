@@ -1,4 +1,5 @@
+STACK=mf
+
 TZ=Europe/Madrid
-#FQDN=migasfreetest.catedu.es
-FQDN=178.32.211.229
-NFS_SERVER=$FQDN
+FQDN=migasfreetest.catedu.es
+NFS_SERVER=192.168.244.244
