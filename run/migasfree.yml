@@ -47,17 +47,6 @@ services:
         networks:
             - mf_network
 
-    nfs-server:
-        image: itsthenetwork/nfs-server-alpine
-        environment:
-            SHARED_DIRECTORY: /migasfree
-        deploy:
-            replicas: 1
-        volumes:
-            - "/exports/migasfree/:/migasfree"
-        networks:
-            - mf_network
-
     backend:
         image: migasfree/backend:${BACKEND_TAG}
         env_file:
