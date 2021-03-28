@@ -1,5 +1,7 @@
 #https://github.com/sjiveson/nfs-server-alpine
 
+. ../config/env/globals
+
 mkdir -p /exports/migasfree/database
 mkdir -p /exports/migasfree/dump
 mkdir -p /exports/migasfree/datastore
@@ -22,10 +24,12 @@ then
     chown 890:890  /exports/migasfree/conf/settings
 fi
 
+_DEV=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)')
+ip addr add ${NFS_SERVER}/24 dev $_DEV
 
 docker run --restart=always -d \
     --name nfsserver \
-    -p 2049:2049 \
+    -p ${NFS_SERVER}:2049:2049 \
     --privileged \
      -v /exports/migasfree/:/migasfree \
      -e SHARED_DIRECTORY=/migasfree \
