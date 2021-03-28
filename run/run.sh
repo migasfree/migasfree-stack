@@ -4,7 +4,7 @@ export FQDN
 
 export NFS_SERVER
 
-export STACK=mf
+export STACK
 
 export LOADBALANCER_TAG=$(cat ../build/loadbalancer/VERSION)
 
