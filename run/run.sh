@@ -6,6 +6,8 @@ export NFS_SERVER
 
 export STACK
 
+export CERTBOT_TAG=$(cat ../build/loadbalancer/VERSION)
+
 export LOADBALANCER_TAG=$(cat ../build/loadbalancer/VERSION)
 
 export BACKEND_TAG=$(cat ../build/backend/VERSION)
