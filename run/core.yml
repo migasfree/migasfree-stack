@@ -20,7 +20,7 @@ services:
             - mf_network
 
         volumes:
-            - "../config/certs:/certs"
+        #    - "../config/certs:/certs"
             - certificates:/usr/local/etc/haproxy/certificates:ro
 
     cerboter:

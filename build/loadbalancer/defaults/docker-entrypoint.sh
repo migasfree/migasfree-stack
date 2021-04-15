@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
-install-certs
-watch-certs &
-LETSENCRYPT_CERT="$(cat /certs/cert.pem)"
-export DEFAULT_SSL_CERT="${DEFAULT_SSL_CERT:-$LETSENCRYPT_CERT}"
+#install-certs
+#watch-certs &
+#LETSENCRYPT_CERT="$(cat /certs/cert.pem)"
+#export DEFAULT_SSL_CERT="${DEFAULT_SSL_CERT:-$LETSENCRYPT_CERT}"
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
     set -- haproxy "$@"
@@ -41,4 +41,4 @@ echo "
 # =============
 #haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -sf $(cat /run/haproxy.pid) -x /var/run/haproxy.sock
 
-haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -sf $(cat /run/haproxy.pid) 
+haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -sf $(cat /run/haproxy.pid)

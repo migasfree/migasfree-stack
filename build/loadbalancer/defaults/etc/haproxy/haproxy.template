@@ -8,6 +8,9 @@ global
     ssl-server-verify none
     pidfile /run/haproxy.pid
     
+    # Enable HAProxy runtime API
+    stats socket :9999 level admin expose-fd listeners
+
     #external-check
 
 
@@ -31,8 +34,14 @@ frontend http
     bind *:80
 
     # Certificate autosigned and CA-FILE
-    bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt verify optional crt-ignore-err all
+    #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt verify optional crt-ignore-err all
     
+    bind :443 ssl crt /usr/local/etc/haproxy/certificates/
+    http-request add-header X-Forwarded-Proto https
+
+    # ACL Certbot
+    acl certbot path_beg /.well-known/acme-challenge/
+
     # Certificate and CA-FILE
     #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt
     
@@ -91,7 +100,7 @@ frontend http
     use_backend mf_backend if url_backend 
     use_backend services if is_GET url_services || url_services_static
     use_backend mf_public if url_public || url_packages || url_src
-
+    use_backend certbot if certbot
 
     default_backend mf_frontend
     #default_backend services
@@ -99,6 +108,8 @@ frontend http
 
 
 
+backend certbot
+    server certbot certbot:380
 
 
 #backend certificates
