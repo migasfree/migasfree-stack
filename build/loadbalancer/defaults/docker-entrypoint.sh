@@ -2,6 +2,12 @@
 set -e
 #install-certs
 #watch-certs &
+
+# If not certificate, haproxy dont start and certbot can't challenge complete
+# Create a self-certificate to init
+
+[ ! -f /usr/local/etc/haproxy/certificates/${FQDN}.pem ] && install-certs
+
 #LETSENCRYPT_CERT="$(cat /certs/cert.pem)"
 #export DEFAULT_SSL_CERT="${DEFAULT_SSL_CERT:-$LETSENCRYPT_CERT}"
 # first arg is `-f` or `--some-option`

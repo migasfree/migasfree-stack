@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Certificates exist
-if [ -d /etc/letsencrypt/live/davole.com ]; then
+if [ -d /etc/letsencrypt/live/${DOMAIN} ]; then
     # Check certificates and renew them
     certbot renew --http-01-port=380
     

@@ -33,18 +33,23 @@ defaults
 frontend http
     bind *:80
 
+    # ACL Certbot
+    acl certbot path_beg /.well-known/acme-challenge/
+
+    use_backend core_certbot if certbot
+
+frontend https
+    bind :443 ssl crt /usr/local/etc/haproxy/certificates/migasfreetest.catedu.es.pem
+    
     # Certificate autosigned and CA-FILE
     #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt verify optional crt-ignore-err all
-    
-    bind :443 ssl crt /usr/local/etc/haproxy/certificates/
+    # Certificate and CA-FILE
+    #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt    
+
     http-request add-header X-Forwarded-Proto https
 
     # ACL Certbot
     acl certbot path_beg /.well-known/acme-challenge/
-
-    # Certificate and CA-FILE
-    #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt
-    
     
     mode http
 #    acl certificates_check url_beg /.well-known
@@ -100,26 +105,20 @@ frontend http
     use_backend mf_backend if url_backend 
     use_backend services if is_GET url_services || url_services_static
     use_backend mf_public if url_public || url_packages || url_src
-    use_backend certbot if certbot
+    use_backend core_certbot if certbot
 
     default_backend mf_frontend
     #default_backend services
 
 
-
-
-backend certbot
-    server certbot certbot:380
+backend core_certbot
+    server core_certbot core_certbot:380
 
 
 #backend certificates
 #    mode http
 #    balance leastconn
 #    server letsencrypt letsencrypt:80 check init-addr last,libc,none
-
-
-
-
 
 
 backend mf_public

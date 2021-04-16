@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
 
-mkdir -p /certs
-mkdir -p "$LIVE_CERT_FOLDER"
+#mkdir -p /certs
+[ ! -d /usr/local/etc/haproxy/certificates ] && exit 1;
+#mkdir -p "$LIVE_CERT_FOLDER"
 
 # Create a self signed default certificate, so HAproxy can start before we have
 # any real certificates.
@@ -10,13 +11,14 @@ mkdir -p "$LIVE_CERT_FOLDER"
 
 # https://gist.github.com/lloesche/d35b820b99d6da5596525ab3b2168ab9
 
-if [[ ! -f /certs/cert.pem ]]; then
+#if [[ ! -f /usr/local/etc/haproxy/certificates/${FQDN}.pem ]]; then
     #openssl genrsa -out cert.key 4096
     #openssl req -new -key cert.key -out cert.csr -nodes -subj "/C=ES/ST=ZARAGOZA/L=ZARAGOZA/O=migasfree/OU=dev/CN=${FQDN}/emailAddress=alberto@migasfree.org"
     #openssl x509 -req -days 365 -in cert.csr -signkey cert.key -out cert.crt
     #cat cert.key cert.crt > /certs/cert.pem
 
-    cd /certs
+    #cd /certs
+    cd /usr/local/etc/haproxy/certificates
     # Create your CA crt and key:
     openssl req -new -x509 -nodes -newkey rsa:4096 -extensions v3_ca -sha256 -days 3650 -subj "/C=ES/ST=ZARAGOZA/L=ZARAGOZA/O=migasfree/CN=Insecure Certificate Authority" -keyout ca.key -out ca.crt
     chmod 600 ca.key
@@ -36,19 +38,19 @@ if [[ ! -f /certs/cert.pem ]]; then
     openssl x509 -in cert.crt -text -noout
     
     # Certificate autosigned for SSL in  haproxy
-    cat cert.key cert.crt > /certs/cert.pem 
+    cat cert.key cert.crt > ${FQDN}.pem 
     
     cd -
 
 
-fi
+#fi
 
 
-# Install combined certificates for HAproxy.
-if [[ -n "$(ls -A $LIVE_CERT_FOLDER)" ]]; then
-    COUNT=0
-    for DIR in "$LIVE_CERT_FOLDER"/*; do
-        cat "$DIR/privkey.pem" "$DIR/fullchain.pem" > /certs/cert.pem
-        (( COUNT += 1 ))
-    done
-fi
+# # Install combined certificates for HAproxy.
+# if [[ -n "$(ls -A $LIVE_CERT_FOLDER)" ]]; then
+#     COUNT=0
+#     for DIR in "$LIVE_CERT_FOLDER"/*; do
+#         cat "$DIR/privkey.pem" "$DIR/fullchain.pem" > /certs/cert.pem
+#         (( COUNT += 1 ))
+#     done
+# fi
