@@ -14,7 +14,8 @@ ENV TERM=xterm \
     _GID=890 \
     _BUILD_DEPENDS='git python3-dev libgpgme11-dev python3-all python3-all-dev debhelper unzip g++ gcc-8 libcairo2-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libpq-dev' \
     _DEPENDS='libzmq5 gnupg rng-tools curl  apt-utils bzip2 xz-utils libgpgme11 python3 python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat-openbsd logrotate wait-for-it' \
-    _PIP_DEPENDS='gunicorn==20.0.4 uvicorn==0.13.4 uvloop==0.15.2 httptools==0.1.1'
+   _PIP_DEPENDS='daphne==3.0.2'
+   # _PIP_DEPENDS='gunicorn==20.0.4 uvicorn==0.13.4 uvloop==0.15.2 httptools==0.1.1 daphne==3.0.2'
 
 RUN _TAG=$(cat /VERSION) && \
     #sed --in-place "s/deb.debian.org/softlibre.unizar.es/g" /etc/apt/sources.list && \

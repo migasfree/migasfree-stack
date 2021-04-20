@@ -251,7 +251,7 @@ send_message ""
 echo "
 
         migasfree BACKEND
-        $(gunicorn -v)
+        $(pip freeze | grep daphne)
         Container: $HOSTNAME
         Time zome: $TZ  $(date)
         Processes: $(nproc)
@@ -267,22 +267,22 @@ echo "
 
 # CELERY BEAT
 # ===========
-DJANGO_SETTINGS_MODULE=migasfree.settings.production celery beat -A migasfree --logfile=/var/tmp/celery-beat.log --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule &
+DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --logfile=/var/tmp/celery-beat.log --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule --loglevel=INFO &
+
 
 # CELERY WORKER
 # ==============
-DJANGO_SETTINGS_MODULE=migasfree.settings.production celery --without-gossip --concurrency=10 --logfile=/dev/null --app=migasfree.celery.app worker -Q default -B --uid 890 &
+DJANGO_SETTINGS_MODULE=migasfree.settings.production celery  --app=migasfree.celery.app worker -Q default -B --uid 890  --without-gossip --concurrency=10 --logfile=/var/tmp/celery-default.log &
 
 
-#touch /tmp/migasfree-celery.log
-#chown $_UID:$_GID /tmp/migasfree-celery.log
+# TODO: daphne is running as root!!!  
+daphne --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application
 
-
-gunicorn --forwarded-allow-ips="loadbalancer,pms-apt,frontend,public,backend" \
-        --user=$_UID --group=$_GID \
-         --log-level=info  --error-logfile=- --access-logfile=- \
-         --timeout=3600 \
-         --worker-tmp-dir=/dev/shm \
-         --workers=$((2* $(nproc) + 1 ))  --worker-connections=1000 \
-         --bind=0.0.0.0:8080 \
-         migasfree.asgi:application -k uvicorn.workers.UvicornWorker
+#gunicorn --forwarded-allow-ips="loadbalancer,pms-apt,frontend,public,backend" \
+#        --user=$_UID --group=$_GID \
+#         --log-level=info  --error-logfile=- --access-logfile=- \
+#         --timeout=3600 \
+#         --worker-tmp-dir=/dev/shm \
+#         --workers=$((2* $(nproc) + 1 ))  --worker-connections=1000 \
+#         --bind=0.0.0.0:8080 \
+#         migasfree.asgi:application -k uvicorn.workers.UvicornWorker
