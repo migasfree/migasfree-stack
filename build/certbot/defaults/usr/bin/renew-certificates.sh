@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Certificates exist
-if [ -d /etc/letsencrypt/live/${DOMAIN} ]; then
+if [ -d /etc/letsencrypt/live/${FQDN} ]; then
     # Check certificates and renew them
     certbot renew --http-01-port=380
     

@@ -12,7 +12,6 @@ services:
 
         env_file:
             - ../config/env/globals
-            - ../config/env/proxy
        
         deploy:
             replicas: 1
@@ -21,14 +20,13 @@ services:
             - mf_network
 
         volumes:
-        #    - "../config/certs:/certs"
+            - "../config/certs:/manualcerts"
             - certificates:/usr/local/etc/haproxy/certificates
 
     certbot:
         image: migasfree/certbot:${CERTBOT_TAG}
         env_file:
             - ../config/env/globals
-            - ../config/env/proxy
         deploy:
             replicas: 1
         networks:

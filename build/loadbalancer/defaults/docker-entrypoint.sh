@@ -1,15 +1,21 @@
 #!/bin/bash
 set -e
-#install-certs
-#watch-certs &
 
-# If not certificate, haproxy dont start and certbot can't challenge complete
+# If not certificate, haproxy don't start and/or certbot can't challenge complete
 # Create a self-certificate to init
 
-[ ! -f /usr/local/etc/haproxy/certificates/${FQDN}.pem ] && install-certs
+if [ "${HTTPSMODE}" = "manual" ]; then
+  if [ ! -f "/manualcerts/${FQDN}.pem" ]; then
+    echo "WARN: Certificate ${FQDN}.pem missing...create a selfsigned now..."
+  else
+    cp "/manualcerts/${FQDN}.pem" "/usr/local/etc/haproxy/certificates/${FQDN}.pem" || \
+      echo "WARN: Error to copy certificate ${FQDN}.pem...create a selfsigned now..."
+  fi
+fi
 
-#LETSENCRYPT_CERT="$(cat /certs/cert.pem)"
-#export DEFAULT_SSL_CERT="${DEFAULT_SSL_CERT:-$LETSENCRYPT_CERT}"
+[ ! -f "/usr/local/etc/haproxy/certificates/${FQDN}.pem" ] && \
+  { echo "INFO: Creating self certificates..."; install-certs; }
+
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
     set -- haproxy "$@"
