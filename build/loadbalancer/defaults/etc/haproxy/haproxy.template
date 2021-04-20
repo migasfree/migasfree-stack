@@ -63,6 +63,8 @@ frontend https
 
     http-request set-var(txn.path) path   # for services_cache
 
+    # WEBSOCKETS
+    acl is_websocket hdr(Upgrade) -i WebSocket
 
     acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/
     
@@ -102,7 +104,7 @@ frontend https
 
 
     use_backend mf_frontend if url_root or url_empty
-    use_backend mf_backend if url_backend 
+    use_backend mf_backend if url_backend || is_websocket
     use_backend services if is_GET url_services || url_services_static
     use_backend mf_public if url_public || url_packages || url_src
     use_backend core_certbot if certbot
@@ -129,13 +131,13 @@ backend mf_public
     # checks
     # option external-check
     # external-check command /usr/bin/check-public
-    
-    option httpchk GET /check
+
+    option tcp-check
 
     # NODES
     # ======
     {% for node in mf_public %}
-    server {{ node }} {{ node }}:80  check inter 2000 rise 1 fall 1
+    server {{ node }} {{ node }}:80  check port 80 inter 2000 rise 1 fall 1
     {% endfor %}
 
     server 127.0.0.1 127.0.0.1:8001 backup
@@ -160,13 +162,13 @@ backend mf_backend
     #option external-check
     #external-check command /usr/bin/check-backend
 
-    option httpchk POST /api/v1/public/server/info/ 
+    option tcp-check
 
     # NODES
     # ======
     {% for node in mf_backend %}
     # server {{ node }} {{ node }}:8080 cookie BE_{{ node }} check inter 2000 rise 1 fall 1
-    server {{ node }} {{ node }}:8080 check inter 2000 rise 1 fall 1
+    server {{ node }} {{ node }}:8080 check port 8080 inter 2000 rise 1 fall 1
     {% endfor %}
 
     # server 127.0.0.1 127.0.0.1:8001 backup
@@ -184,12 +186,12 @@ backend mf_frontend
     # checks
     #option external-check
     #external-check command /usr/bin/check-frontend
-    option httpchk GET /index.html
+    option tcp-check
 
     # NODES
     # ======
     {% for node in mf_frontend %}
-    server {{ node }} {{ node }}:80  check inter 2000 rise 1 fall 1
+    server {{ node }} {{ node }}:80  check port 80 inter 2000 rise 1 fall 1
     {% endfor %}
 
     server 127.0.0.1 127.0.0.1:8001 backup
