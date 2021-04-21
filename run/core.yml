@@ -20,7 +20,6 @@ services:
             - mf_network
 
         volumes:
-            - "../config/certs:/manualcerts"
             - certificates:/usr/local/etc/haproxy/certificates
 
     certbot:
@@ -40,3 +39,8 @@ networks:
 
 volumes:
     certificates:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=${NFS_SERVER},rw
+            device: :/certificates

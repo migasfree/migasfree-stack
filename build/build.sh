@@ -12,7 +12,7 @@ function build
     cd - >/dev/null
 }
 
-for IMAGE in loadbalancer datastore database backend frontend public pms-apt
+for IMAGE in loadbalancer datastore database backend frontend public pms-apt certbot
 #for IMAGE in loadbalancer
 do
    build $IMAGE

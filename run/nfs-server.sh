@@ -8,6 +8,7 @@ mkdir -p /exports/migasfree/datastore
 mkdir -p /exports/migasfree/conf
 mkdir -p /exports/migasfree/public
 mkdir -p /exports/migasfree/keys
+mkdir -p /exports/migasfree/certificates
 
 
 chown 70:70 /exports/migasfree/database
@@ -16,6 +17,7 @@ chown 999:999 /exports/migasfree/datastore
 chown 890:890  /exports/migasfree/conf
 chown 890:890  /exports/migasfree/public
 chown 890:890  /exports/migasfree/keys
+chown root:root /exports/migasfree/certificates
 
 
 if ! [ -f /exports/migasfree/conf/settings.py ];

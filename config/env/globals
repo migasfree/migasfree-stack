@@ -4,8 +4,9 @@ TZ=Europe/Madrid
 FQDN=migasfreetest.catedu.es
 NFS_SERVER=192.168.244.244
 
-# Certificate HTTPS. Values: manual, self, auto
-#   Manual mode require FQDN.pem valid on config/certs directory
+# Certificate HTTPS. Values: manual, auto
+#   Manual mode require FQDN.pem valid on config/certs directory.
+#   If not exists FQDN.pem, self certificated is generated.
 HTTPSMODE=auto
 
 # Letsencrypt (auto mode)

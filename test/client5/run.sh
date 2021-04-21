@@ -1,9 +1,9 @@
 #!/bin/bash
 . ../../config/env/globals
 
-if [ "$HTTPSMODE" = "self" ]
+if [ "$HTTPSMODE" = "manual" ]
 then
-    cp ../../config/certs/ca.crt defaults/usr/share/ca-certificates/ca.crt
+    cp /exports/migasfree/certificates/ca.crt defaults/usr/share/ca-certificates/ca.crt
 fi
 docker build . -t migasfree/client:5.0
 docker run --rm \
