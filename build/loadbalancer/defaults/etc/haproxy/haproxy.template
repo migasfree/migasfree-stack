@@ -60,7 +60,7 @@ frontend http
     # WEBSOCKETS
     acl is_websocket hdr(Upgrade) -i WebSocket
 
-    acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/
+    acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/ /alerts/
     
     # api v4 COMPATIBILITY
     acl url_backend  path_beg /get_key_repositories /get_properties /get_computer_info
