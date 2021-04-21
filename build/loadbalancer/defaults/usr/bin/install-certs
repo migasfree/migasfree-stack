@@ -16,14 +16,14 @@ openssl req -newkey rsa:2048 -nodes -sha256 -keyout cert.key -out cert.csr -subj
 # openssl req -in cert.csr -text -noout
 
 # Sign the CSR, resulting in CRT and add the v3 SAN extension:
-openssl x509 -req -in cert.csr -out cert.crt -CA ca.crt -CAkey ca.key -CAcreateserial -sha256 -days 1095 -extensions SAN -extfile <(cat  /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=@san_names\nbasicConstraints=CA:FALSE\nkeyUsage=nonRepudiation,digitalSignature,keyEncipherment\n[san_names]\nIP.1=192.168.1.1\n"))
+openssl x509 -req -in cert.csr -out cert.crt -CA ca.crt -CAkey ca.key -CAcreateserial -sha256 -days 1095 -extensions SAN -extfile <(cat  /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=@san_names\nbasicConstraints=CA:FALSE\nkeyUsage=nonRepudiation,digitalSignature,keyEncipherment\n[san_names]\nIP.1=${IPCERT}\n"))
 chmod 600 cert.key
 
 # Check contents of CRT (optional)
 openssl x509 -in cert.crt -text -noout
 
 # Certificate autosigned for SSL in  haproxy
-cat cert.key cert.crt > ${FQDN}.pem 
+cat cert.key cert.crt > ${FQDN}.pem
 
 cd -
 
