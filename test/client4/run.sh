@@ -1,7 +1,10 @@
 #!/bin/bash
 . ../../config/env/globals
 
-cp ../../config/certs/ca.crt defaults/usr/share/ca-certificates/ca.crt
+if [ "$HTTPSMODE" = "self" ]
+then
+    cp ../../config/certs/ca.crt defaults/usr/share/ca-certificates/ca.crt
+fi
 docker build . -t migasfree/client:4.20
 docker run --rm \
 	-e TZ="Europe/Madrid" \
