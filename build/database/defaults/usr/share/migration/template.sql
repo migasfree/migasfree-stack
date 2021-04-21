@@ -8,6 +8,14 @@ CREATE EXTENSION IF NOT EXISTS dblink;
 SELECT dblink_connect('REMOTE', 'host=@OLD_HOST@ port=@OLD_PORT@  dbname=@OLD_DB@ user=@OLD_USER@ password=@OLD_PWD@ ');
 
 
+-- NORMALIZE V4 DATABASE
+\echo 'Normalize V4 database'
+select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = '''' ');
+select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = ''unkowM'' ');
+select dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = '''' ');
+select dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = ''unkown'' ');
+
+
 -- TEMPORARILY DISABLE ALL TRIGGERS
 SET session_replication_role TO 'replica';
 
