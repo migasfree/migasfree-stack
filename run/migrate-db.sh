@@ -68,12 +68,12 @@ if [[ $REPLY = "yes" ]] ; then
 
     bash scale.sh ${STACK}_backend $_REPLICAS_BE
     bash scale.sh ${STACK}_frontend $_REPLICAS_FE
-
-    BE_V5=$(docker ps |grep ${STACK}_backend|awk '{print $1}' | head -n 1)
     echo "***** BACKEND & FRONTEND: ENABLED *****"
+
 
     # SUMMARIZE SYNCS 
     # ================
+    BE_V5=$(docker ps |grep ${STACK}_backend|awk '{print $1}' | head -n 1)
     let _COUNTER=0
     while true
     do
