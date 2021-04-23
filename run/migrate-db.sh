@@ -1,7 +1,9 @@
+#!/bin/bash 
+
 . ../config/env/globals
 
 DB_V5=$(docker ps |grep ${STACK}_database|awk '{print $1}')
-BE_V5=$(docker ps |grep ${STACK}_backend|awk '{print $1}')
+BE_V5=$(docker ps |grep ${STACK}_backend|awk '{print $1}'|head -n 1)
 
 
 OLD_HOST=$1
@@ -12,37 +14,37 @@ OLD_PWD=$5
 
 
 function help {
-  echo "Sintax: migrate-db OLD_HOST OLD_PORT [OLD_DB] [OLD_USER] [OLD_PWD]"
-  echo
-  echo "Samples:"
-  echo "    migrate-db 192.168.1.105 5555"
-  echo "    migrate_db 172.16.17.20 5432 migasfree migasfree mipass"
-  exit 1
+    echo "Sintax: migrate-db OLD_HOST OLD_PORT [OLD_DB] [OLD_USER] [OLD_PWD]"
+    echo
+    echo "Samples:"
+    echo "    migrate-db 192.168.1.105 5555"
+    echo "    migrate_db 172.16.17.20 5432 migasfree migasfree mipass"
+    exit 1
 }
 
 if [ -z $OLD_HOST ] ;
 then
-   help 
+    help 
 fi
 
 if [ -z $OLD_PORT ] ;
 then
-   help 
+    help 
 fi
 
 if [ -z $OLD_DB ];
 then
-   OLD_DB=migasfree
+    OLD_DB=migasfree
 fi
 
 if [ -z $OLD_USER ];
 then
-   OLD_USER=migasfree
+    OLD_USER=migasfree
 fi
 
 if [ -z $OLD_PWD ];
 then
-   OLD_PWD=migasfree
+    OLD_PWD=migasfree
 fi
 
 echo
@@ -53,11 +55,38 @@ if [[ $REPLY = "yes" ]] ; then
 
     # MIGRATE DATABASE FROM V4 TO V5
     # ==============================
-    time docker exec ${DB_V5} bash -c "echo yes| bash /usr/share/migration/migrate_from_v4 $OLD_HOST  $OLD_PORT $OLD_DB $OLD_USER $OLD_PWD"
+    echo "DATA MIGRATION"
+    echo "=============="
+
+    _REPLICAS_BE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' mf_backend)
+    _REPLICAS_FE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' mf_frontend)
+    bash scale.sh ${STACK}_backend 0
+    bash scale.sh ${STACK}_frontend 0
+    echo "***** BACKEND & FRONTEND: DISABLED *****"
+
+    /usr/bin/time -f "Time DATA MIGRATION: %E"  docker exec ${DB_V5} bash -c "echo yes| bash /usr/share/migration/migrate_from_v4 $OLD_HOST  $OLD_PORT $OLD_DB $OLD_USER $OLD_PWD"
+
+    bash scale.sh ${STACK}_backend $_REPLICAS_BE
+    bash scale.sh ${STACK}_frontend $_REPLICAS_FE
+
+    BE_V5=$(docker ps |grep ${STACK}_backend|awk '{print $1}' | head -n 1)
+    echo "***** BACKEND & FRONTEND: ENABLED *****"
 
     # SUMMARIZE SYNCS 
     # ================
-    # TODO: django-admin refresh_redis_syncs está consumiendo toda la RAM. Por ahora deshabilito.  
-    #time docker exec ${BE_V5} bash -c "django-admin refresh_redis_syncs"
-
+    let _COUNTER=0
+    while true
+    do
+        _YEAR=$(date -d "now -$_COUNTER year" +"%Y")
+        
+        echo "Calculate syncronizations ${_YEAR} ..."
+        /usr/bin/time -f "Time ${_YEAR}:  %E"  docker exec ${BE_V5} bash -c "django-admin refresh_redis_syncs --since $_YEAR --until $_YEAR >/dev/null"
+        
+        if [ "$_YEAR" = "2010" ]
+        then
+            break
+        fi
+        _COUNTER=$(($_COUNTER -1))
+    done
+   
 fi
