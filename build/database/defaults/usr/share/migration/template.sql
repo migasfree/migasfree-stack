@@ -10,6 +10,7 @@ SELECT dblink_connect('REMOTE', 'host=@OLD_HOST@ port=@OLD_PORT@  dbname=@OLD_DB
 
 -- NORMALIZE V4 DATABASE
 \echo 'Normalize V4 database'
+\! send_message 'database migration: normalize v4 '
 select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = '''' ');
 select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = ''unkowM'' ');
 select dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = '''' ');
@@ -22,6 +23,7 @@ SET session_replication_role TO 'replica';
 
 -- APPLICATIONS
 \echo 'app_catalog_application'
+\! send_message 'database migration: app_catalog_application '
 DELETE FROM app_catalog_application;
 INSERT INTO app_catalog_application
     SELECT T.*
@@ -39,6 +41,7 @@ FROM catalog_application') AS T(
     );
 
 \echo 'app_catalog_application_available_for_attributes'
+\! send_message 'database migration: app_catalog_application_available_for_attributes'
 DELETE FROM app_catalog_application_available_for_attributes;
 INSERT INTO app_catalog_application_available_for_attributes
     SELECT T.*
@@ -51,6 +54,7 @@ FROM catalog_application_available_for_attributes') AS T(
     );
 
 \echo 'app_catalog_packagesbyproject'
+\! send_message 'database migration: app_catalog_packagesbyproject'
 DELETE FROM app_catalog_packagesbyproject;
 INSERT INTO app_catalog_packagesbyproject
     SELECT T.*
@@ -64,6 +68,7 @@ FROM catalog_packagesbyproject') AS T(
     );
 
 \echo 'app_catalog_policy'
+\! send_message 'database migration: app_catalog_policy'
 DELETE FROM app_catalog_policy;
 INSERT INTO app_catalog_policy
     SELECT T.*
@@ -78,6 +83,7 @@ FROM catalog_policy') AS T(
     );
 
 \echo 'app_catalog_policy_excluded_attributes'
+\! send_message 'database migration: app_catalog_policy_excluded_attributes'
 DELETE FROM app_catalog_policy_excluded_attributes;
 INSERT INTO app_catalog_policy_excluded_attributes
     SELECT T.*
@@ -90,6 +96,7 @@ FROM catalog_policy_excluded_attributes') AS T(
     );
 
 \echo 'app_catalog_policy_included_attributes'
+\! send_message 'database migration: app_catalog_policy_included_attributes'
 DELETE FROM app_catalog_policy_included_attributes;
 INSERT INTO app_catalog_policy_included_attributes
     SELECT T.*
@@ -102,6 +109,7 @@ FROM catalog_policy_included_attributes') AS T(
     );
 
 \echo 'app_catalog_policygroup'
+\! send_message 'database migration: app_catalog_policygroup'
 DELETE FROM app_catalog_policygroup;
 INSERT INTO app_catalog_policygroup
     SELECT T.*
@@ -114,6 +122,7 @@ FROM catalog_policygroup') AS T(
     );
 
 \echo 'app_catalog_policygroup_applications'
+\! send_message 'database migration: app_catalog_policygroup_applications'
 DELETE FROM app_catalog_policygroup_applications;
 INSERT INTO app_catalog_policygroup_applications
     SELECT T.*
@@ -126,6 +135,7 @@ FROM catalog_policygroup_applications') AS T(
     );
 
 \echo 'app_catalog_policygroup_excluded_attributes'
+\! send_message 'database migration: app_catalog_policygroup_excluded_attributes'
 DELETE FROM app_catalog_policygroup_excluded_attributes;
 INSERT INTO app_catalog_policygroup_excluded_attributes
     SELECT T.*
@@ -138,6 +148,7 @@ FROM catalog_policygroup_excluded_attributes') AS T(
     );
 
 \echo 'app_catalog_policygroup_included_attributes'
+\! send_message 'database migration: app_catalog_policygroup_included_attributes'
 DELETE FROM app_catalog_policygroup_included_attributes;
 INSERT INTO app_catalog_policygroup_included_attributes
     SELECT T.*
@@ -152,6 +163,7 @@ FROM catalog_policygroup_included_attributes') AS T(
 
 -- AUTH
 \echo 'auth_group'
+\! send_message 'database migration: auth_group'
 DELETE FROM auth_group;
 INSERT INTO auth_group
     SELECT T.*
@@ -164,6 +176,7 @@ FROM auth_group') AS T(
     );
 
 \echo 'auth_group_permissions'
+\! send_message 'database migration: auth_group_permissions'
 DELETE FROM auth_group_permissions;
 INSERT INTO auth_group_permissions
     SELECT T.*
@@ -178,6 +191,7 @@ FROM auth_group_permissions') AS T(
     );
 
 \echo 'auth_permission'
+\! send_message 'database migration: auth_permission'
 DELETE FROM auth_permission;
 INSERT INTO auth_permission
     SELECT T.*
@@ -194,6 +208,7 @@ FROM auth_permission') AS T(
     );
 
 \echo 'auth_user'
+\! send_message 'database migration: auth_user'
 DELETE FROM auth_user;
 INSERT INTO auth_user
     SELECT T.*
@@ -224,6 +239,7 @@ FROM auth_user') AS T(
     );
         
 \echo 'auth_user_groups'
+\! send_message 'database migration: auth_user_groups'
 DELETE FROM auth_user_groups;
 INSERT INTO auth_user_groups
     SELECT T.*
@@ -238,6 +254,7 @@ FROM auth_user_groups') AS T(
     );
 
 \echo 'auth_user_user_permissions'
+\! send_message 'database migration: auth_user_user_permissions'
 DELETE FROM auth_user_user_permissions;
 INSERT INTO auth_user_user_permissions
     SELECT T.*
@@ -250,6 +267,7 @@ FROM auth_user_user_permissions') AS T(
     );
 
 \echo 'authtoken_token'
+\! send_message 'database migration: authtoken_token'
 DELETE FROM authtoken_token;
 INSERT INTO authtoken_token
     SELECT T.*
@@ -266,6 +284,7 @@ FROM authtoken_token') AS T(
     
 -- CLIENT
 \echo 'client_computer'
+\! send_message 'database migration: client_computer'
 DELETE FROM client_computer;
 INSERT INTO client_computer
   SELECT
@@ -343,6 +362,7 @@ FROM server_computer') AS T(
     );
 
 \echo 'client_computer_sync_attributes'
+\! send_message 'database migration: client_computer_sync_attributes'
 DELETE FROM client_computer_sync_attributes;
 INSERT INTO client_computer_sync_attributes
     SELECT T.*
@@ -351,6 +371,7 @@ INSERT INTO client_computer_sync_attributes
 FROM server_computer_sync_attributes') AS T(id int, computer_id int, attribute_id int);
 
 \echo 'client_computer_tags'
+\! send_message 'database migration: client_computer_tags'
 DELETE FROM client_computer_tags;
 INSERT INTO client_computer_tags
     SELECT T.*
@@ -359,6 +380,7 @@ INSERT INTO client_computer_tags
 FROM server_computer_tags') AS T(id int, computer_id int, serverattribute_id int);
 
 \echo 'client_error'
+\! send_message 'database migration: client_error'
 DELETE FROM client_error;
 INSERT INTO client_error
     SELECT T.*
@@ -379,6 +401,7 @@ FROM server_error') AS T(
     );
 
 \echo 'client_fault'
+\! send_message 'database migration: client_fault'
 DELETE FROM client_fault;
 INSERT INTO client_fault
     SELECT T.*
@@ -401,6 +424,7 @@ FROM server_fault') AS T(
     );
 
 \echo 'client_faultdefinition'
+\! send_message 'database migration: client_faultdefinition'
 DELETE FROM client_faultdefinition;
 INSERT INTO client_faultdefinition
     SELECT T.*
@@ -421,6 +445,7 @@ FROM server_faultdefinition') AS T(
     );
 
 \echo 'client_faultdefinition_excluded_attributes'
+\! send_message 'database migration: client_faultdefinition_excluded_attributes'
 DELETE FROM client_faultdefinition_excluded_attributes;
 INSERT INTO client_faultdefinition_excluded_attributes
     SELECT T.*
@@ -435,6 +460,7 @@ FROM server_faultdefinition_excluded_attributes') AS T(
     );
 
 \echo 'client_faultdefinition_included_attributes'
+\! send_message 'database migration: client_faultdefinition_included_attributes'
 DELETE FROM client_faultdefinition_included_attributes;
 INSERT INTO client_faultdefinition_included_attributes
     SELECT T.*
@@ -449,6 +475,7 @@ FROM server_faultdefinition_included_attributes') AS T(
     );
 
 \echo 'client_faultdefinition_users'
+\! send_message 'database migration: client_faultdefinition_users'
 DELETE FROM client_faultdefinition_users;
 INSERT INTO client_faultdefinition_users
     SELECT T.*
@@ -463,6 +490,7 @@ FROM server_faultdefinition_users') AS T(
     );
 
 \echo 'client_migration'
+\! send_message 'database migration: client_migration'
 DELETE FROM client_migration;
 INSERT INTO client_migration
     SELECT T.*
@@ -479,6 +507,7 @@ FROM server_migration') AS T(
     );
 
 \echo 'client_notification'
+\! send_message 'database migration: client_notification'
 DELETE FROM client_notification;
 INSERT INTO client_notification
     SELECT T.*
@@ -496,9 +525,11 @@ FROM server_notification') AS T(
 
 -- ONLY DELETE client_packagehistory
 \echo 'client_packagehistory'
+\! send_message 'database migration: client_packagehistory'
 DELETE FROM client_packagehistory;
 
 \echo 'client_statuslog'
+\! send_message 'database migration: client_statuslog'
 DELETE FROM client_statuslog;
 INSERT INTO client_statuslog
     SELECT T.*
@@ -515,6 +546,7 @@ FROM server_statuslog') AS T(
     );
 
 \echo 'client_synchronization'
+\! send_message 'database migration: client_synchronization'
 DELETE FROM client_synchronization;
 INSERT INTO client_synchronization
     SELECT T.*
@@ -539,6 +571,7 @@ FROM server_synchronization') AS T(
     );
 
 \echo 'client_user'
+\! send_message 'database migration: client_user'
 DELETE FROM client_user;
 INSERT INTO client_user
     SELECT T.* FROM dblink('REMOTE', 'select * FROM server_user') AS T(id int, name varchar(50),fullname varchar(100));
@@ -546,6 +579,7 @@ INSERT INTO client_user
 
 -- CORE
 \echo 'core_attribute'
+\! send_message 'database migration: core_attribute'
 DELETE FROM core_attribute;
 INSERT INTO core_attribute
     SELECT T.id, T.value, T.description, T.longitude, T.latitude, T.property_att
@@ -559,6 +593,7 @@ INSERT INTO core_attribute
 FROM server_attribute') AS T(id int, value varchar(250), description text, longitude double precision, latitude double precision, property_att int );
 
 \echo 'core_attributeset'
+\! send_message 'database migration: core_attributeset'
 DELETE FROM core_attributeset;
 INSERT INTO core_attributeset
     SELECT T.*
@@ -572,6 +607,7 @@ INSERT INTO core_attributeset
 FROM server_attributeset') AS T(id int, name varchar(50), description text, enabled bool, longitude double precision, latitude double precision);
 
 \echo 'core_attributeset_excluded_attributes'
+\! send_message 'database migration: core_attributeset_excluded_attributes'
 DELETE FROM core_attributeset_excluded_attributes;
 INSERT INTO core_attributeset_excluded_attributes
     SELECT T.*
@@ -580,6 +616,7 @@ INSERT INTO core_attributeset_excluded_attributes
 FROM server_attributeset_excluded_attributes') AS T(id int, attributeset_id int, attribute_id int);
 
 \echo 'core_attributeset_included_attributes'
+\! send_message 'database migration: core_attributeset_included_attributes'
 DELETE FROM core_attributeset_included_attributes;
 INSERT INTO core_attributeset_included_attributes
     SELECT T.*
@@ -590,6 +627,7 @@ FROM server_attributeset_included_attributes') AS T(id int, attributeset_id int,
 
 -- TODO DEPLOYMENT
 \echo 'core_deployment'
+\! send_message 'database migration: core_deployment'
 DELETE FROM core_deployment;
 INSERT INTO core_deployment
     SELECT T.*
@@ -640,6 +678,7 @@ FROM server_deployment') AS T(
     );
 
 \echo 'core_deployment_available_packages'
+\! send_message 'database migration: core_deployment_available_packages'
 DELETE FROM core_deployment_available_packages;
 INSERT INTO core_deployment_available_packages
     SELECT T.*
@@ -661,6 +700,7 @@ INNER JOIN server_package AS P ON P.id=A.package_id
     );
 
 \echo 'core_deployment_available_package_sets'
+\! send_message 'database migration: core_deployment_available_package_sets'
 DELETE FROM core_deployment_available_package_sets;
 INSERT INTO core_deployment_available_package_sets
     SELECT T.*
@@ -683,6 +723,7 @@ INNER JOIN server_package AS P ON P.id=A.package_id
     );
 
 \echo 'core_deployment_excluded_attributes'
+\! send_message 'database migration: core_deployment_excluded_attributes'
 DELETE FROM core_deployment_excluded_attributes;
 INSERT INTO core_deployment_excluded_attributes
     SELECT T.*
@@ -697,6 +738,7 @@ FROM server_deployment_excluded_attributes') AS T(
     );
 
 \echo 'core_deployment_included_attributes'
+\! send_message 'database migration: core_deployment_included_attributes'
 DELETE FROM core_deployment_included_attributes;
 INSERT INTO core_deployment_included_attributes
     SELECT T.*
@@ -710,8 +752,8 @@ FROM server_deployment_included_attributes') AS T(
     attribute_id int
     );
 
-
 \echo 'core_domain'
+\! send_message 'database migration: core_domain'
 DELETE FROM core_domain;
 INSERT INTO core_domain
     SELECT T.*
@@ -726,6 +768,7 @@ FROM server_domain') AS T(
     );
 
 \echo 'core_domain_excluded_attributes'
+\! send_message 'database migration: core_domain_excluded_attributes'
 DELETE FROM core_domain_excluded_attributes;
 INSERT INTO core_domain_excluded_attributes
     SELECT T.*
@@ -740,6 +783,7 @@ FROM server_domain_excluded_attributes') AS T(
     );
 
 \echo 'core_domain_included_attributes'
+\! send_message 'database migration: core_domain_included_attributes'
 DELETE FROM core_domain_included_attributes;
 INSERT INTO core_domain_included_attributes
     SELECT T.*
@@ -754,6 +798,7 @@ FROM server_domain_included_attributes') AS T(
     );
 
 \echo 'core_domain_tags'
+\! send_message 'database migration: core_domain_tags'
 DELETE FROM core_domain_tags;
 INSERT INTO core_domain_tags
     SELECT T.*
@@ -767,8 +812,8 @@ FROM server_domain_tags') AS T(
     serverattribute_id int
     );
 
-
 \echo 'core_package'
+\! send_message 'database migration: core_package'
 DELETE FROM core_package;
 INSERT INTO core_package
     SELECT T.* 
@@ -797,6 +842,7 @@ FROM server_package
     );
 
 \echo 'core_packageset'
+\! send_message 'database migration: core_packageset'
 DELETE FROM core_packageset;
 INSERT INTO core_packageset
     SELECT T.* 
@@ -820,13 +866,15 @@ FROM server_package
     store_id int
     );
 
-\echo 'core_platform'     
+\echo 'core_platform'
+\! send_message 'database migration: core_platform'
 DELETE FROM core_platform;
 INSERT INTO core_platform
     SELECT T.* FROM dblink('REMOTE', 'select * FROM server_platform') AS T(id int, name varchar(50));
 
 -- TODO Revisar campo "slug" y "pms"
 \echo 'core_project'
+\! send_message 'database migration: core_project'
 DELETE FROM core_project;     
 INSERT INTO core_project
     SELECT T.id,T.name,T.name,T.pms,'amd64',T.auto_register_computers,T.platform FROM dblink('REMOTE',
@@ -863,6 +911,7 @@ INSERT INTO core_property
  FROM server_property') AS T(id int, prefix varchar(3), name varchar(50), enabled bool, kind varchar(1), sort varchar(10),auto_add bool, language int,code text);
  
 \echo 'core_schedule'
+\! send_message 'database migration: core_schedule'
 DELETE FROM core_schedule;
 INSERT INTO core_schedule
     SELECT T.*
@@ -877,6 +926,7 @@ FROM server_schedule') AS T(
     );
 
 \echo 'core_scheduledelay'
+\! send_message 'database migration: core_scheduledelay'
 DELETE FROM core_scheduledelay;
 INSERT INTO core_scheduledelay
     SELECT T.*
@@ -893,6 +943,7 @@ FROM server_scheduledelay') AS T(
     );
 
 \echo 'core_scheduledelay_attributes'
+\! send_message 'database migration: core_scheduledelay_attributes'
 DELETE FROM core_scheduledelay_attributes;
 INSERT INTO core_scheduledelay_attributes
     SELECT T.*
@@ -907,6 +958,7 @@ FROM server_scheduledelay_attributes') AS T(
     );
 
 \echo 'core_scope'
+\! send_message 'database migration: core_scope'
 DELETE FROM core_scope;
 INSERT INTO core_scope
     SELECT T.*
@@ -923,6 +975,7 @@ FROM server_scope') AS T(
     );
 
 \echo 'core_scope_excluded_attributes'
+\! send_message 'database migration: core_scope_excluded_attributes'
 DELETE FROM core_scope_excluded_attributes;
 INSERT INTO core_scope_excluded_attributes
     SELECT T.*
@@ -937,6 +990,7 @@ FROM server_scope_excluded_attributes') AS T(
     );
 
 \echo 'core_scope_included_attributes'
+\! send_message 'database migration: core_scope_included_attributes'
 DELETE FROM core_scope_included_attributes;
 INSERT INTO core_scope_included_attributes
     SELECT T.*
@@ -951,6 +1005,7 @@ FROM server_scope_included_attributes') AS T(
     );
 
 \echo 'core_store'
+\! send_message 'database migration: core_store'
 DELETE FROM core_store;
 INSERT INTO core_store
     SELECT T.*
@@ -967,6 +1022,7 @@ FROM server_store') AS T(
     );
 
 \echo 'core_userprofile'
+\! send_message 'database migration: core_userprofile'
 DELETE FROM core_userprofile;
 INSERT INTO core_userprofile
     SELECT T.*
@@ -981,6 +1037,7 @@ FROM server_userprofile') AS T(
     );
 
 \echo 'core_userprofile_domains'
+\! send_message 'database migration: core_userprofile_domains'
 DELETE FROM core_userprofile_domains;
 INSERT INTO core_userprofile_domains
     SELECT T.*
@@ -996,6 +1053,7 @@ FROM server_userprofile_domains') AS T(
   
 --   DEVICES
 \echo 'device_capability'
+\! send_message 'database migration: device_capability'
 DELETE FROM device_capability;
 INSERT INTO device_capability
     SELECT T.*
@@ -1004,6 +1062,7 @@ INSERT INTO device_capability
 FROM server_devicefeature') AS T(id int, name varchar(50));
 
 \echo 'device_connection'
+\! send_message 'database migration: device_connection'
 DELETE FROM device_connection;
 INSERT INTO device_connection
     SELECT T.*
@@ -1012,6 +1071,7 @@ INSERT INTO device_connection
 FROM server_deviceconnection') AS T(id int, name varchar(50), fields varchar(100), device_type_id int);
 
 \echo 'device_device'
+\! send_message 'database migration: device_device'
 DELETE FROM device_device;
 INSERT INTO device_device
     SELECT T.*
@@ -1020,6 +1080,7 @@ INSERT INTO device_device
 FROM server_device') AS T(id int, name varchar(50), data text, connection_id int, model_id int);
 
 \echo 'device_device_available_for_attributes'
+\! send_message 'database migration: device_device_available_for_attributes'
 DELETE FROM device_device_available_for_attributes;
 INSERT INTO device_device_available_for_attributes
     SELECT T.*
@@ -1028,6 +1089,7 @@ INSERT INTO device_device_available_for_attributes
 FROM server_device_available_for_attributes') AS T(id int, device_id int, attribute_id int);
 
 \echo 'device_driver'
+\! send_message 'database migration: device_driver'
 DELETE FROM device_driver;
 INSERT INTO device_driver
     SELECT T.*
@@ -1036,6 +1098,7 @@ INSERT INTO device_driver
 FROM server_devicedriver') AS T(id int, name varchar(100), packages_to_install text,capability_id int, model_id int, project_id int);
 
 \echo 'device_logical'
+\! send_message 'database migration: device_logical'
 DELETE FROM device_logical;
 INSERT INTO device_logical
     SELECT T.*
@@ -1044,6 +1107,7 @@ INSERT INTO device_logical
 FROM server_devicelogical') AS T(id int, alternative_capability_name varchar(50), capability_id int, device_id int);
 
 \echo 'device_logical_attributes'
+\! send_message 'database migration: device_logical_attributes'
 DELETE FROM device_logical_attributes;
 INSERT INTO device_logical_attributes
     SELECT T.*
@@ -1052,6 +1116,7 @@ INSERT INTO device_logical_attributes
 FROM server_devicelogical_attributes') AS T(id int, logical_id int, attribute_id int);
 
 \echo 'device_manufacturer'
+\! send_message 'database migration: device_manufacturer'
 DELETE FROM device_manufacturer;
 INSERT INTO device_manufacturer
     SELECT T.*
@@ -1060,6 +1125,7 @@ INSERT INTO device_manufacturer
 FROM server_devicemanufacturer') AS T(id int, name varchar(50));
 
 \echo 'device_model'
+\! send_message 'database migration: device_model'
 DELETE FROM device_model;
 INSERT INTO device_model
     SELECT T.*
@@ -1068,6 +1134,7 @@ INSERT INTO device_model
 FROM server_devicemodel') AS T(id int, name varchar(50), device_type_id int, manufacter_id int);
 
 \echo 'device_model_connections'
+\! send_message 'database migration: device_model_connections'
 DELETE FROM device_model_connections;
 INSERT INTO device_model_connections
     SELECT T.*
@@ -1076,6 +1143,7 @@ INSERT INTO device_model_connections
 FROM server_devicemodel_connections') AS T(id int, model_id int, connection_id int);
 
 \echo 'device_type'
+\! send_message 'database migration: device_type'
 DELETE FROM device_type;
 INSERT INTO device_type
     SELECT T.*
@@ -1086,6 +1154,7 @@ FROM server_devicetype') AS T(id int, name varchar(50));
 
 -- HARDWARE
 \echo 'hardware_capability'
+\! send_message 'database migration: hardware_capability'
 DELETE FROM hardware_capability;
 INSERT INTO hardware_capability
     SELECT T.*
@@ -1102,6 +1171,7 @@ FROM server_hwcapability') AS T(
     );
 
 \echo 'hardware_configuration'
+\! send_message 'database migration: hardware_configuration'
 DELETE FROM hardware_configuration;
 INSERT INTO hardware_configuration
     SELECT T.*
@@ -1118,6 +1188,7 @@ FROM server_hwconfiguration') AS T(
     );
 
 \echo 'hardware_logicalname'
+\! send_message 'database migration: hardware_logicalname'
 DELETE FROM hardware_logicalname;
 INSERT INTO hardware_logicalname
     SELECT T.*
@@ -1132,6 +1203,7 @@ FROM server_hwlogicalname') AS T(
     );
 
 \echo 'hardware_node'
+\! send_message 'database migration: hardware_node'
 DELETE FROM hardware_node;
 INSERT INTO hardware_node
     SELECT T.*
@@ -1183,9 +1255,13 @@ FROM server_hwnode') AS T(
 
 
 SET session_replication_role TO 'origin';
-
+\echo 'reindex database'
+\! send_message 'database migration: reindex database'
 REINDEX DATABASE migasfree;
-VACUUM FULL FREEZE VERBOSE ANALYZE;
+
+\echo 'vacuum database'
+\! send_message 'database migration: vacuum database'
+VACUUM FULL FREEZE ANALYZE;
 
 /*
 ===================
@@ -1208,6 +1284,10 @@ SELECT 'select '
        and pg_get_expr(d.adbin, d.adrelid) ~ '^nextval';
 
 */
+
+\echo 'resetting sequences'
+\! send_message 'database migration: resetting sequences'
+
  select setval('django_migrations_id_seq'::regclass, (select max( id) from only public.django_migrations));
  select setval('django_content_type_id_seq'::regclass, (select max( id) from only public.django_content_type));
  select setval('auth_permission_id_seq'::regclass, (select max( id) from only public.auth_permission));
@@ -1285,3 +1365,5 @@ SELECT 'select '
  select setval('hardware_configuration_id_seq'::regclass, (select max( id) from only public.hardware_configuration));
  select setval('hardware_capability_id_seq'::regclass, (select max( id) from only public.hardware_capability));
 
+\echo 'finished'
+\! send_message 'database migration: finished'

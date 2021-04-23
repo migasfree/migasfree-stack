@@ -1,6 +1,7 @@
-#FROM postgres:11.4-alpine
 FROM postgres:13.2-alpine
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
+
+RUN apk add curl
 
 COPY defaults/usr /usr
 COPY defaults/etc/pam.d/cron /etc/pam.d/cron

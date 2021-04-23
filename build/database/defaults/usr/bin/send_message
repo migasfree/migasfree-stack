@@ -1,0 +1,2 @@
+#!/bin/bash
+curl -d "text=$1;container=$(hostname);service=$SERVICE;node=$NODE" -X POST http://loadbalancer:8001/services/message &> /dev/null
