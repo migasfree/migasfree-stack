@@ -1,7 +1,7 @@
 
 
 _VERSION=5.0
-for _IMG in loadbalancer pms-apt public database datastore client
+for _IMG in loadbalancer pms-apt public database datastore client certbot
 do
     docker save --output ./migasfree-${_IMG}-${_VERSION}.tar migasfree/${_IMG}:${_VERSION}
 done
