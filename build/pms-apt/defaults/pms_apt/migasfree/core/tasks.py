@@ -20,7 +20,7 @@ BACKEND=BROKER_URL
 _USER = 'admin'  # User admin in backend
 _SERVER = 'backend:8080'
 
-_PATH_PUBLIC=os.environ["PATH_PUBLIC"]
+_PATH_PUBLIC = os.popen("mount |grep ^:/public |awk '{printf $3}'").read()
 _REPOSITORY_TRAILING_PATH='repos'
 _STORE_TRAILING_PATH="stores"
 
