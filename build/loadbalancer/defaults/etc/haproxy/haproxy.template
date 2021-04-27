@@ -59,8 +59,9 @@ frontend http
 
     http-request set-var(txn.path) path   # for services_cache
 
-    # WEBSOCKETS
-    acl is_websocket hdr(Upgrade) -i WebSocket
+    # WEBSOCKETS. Routing based on websocket protocol header
+    acl hdr_connection_upgrade hdr(Connection) -i upgrade
+    acl hdr_upgrade_websocket hdr(Upgrade) -i websocket
 
     acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/ /alerts/
     
@@ -100,7 +101,7 @@ frontend http
 
 
     use_backend mf_frontend if url_root or url_empty
-    use_backend mf_backend if url_backend || is_websocket
+    use_backend mf_backend if url_backend || hdr_connection_upgrade || hdr_upgrade_websocket
     use_backend services if is_GET url_services || url_services_static
     use_backend mf_public if url_public || url_packages || url_src
     use_backend core_certbot if certbot
