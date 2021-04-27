@@ -1,8 +1,9 @@
 global
     maxconn 4096
     maxpipes 1024
-    log 127.0.0.1 local0
-    log 127.0.0.1 local1 notice
+    log fd@2 local2
+    #log 127.0.0.1 local0
+    #log 127.0.0.1 local1 notice
     # tune.bufsize 32768   # workaround -> 414 Request-URI Too Large
     tune.ssl.default-dh-param 2048
     ssl-server-verify none
@@ -10,7 +11,8 @@ global
     
     # Enable HAProxy runtime API
     stats socket :9999 level admin expose-fd listeners
-
+    
+    master-worker
     #external-check
 
 
@@ -63,7 +65,7 @@ frontend http
     acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/ /alerts/
     
     # api v4 COMPATIBILITY
-    acl url_backend  path_beg /get_key_repositories /get_properties /get_computer_info
+    acl url_backend  path_beg /get_key_repositories /get_properties /get_computer_info /repository-url-template
     http-request replace-path /admin/server/computer/(.*)/change /computers/results/\1    # migasfree-play 1.x 
 
 
