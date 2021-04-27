@@ -16,10 +16,9 @@ services:
             - source: password_admin
         volumes:
             - keys:/var/lib/migasfree-backend/keys
-            - public:/var/migasfree/public
+            - public:/var/lib/migasfree-backend/public
         networks:
             - mf_network
-
 
     public:
         image: migasfree/public:${PUBLIC_TAG}
@@ -29,7 +28,6 @@ services:
             - ../config/env/globals
             - ../config/env/swarm
         volumes:
-#            - "/var/lib/migasfree/${FQDN}/public:/var/migasfree/public:ro"
             - public:/var/migasfree/public:ro
         networks:
             - mf_network
@@ -43,7 +41,6 @@ services:
             - ../config/env/swarm
         depends_on:
             - backend
-
         networks:
             - mf_network
 
@@ -62,21 +59,53 @@ services:
             - datastore
             - public
         volumes:
- #           - "/var/lib/migasfree/${FQDN}/conf:/etc/migasfree-server"
- #           - conf:/etc/migasfree-server
             - conf:/var/lib/migasfree-backend/conf
-
- #           - "/var/lib/migasfree/${FQDN}/public:/var/migasfree/repo"
             - public:/var/lib/migasfree-backend/public
-
-#           - "/var/lib/migasfree/${FQDN}/keys:/usr/share/migasfree-server"
             - keys:/var/lib/migasfree-backend/keys
-
-            #- "/usr/share/ca-certificates/192.168.1.201.crt:/usr/share/ca-certificates/192.168.1.201.crt"
-
         networks:
             - mf_network
 
+    worker:
+        image: migasfree/backend:${BACKEND_TAG}
+        env_file:
+            - ../config/env/globals
+            - ../config/env/backend
+            - ../config/env/swarm
+        deploy:
+            replicas: 1
+        secrets:
+            - source: password_database
+        depends_on:
+            - database
+            - datastore
+            - public
+        volumes:
+            - conf:/var/lib/migasfree-backend/conf
+            - public:/var/lib/migasfree-backend/public
+            - keys:/var/lib/migasfree-backend/keys
+        networks:
+            - mf_network
+
+    beat:
+        image: migasfree/backend:${BACKEND_TAG}
+        env_file:
+            - ../config/env/globals
+            - ../config/env/backend
+            - ../config/env/swarm
+        deploy:
+            replicas: 1
+        secrets:
+            - source: password_database
+        depends_on:
+            - database
+            - datastore
+            - public
+        volumes:
+            - conf:/var/lib/migasfree-backend/conf
+            - public:/var/lib/migasfree-backend/public
+            - keys:/var/lib/migasfree-backend/keys
+        networks:
+            - mf_network
 
     database:
         image: migasfree/database:${DATABASE_TAG}
@@ -91,29 +120,18 @@ services:
         deploy:
             replicas: 1
         volumes:
-
             - type: tmpfs
               target: /dev/shm
               tmpfs:
                 size: 1024000000 # (this means 1GB)
-
-
-#            - "/var/lib/migasfree/${FQDN}/conf:/etc/migasfree-server"
             - conf:/etc/migasfree-server
-
-#            - "/var/lib/migasfree/${FQDN}/data:/var/lib/postgresql/data"
             - database:/var/lib/postgresql/data
-
-#            - "/var/lib/migasfree/${FQDN}/dump:/var/migasfree/dump"
             - dump:/var/migasfree/dump
-        
         #ELIMINAR EN PRO, DEJAR SOLO PARA MIGRACION DE BD
         ports:
             - "5432:5432"
-
         networks:
             - mf_network
-
 
     datastore:
         image: migasfree/datastore:${DATASTORE_TAG}
@@ -128,9 +146,7 @@ services:
         deploy:
             replicas: 1
         volumes:
-#            - "/var/lib/migasfree/${FQDN}/datastore:/var/lib/postgresql/datastore"
             - datastore:/data
-
         networks:
             - mf_network
 
