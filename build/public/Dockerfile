@@ -9,14 +9,14 @@ RUN apk --no-cache add bind-tools curl shadow && \
 
 COPY defaults/var/migasfree /var/migasfree
 
-# Grapelly  STATIC
-COPY --from=migasfree/backend:master /usr/local/lib/python3.7/dist-packages/grappelli/static /var/migasfree/static
+# Django admin STATIC
+COPY --from=migasfree/backend:master /venv/lib64/python3.7/site-packages/django/contrib/admin/static/ /var/migasfree/static
 
 # Rest-framework STATIC
-COPY --from=migasfree/backend:master /usr/local/lib/python3.7/dist-packages/rest_framework/static /var/migasfree/static
+COPY --from=migasfree/backend:master /venv/lib64/python3.7/site-packages/rest_framework/static /var/migasfree/static
 
 # Swagger STATIC
-COPY --from=migasfree/backend:master /usr/local/lib/python3.7/dist-packages/drf_yasg/static /var/migasfree/static
+COPY --from=migasfree/backend:master /venv/lib64/python3.7/site-packages/drf_yasg/static /var/migasfree/static
 
 RUN chown -R 890:890 /var/migasfree/
 

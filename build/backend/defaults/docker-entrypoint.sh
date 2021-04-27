@@ -234,6 +234,7 @@ function migasfree_init
 
 # START
 # =====
+. /venv/bin/activate
 
 set_TZ
 
@@ -248,13 +249,19 @@ migasfree_init
 reload_loadbalancer
 send_message ""
 
+if [ "$SERVICE" = "mf_backend" ]
+then
+    _PROCESS=$(pip freeze | grep daphne)
+else
+    _PROCESS=$(pip freeze | grep celery)
+fi
+
 echo "
 
-        migasfree BACKEND
-        $(pip freeze | grep daphne)
+        migasfree  $SERVICE
+        $_PROCESS
         Container: $HOSTNAME
         Time zome: $TZ  $(date)
-        Processes: $(nproc)
                -------O--
               \\         o \\
                \\           \\
@@ -264,19 +271,18 @@ echo "
 
 "
 
+if [ "$SERVICE" = "mf_beat" ]
+then
+    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule  --loglevel INFO 
+elif [ "$SERVICE" = "mf_worker" ]
+then
+    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery  --app=migasfree.celery.app worker --queues=default --uid 890 --without-gossip --concurrency=10 --loglevel INFO
+else
+    # TODO: daphne is running as root!!!  
+    # python3 -u  -> force the stdout and stderr streams to be unbuffered 
+    python3 -u $(which daphne)  --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application
+fi
 
-# CELERY BEAT
-# ===========
-DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --logfile=/var/tmp/celery-beat.log --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule --loglevel=INFO &
-
-
-# CELERY WORKER
-# ==============
-DJANGO_SETTINGS_MODULE=migasfree.settings.production celery  --app=migasfree.celery.app worker -Q default -B --uid 890  --without-gossip --concurrency=10 --logfile=/var/tmp/celery-default.log &
-
-
-# TODO: daphne is running as root!!!  
-daphne --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application
 
 #gunicorn --forwarded-allow-ips="loadbalancer,pms-apt,frontend,public,backend" \
 #        --user=$_UID --group=$_GID \
