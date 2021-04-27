@@ -12,9 +12,9 @@ SELECT dblink_connect('REMOTE', 'host=@OLD_HOST@ port=@OLD_PORT@  dbname=@OLD_DB
 \echo 'Normalize V4 database'
 \! send_message 'database migration: normalize v4 '
 select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = '''' ');
-select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = ''unkowM'' ');
+select dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = ''unknown'' ');
 select dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = '''' ');
-select dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = ''unkown'' ');
+select dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = ''unknown'' ');
 
 
 -- TEMPORARILY DISABLE ALL TRIGGERS
