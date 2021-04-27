@@ -1,8 +1,0 @@
-
-refresh_redis_syncs
-================
-
-vi /etc/passwd
-     www-data     /bin/bash
-
-su -c "time django-admin refresh_redis_syncs" www-data
