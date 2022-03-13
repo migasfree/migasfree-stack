@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+function send_message {
+    curl -d "text=$1;container=$(hostname);service=$SERVICE;node=$NODE" -X POST http://loadbalancer:8001/services/message &> /dev/null
+}
+
 
 function set_TZ {
     if [ -z "$TZ" ]; then
@@ -60,6 +64,8 @@ echo "
 
 
 "
+
+send_message "starting database"
 
 # Run docker-entrypoint.sh (from postgres image)
 /usr/local/bin/docker-entrypoint.sh postgres
