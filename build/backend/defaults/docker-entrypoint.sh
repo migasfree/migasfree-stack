@@ -3,9 +3,44 @@
 _FILE_LOCK=/var/lib/migasfree-backend/conf/.init-server
 _SETTINGS=/var/lib/migasfree-backend/conf/settings.py
 
+function wait {
+    local _SERVER=$1
+    local _PORT=$2
+    local counter=0
+    until [ $counter -gt 5 ]
+    do
+        nc -z $_SERVER $_PORT 2> /dev/null
+       if  [ $? = 0 ]
+       then
+           echo "$_SERVER:$_PORT is running."
+           return
+       else
+           echo "$_SERVER:$_PORT is not running after $counter seconds."
+           sleep 1
+       fi
+        ((counter++))
+    done
+    echo "Rebooting container"
+    exit
+}
+
+# ENVIRONMENT VARIABLES FOR VOLUMES  
+function get_mount_paths {
+    IFS=$'\n'
+    for _M in $(mount|grep '^:/' )
+    do
+        local _KEY=$(echo -n "$_M"|awk '{print $1}')
+        _KEY=${_KEY:2}
+        _KEY=${_KEY^^} 
+        local _VALUE=$(echo -n "$_M"|awk '{print $3}')
+        #export PATH_${_KEY}=${_VALUE}
+        export MIGASFREE_${_KEY}_DIR=${_VALUE}
+    done
+    IFS=""
+}
 
 function set_TZ {
-    send_message "setting the time zone"
+    #send_message "setting the time zone"
     if [ -z "$TZ" ]; then
       TZ="Europe/Madrid"
     fi
@@ -153,18 +188,12 @@ function create_database()
 }
 
 
-function wait_postgresql {
-    send_message "waiting database"
-    wait-for-it -h $_HOST -p $_PORT
-}
-
-
 function migrate {
     send_message "running database migrations"
         su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate auth" www-data
     if [ "$1" = "fake-initial" ]
     then
-        su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate --fake-inicitial" www-data
+        su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate --fake-initial" www-data
     else
         su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate" www-data
     fi
@@ -188,7 +217,7 @@ function lock_server {
     send_message "expect other backend to start"
     while [ -f  $_FILE_LOCK ] ; do
         _CONTAINER_LOCKING=$(cat $_FILE_LOCK)
-        wait-for-it -h $_CONTAINER_LOCKING -p 8080
+        wait $_CONTAINER_LOCKING 8080
         if ! [ $? = 0 ]
         then
             break
@@ -209,8 +238,6 @@ function migasfree_init
     set_permissions
 
     create_keys
-
-    wait_postgresql
 
     lock_server
 
@@ -236,21 +263,24 @@ function migasfree_init
 # =====
 . /venv/bin/activate
 
+wait $REDIS_HOST $REDIS_PORT 
+wait $POSTGRES_HOST $POSTGRES_PORT
+
 set_TZ
 
-send_message "starting $SERVICE"
-
-get_settings
-
-update_ca_certificates
-
-migasfree_init
-
-reload_loadbalancer
-send_message ""
+get_mount_paths
 
 if [ "$SERVICE" = "mf_backend" ]
 then
+
+    send_message "starting $SERVICE"
+
+    get_settings
+
+    update_ca_certificates
+
+    migasfree_init
+
     _PROCESS=$(pip freeze | grep daphne)
 else
     _PROCESS=$(pip freeze | grep celery)
@@ -271,6 +301,9 @@ echo "
 
 "
 
+reload_loadbalancer
+send_message ""
+
 if [ "$SERVICE" = "mf_beat" ]
 then
     DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule  --loglevel INFO 
@@ -280,7 +313,7 @@ then
 else
     # TODO: daphne is running as root!!!  
     # python3 -u  -> force the stdout and stderr streams to be unbuffered 
-    python3 -u $(which daphne)  --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application
+    su -c "python3 -u $(which daphne)  --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application" www-data
 fi
 
 

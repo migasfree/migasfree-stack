@@ -13,7 +13,7 @@ ENV TERM=xterm \
     _UID=890 \
     _GID=890 \
     _BUILD_DEPENDS='git python3-dev libgpgme11-dev python3-all python3-all-dev unzip g++ gcc-8 libcairo2-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libpq-dev' \
-    _DEPENDS='libzmq5 gnupg rng-tools curl  apt-utils bzip2 xz-utils libgpgme11 python3 python3-venv python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat-openbsd logrotate wait-for-it libmagic1' \
+    _DEPENDS='libzmq5 gnupg rng-tools curl  apt-utils bzip2 xz-utils libgpgme11 python3 python3-venv python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat libmagic1' \
    _PIP_DEPENDS='daphne==3.0.2'
    # _PIP_DEPENDS='gunicorn==20.0.4 uvicorn==0.13.4 uvloop==0.15.2 httptools==0.1.1 daphne==3.0.2'
 
@@ -45,11 +45,27 @@ RUN cd / && \
     python3 setup.py install && \
     rm -rf /migasfree-backend
 
+RUN  . /venv/bin/activate &&\
+    # Simbolic links to be copied from other containers && \
+    # MIGASFREE MODULE && \
+    MIGASFREE_MODULE_PATH=$(python3 -c "import migasfree;print(migasfree.__path__[0])") && \
+    ln -s  $MIGASFREE_MODULE_PATH  /migasfree && \
+    # STATIC FILES && \
+    mkdir /static && \
+    STATIC_DJANGO=$(python3 -c "import django;print(django.__path__[0])") && \
+    ln -s ${STATIC_DJANGO}/contrib/admin/static/admin /static/admin && \
+    STATIC_REST_FRAMEWORK=$(python3 -c "import rest_framework;print(rest_framework.__path__[0])") && \
+    ln -s ${STATIC_REST_FRAMEWORK}/static/rest_framework /static/rest_framework && \
+    STATIC_DRF_YASG=$(python3 -c "import drf_yasg;print(drf_yasg.__path__[0])") && \
+    ln -s ${STATIC_DRF_YASG}/static/drf-yasg /static/drf-yasg
+    
+
     # explicity set user/group IDs to www-data && \
 RUN usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
-    . /venv/bin/activate &&\
-    django-admin collectstatic --noinput && \
+    chsh -s /bin/bash www-data && \
+    #. /venv/bin/activate &&\
+    #django-admin collectstatic --noinput && \
     apt-get -y --auto-remove purge $_BUILD_DEPENDS && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
