@@ -22,8 +22,7 @@ configurar el cliente para que pueda trabajar con normalidad.
 Info: Error de curl: server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
 
 Solucion:
-En el ordenador cliente debes instalar el certificado y configurar
-el ajuste SSL_Cert en /etc/migasfree.conf
+En el ordenador cliente debes instalar el certificado y configurar el ajuste SSL_Cert en /etc/migasfree.conf
 
 p.e:
 SSL_Cert = /usr/share/migasfree-certs/cert.pem
