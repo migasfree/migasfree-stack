@@ -1,5 +1,7 @@
 #!/bin/bash
-. ../../config/env/globals
+
+source ../../config/env/general
+source ../../config/env/stack
 
 if [ "$HTTPSMODE" = "manual" ]
 then
