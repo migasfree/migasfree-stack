@@ -61,6 +61,7 @@ REDIS_HOST = 'datastore'
 REDIS_PORT = 6379
 REDIS_DB = 0
 BROKER_URL = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)
+CELERY_RESULT_BACKEND = BROKER_URL
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -128,3 +129,8 @@ MIGASFREE_EXTERNAL_ACTIONS = {
 MIGASFREE_ORGANIZATION="ACME"
 MIGASFREE_HELP_DESK="Help Desk: 555 555 555"
 #MIGASFREE_COMPUTER_SEARCH_FIELDS=('name','id','ip_address','forwarded_ip_address')
+
+
+# Importante
+SESSION_COOKIE_AGE=1
+
