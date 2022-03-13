@@ -4,11 +4,11 @@ SECRETS
 password_database
 --------------------------
 
-Password in 'migasfree' database (postresql)
+Password in 'migasfree' database (postgresql)
 Default: 'migasfree'
 
-password_admin
+token_admin
 -----------------------
 
-Password for user 'admin' to access to the backend. 
-Default: 'admin'
+Token for user 'admin' to access to the backend.  It's used in pms-* to creates repositories
+Default: ''    
