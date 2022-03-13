@@ -4,7 +4,7 @@ LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 
 ENV LIVE_CERT_FOLDER="/etc/letsencrypt/live" \
     BUILD_DEPENDS='py3-pip' \
-    RUNTIME_DEPENDS='bash tzdata inotify-tools openssl ca-certificates socat curl bind-tools python3' \
+    RUNTIME_DEPENDS='bash tzdata inotify-tools openssl ca-certificates socat curl bind-tools python3 curl' \
     RUNTIME_PIP='web.py jinja2'
 
 
@@ -13,10 +13,6 @@ RUN apk add --update --no-cache $BUILD_DEPENDS $RUNTIME_DEPENDS && \
     #apk del $BUILD_DEPENDS && \
     rm -rf /var/cache/apk/*
 
-
-#COPY defaults/usr/bin/check-public /usr/bin/check-public
-#COPY defaults/usr/bin/check-backend /usr/bin/check-backend
-#COPY defaults/usr/bin/check-frontend /usr/bin/check-frontend
 
 COPY defaults/usr/share/services /usr/share/services
 COPY defaults/usr/bin/install-certs /usr/bin/install-certs

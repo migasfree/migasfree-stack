@@ -83,7 +83,7 @@ frontend http
 
     # public
     # ======
-    acl url_public path_beg /public/ /static/ /repo/  # (/repo = retrocompatibility)
+    acl url_public path_beg /public/ /static/ /pool/ /repo/  # (/repo = retrocompatibility)
 
 
     # services static
@@ -93,26 +93,27 @@ frontend http
 
     acl is_GET method GET
 
-
     # external sources
     # ================
     acl url_src path_beg /src/
-    acl url_packages path_end .deb .rpm
-
+    #acl url_packages path_end .deb .rpm .yaml .msix
+    acl url_packages path_end {{ extensions }}
 
     use_backend mf_frontend if url_root or url_empty
     use_backend mf_backend if url_backend || hdr_connection_upgrade || hdr_upgrade_websocket
     use_backend services if is_GET url_services || url_services_static
-    use_backend mf_public if url_public || url_packages || url_src
+    use_backend mf_public if url_public || url_packages || url_src 
+{% if certbot %}
     use_backend core_certbot if certbot
+{% endif %}
 
     default_backend mf_frontend
     #default_backend services
 
-
+{% if certbot %}
 backend core_certbot
     server core_certbot core_certbot:380
-
+{% endif %}
 
 #backend certificates
 #    mode http

@@ -29,10 +29,12 @@ fileconfig = "/etc/haproxy/haproxy.cfg"
 
 def check_running():
     while True:
-        if not ckeck_server(os.environ['FQDN'], 443):
+        if not ckeck_server2(os.environ['FQDN'], 443):
             config_haproxy()
             reload_haproxy()
+        
         time.sleep(10)
+
 
 class icon:
     def GET(self):
@@ -347,20 +349,32 @@ def config_haproxy():
 
     context["cerbot"] = (os.environ["HTTPSMODE"] == "auto")
     
-    context["mf_public"] = get_nodes("public")
+    if ckeck_server("public",8080):
+        context["mf_public"] = get_nodes("public")
+    else: 
+         context["mf_public"] = []
 
-    context["mf_backend"] = get_nodes("backend")
-    if len(global_data['extensions']) == 0 and len(context["mf_backend"] ) > 0:
-        global_data['extensions']=get_extensions()
-        if len(global_data['extensions']) > 0:
-            config_nginx()
+    if ckeck_server("backend",8080):
+        context["mf_backend"] = get_nodes("backend")
+        if len(global_data['extensions']) == 0 and len(context["mf_backend"] ) > 0:
+            global_data['extensions']=get_extensions()
+            if len(global_data['extensions']) > 0:
+                config_nginx()
 
-    if  len(global_data['extensions']) == 0:
-        context["extensions"] = ".deb .rpm"
+        if  len(global_data['extensions']) == 0:
+            context["extensions"] = ".deb .rpm"
+        else:
+            context["extensions"]  = "."+" .".join(global_data['extensions'])
+
+
+     # Si no hay backends se asume que tampoco hay frontend
+        if ckeck_server("frontend",8080):
+            context["mf_frontend"] = get_nodes("frontend")
+        else:
+            context["mf_frontend"] = []
     else:
-        context["extensions"]  = "."+" .".join(global_data['extensions'])
-
-    context["mf_frontend"] = get_nodes("frontend")
+        context["mf_public"] = []
+        context["mf_frontend"] = []
     
     with open(fileconfig, "w") as f:
         f.write(Template(haproxy_template).render(context))
@@ -379,7 +393,14 @@ def get_nodes(service):
                 nodes.append(node)
     return nodes
 
+
 def ckeck_server(host: str,port: int):
+    return True
+
+def ckeck_server2(host: str,port: int):
+    """
+    return True
+    """
     try:
         args = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
     except:
