@@ -1,59 +1,45 @@
 version: "3.7"
 
 services:
-
-    pms-apt:
-        image: migasfree/pms-apt:${PMS_APT_TAG}
-        deploy:
-            replicas: 1
-        env_file:
-            - ../config/env/globals
-            - ../config/env/swarm
-        depends_on:
-            - backend
-            - datastore
-        secrets:
-            - source: password_admin
-        volumes:
-            - keys:/var/lib/migasfree-backend/keys
-            - public:/var/lib/migasfree-backend/public
-        networks:
-            - mf_network
+${SERVICES_PMS}
 
     public:
-        image: migasfree/public:${PUBLIC_TAG}
+        image: migasfree/public:$(cat ../../build/public/VERSION)
         deploy:
-            replicas: 1
+            replicas: ${REPLICAS_PUBLIC}
         env_file:
-            - ../config/env/globals
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack
         volumes:
             - public:/var/migasfree/public:ro
+            - conf:/var/lib/migasfree-backend/conf
         networks:
             - mf_network
 
     frontend:
-        image: migasfree/frontend:${FRONTEND_TAG}
+        image: migasfree/frontend:$(cat ../../build/frontend/VERSION)
         deploy:
-            replicas: 1
+            replicas: ${REPLICAS_FRONTEND}
         env_file:
-            - ../config/env/globals
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack
         depends_on:
             - backend
         networks:
             - mf_network
 
     backend:
-        image: migasfree/backend:${BACKEND_TAG}
+        image: migasfree/backend:$(cat ../../build/backend/VERSION)
         env_file:
-            - ../config/env/globals
-            - ../config/env/backend
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack
+        environment:
+              - 'MIGASFREE_FQDN=$FQDN'
         deploy:
-            replicas: 1
+            replicas: ${REPLICAS_BACKEND}
         secrets:
             - source: password_database
+            - source: token_admin
         depends_on:
             - database
             - datastore
@@ -62,17 +48,23 @@ services:
             - conf:/var/lib/migasfree-backend/conf
             - public:/var/lib/migasfree-backend/public
             - keys:/var/lib/migasfree-backend/keys
+            - tmp:/var/lib/migasfree-backend/tmp
+            - plugins:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree/core/pms/plugins 
+            # DEVELOPMENT
+            - /store/desarrollo/git/migasfree-backend/migasfree:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree
+ 
         networks:
             - mf_network
 
     worker:
-        image: migasfree/backend:${BACKEND_TAG}
+        image: migasfree/backend:$(cat ../../build/backend/VERSION)
         env_file:
-            - ../config/env/globals
-            - ../config/env/backend
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack
+        environment:
+              - 'MIGASFREE_FQDN=$FQDN'
         deploy:
-            replicas: 1
+            replicas:  ${REPLICAS_WORKER}
         secrets:
             - source: password_database
         depends_on:
@@ -87,11 +79,12 @@ services:
             - mf_network
 
     beat:
-        image: migasfree/backend:${BACKEND_TAG}
+        image: migasfree/backend:$(cat ../../build/backend/VERSION)
         env_file:
-            - ../config/env/globals
-            - ../config/env/backend
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack
+        environment:
+              - 'MIGASFREE_FQDN=$FQDN'
         deploy:
             replicas: 1
         secrets:
@@ -108,11 +101,10 @@ services:
             - mf_network
 
     database:
-        image: migasfree/database:${DATABASE_TAG}
+        image: migasfree/database:$(cat ../../build/database/VERSION)
         env_file:
-            - ../config/env/globals
-            - ../config/env/backend
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack 
         environment:
             - POSTGRES_PASSWORD_FILE=/run/secrets/password_database
         secrets:
@@ -134,11 +126,10 @@ services:
             - mf_network
 
     datastore:
-        image: migasfree/datastore:${DATASTORE_TAG}
+        image: migasfree/datastore:$(cat ../../build/datastore/VERSION)
         env_file:
-            - ../config/env/globals
-            - ../config/env/backend
-            - ../config/env/swarm
+            - ../config/env/general
+            - ../config/env/stack
         environment:
             - POSTGRES_PASSWORD_FILE=/run/secrets/password_database
         secrets:
@@ -159,8 +150,8 @@ networks:
 secrets:
     password_database:
         file: ../config/secrets/password_database
-    password_admin:
-        file: ../config/secrets/password_admin
+    token_admin:
+        file: ../config/secrets/token_admin
 
 
 volumes:
@@ -198,10 +189,31 @@ volumes:
             o: addr=${NFS_SERVER},rw
             device: :/public
 
+    tmp:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=${NFS_SERVER},rw
+            device: :/tmp
+
+    plugins:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=${NFS_SERVER},rw
+            device: :/plugins
+
     keys:
         driver: local
         driver_opts:
             type: nfs4
             o: addr=${NFS_SERVER},rw
             device: :/keys
-    
+
+    certificates:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=${NFS_SERVER},rw
+            device: :/certificates
+

@@ -3,35 +3,23 @@ version: "3.7"
 services:
 
     loadbalancer:
-        image: migasfree/loadbalancer:${LOADBALANCER_TAG}
-        
+        image: migasfree/loadbalancer:$(cat ../../build/loadbalancer/VERSION)
         ports:
             - 80:80
             - 443:443
             - 9999
-
         env_file:
-            - ../config/env/globals
-       
+            - ../config/env/general
+            - ../config/env/stack
         deploy:
             replicas: 1
-
         networks:
             - mf_network
-
         volumes:
             - certificates:/usr/local/etc/haproxy/certificates
+            - conf:/var/lib/migasfree-backend/conf
 
-    certbot:
-        image: migasfree/certbot:${CERTBOT_TAG}
-        env_file:
-            - ../config/env/globals
-        deploy:
-            replicas: 1
-        networks:
-            - mf_network
-        volumes:
-            - certificates:/etc/certificates
+${SERVICE_CERTBOT}
 
 networks:
     mf_network:
@@ -44,3 +32,10 @@ volumes:
             type: nfs4
             o: addr=${NFS_SERVER},rw
             device: :/certificates
+
+    conf:
+        driver: local
+        driver_opts:
+            type: nfs4
+            o: addr=${NFS_SERVER},rw
+            device: :/conf

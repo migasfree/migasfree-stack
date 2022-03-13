@@ -1,0 +1,25 @@
+
+    ${_PMS}:
+        image: migasfree/${_PMS}:${_PMS_TAG}
+        deploy:
+            replicas: 1
+        env_file:
+            - ../config/env/general
+            - ../config/env/stack
+        depends_on:
+            - backend
+            - datastore
+        secrets:
+            - source: token_admin
+        volumes:
+            - keys:/var/lib/migasfree-backend/keys
+            - public:/var/lib/migasfree-backend/public
+            - tmp:/var/lib/migasfree-backend/tmp
+            - certificates:/var/lib/migasfree-backend/certificates
+            - plugins:/pms/migasfree/core/pms/plugins
+            # DEVELOPMENT
+            - /store/desarrollo/git/migasfree-backend/migasfree:/pms/migasfree
+ 
+            
+        networks:
+            - mf_network

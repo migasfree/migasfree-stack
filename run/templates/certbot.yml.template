@@ -1,0 +1,13 @@
+
+    certbot:
+        image: migasfree/certbot:$(cat ../../build/certbot/VERSION)
+        env_file:
+            - ../config/env/general
+            - ../config/env/stack   
+        deploy:
+            replicas: 1
+        networks:
+            - mf_network
+        volumes:
+            - certificates:/etc/certificates
+

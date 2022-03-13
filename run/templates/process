@@ -1,0 +1,64 @@
+#!/bin/bash
+
+_PATH=$(dirname $(readlink -f $0))
+cd "${_PATH}"
+
+function process_template {
+    _FILE_YML=$1
+    rm -f ${_FILE_YML}
+    ( echo "cat <<EOF > ${_FILE_YML}";
+      cat ${_FILE_YML}.template;
+      echo "";
+      echo "EOF";
+    ) >temp.yml
+    . temp.yml
+    rm temp.yml 
+    _OUTPUT=$(<${_FILE_YML})
+    rm ${_FILE_YML}
+    echo -n "${_OUTPUT}"
+}
+
+
+source ../../config/env/general
+source ../../config/env/stack
+source ../../config/env/replicas
+
+
+# PROCESS  CERTBOT > Result is in variable SERVICE_CERTBOT
+# =================================================
+if [ ${HTTPSMODE} = auto ]
+then
+  process_template "certbot.yml" >  _temp.yml   
+  SERVICE_CERTBOT=$(<_temp.yml )
+  rm _temp.yml
+else
+  SERVICE_CERTBOT=""
+fi
+
+# PROCESS CORE.YML
+# ================
+process_template core.yml > ../core.yml
+
+
+
+# PROCESS ALL PMS -> Result is in varaible SERVICES_PMS
+# ==============================================
+IFS=','
+for _PMS in $PMS_ENABLED
+do 
+    _PMS_TAG=$(cat ../../build/${_PMS}/VERSION)
+    process_template "pms.yml" >> _temp.yml   
+done
+IFS=
+SERVICES_PMS=$(<_temp.yml )
+rm _temp.yml
+
+
+
+# PROCESS MIGASFREE.YML
+# =====================
+process_template migasfree.yml > ../migasfree.yml
+
+cd -
+
+
