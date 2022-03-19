@@ -17,8 +17,9 @@
             - tmp:/var/lib/migasfree-backend/tmp
             - certificates:/var/lib/migasfree-backend/certificates
             - plugins:/pms/migasfree/core/pms/plugins
-            # DEVELOPMENT
-            - /store/desarrollo/git/migasfree-backend/migasfree:/pms/migasfree
+
+            # ONLY FOR DEVELOPMENT
+            # - /store/desarrollo/git/migasfree-backend/migasfree:/pms/migasfree
  
             
         networks:

@@ -50,8 +50,9 @@ ${SERVICES_PMS}
             - keys:/var/lib/migasfree-backend/keys
             - tmp:/var/lib/migasfree-backend/tmp
             - plugins:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree/core/pms/plugins 
-            # DEVELOPMENT
-            - /store/desarrollo/git/migasfree-backend/migasfree:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree
+
+            # ONLY FOR DEVELOPMENT
+            # - /store/desarrollo/git/migasfree-backend/migasfree:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree
  
         networks:
             - mf_network
