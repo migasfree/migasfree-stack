@@ -3,6 +3,7 @@
 import web
 import time
 from web.httpserver import StaticMiddleware
+from datetime import datetime
 
 import json
 import platform
@@ -11,6 +12,7 @@ import subprocess
 import os
 import socket
 import _thread
+
 
 with open("/etc/haproxy/haproxy.template") as f:
     haproxy_template = f.read()
@@ -23,7 +25,7 @@ urls = (
     '/services/reconfigure', 'reconfigure',
 )
 
-global_data = {'message':'', 'need_reload': True,"extensions": []}
+global_data = {'services': {}, 'message': '', 'need_reload': True, "extensions": [], "ok": False, "now": datetime.now()}
 
 fileconfig = "/etc/haproxy/haproxy.cfg"
 
@@ -58,122 +60,336 @@ class manifest:
 class message:
     def GET(self):
 
-        second=int(time.time() % 60)  # 0-59
         web.header('Content-Type', 'application/json')
-        msg = global_data["message"]
-        pms=os.environ['PMS_ENABLED'].split(',')
-        services=['datastore', 'database','backend','beat','worker','frontend','public', *pms]
-        if not msg:
-            missing = []
-            #check services
-            for service in services:
-                if len(get_nodes(service)) < 1:
-                    missing.append(service)
-
-            if len(missing)>0:
-                msg = "waiting to {}".format(", ".join(missing))
-                icon = "spoon-checking-{}.svg".format(second % 3)
-                gear =  "search.svg"
-                global_data["need_reload"]=True
-            else:
-                if global_data["need_reload"]:
-                    reload_haproxy()
-                    global_data["need_reload"]=False
-
-                global_data["message"] = ""
-                """
-                global_data["service"] = ""
-                global_data["container"] = ""
-                """
-                msg = "All services are running"
-                icon = global_data["icon"] = "spoon-ok-{}.svg".format(second % 2)
-                gear =  "gear-{}.svg".format(second % 3)
-
-        else:
-            icon = global_data["icon"] = "spoon-starting-{}.svg".format(second % 2)
-            gear =  "tools.svg"
         
+        if int((datetime.now() - global_data['now']).total_seconds()) >=1 :
+            global_data['now']=datetime.now();
+
+            pms=os.environ['PMS_ENABLED'].split(',')
+            services=['frontend','backend','beat','worker','public', *pms, 'database','datastore' ]
+
+            if  'services' not in global_data: 
+                global_data['services']= {}
+            
+            if 'last_message' not in global_data:
+                global_data['last_message']=""
+
+            missing = False
+            message = False
+
+            for _service in services:
+                
+                if "mf_"+_service not in global_data['services']:
+                    global_data['services']["mf_"+_service] = {
+                            "message": "",
+                            "node" : "",
+                            "container": "",
+                            "missing": True,
+                    }
+
+                # missing
+                nodes = len(get_nodes(_service))
+                global_data['services']["mf_"+_service]['missing'] = (nodes < 1)
+                global_data['services']["mf_"+_service]['nodes' ] = nodes
+                
+                if global_data['services']["mf_"+_service]['missing']:
+                    global_data["need_reload"]=True
+                    missing=True
+                
+                if global_data['services']["mf_"+_service]["message"]:
+                    message = True
+            
+                global_data["ok"] = False
+                if not message:
+                    if missing:
+                        global_data["need_reload"]=True
+                    else:
+                        if global_data["need_reload"]:
+                            reload_haproxy()
+                            global_data["need_reload"]=False
+                        global_data["ok"] = True
+
         return json.dumps({
-                "message": msg, 
-                "icon": icon, 
-                "gear": gear,
-                "tooltip": "Spoon"
+                "last_message": global_data['last_message'],
+                "services": global_data['services'],
+                "ok": global_data["ok"]
             })
 
 
-
     def POST(self):
-        param = web.input()
-        if 'text' in param:
-            global_data["message"] = param.text.split(";")[0]
-        """
-        if 'container' in param:
-            global_data["container"] = param.container
-        if 'service' in param:
-            global_data["service"] = param.service
-        """
+        data = json.loads(web.data())
+        make_global_data(data)
 
 class reconfigure:
     def POST(self):
-        config_haproxy()
+        data={ 
+                "text":"reconfigure", 
+                "service": os.environ["SERVICE"] ,
+                "node":os.environ["NODE"],
+                "container": os.environ["HOSTNAME"] 
+            }
+    
+        make_global_data(data)
+        config_haproxy()        
         reload_haproxy()
+        
+        time.sleep(1)
+        data["text"]="" 
+        make_global_data(data)
+
+
+
+def make_global_data(data): 
+    global_data["ok"] = False
+
+    if 'service' in data:
+
+        if data['service'] not in global_data['services']:
+                global_data['services'][data['service']]={
+                    "message":"",
+                    "node":"",
+                    "container":"",
+                    "missing": True
+                }
+        
+        if 'text' in data:
+            global_data['services'][data['service']]["message"] = data["text"]
+            global_data['last_message']= data["service"]
+        if 'node' in data:
+            global_data['services'][data['service']]["node"] = data['node']
+        if 'container' in data:
+            global_data['services'][data['service']]["container"] = data['container']
 
 
 def status_page(context):
     template="""
 <!DOCTYPE html>
+<html lang="es">  
+  <head>    
+ 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Status | Migasfree</title>
+    
+<style>
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
 
 
-<html manifest="/services/manifest">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-        <title>Status of services | Migasfree</title>
-        <script src="/services-static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="/services-static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+            
+      function sleep (time) {
+          return new Promise((resolve) => setTimeout(resolve, time));
+      }
+     
 
 
+      var time = +new Date;
+      var circles = "#loadbalancer, #frontend, #backend, #beat, #worker, #public, #pms, #database, #datastore";
+      var serv = ""
 
-        <script type="text/javascript">
-            function sleep (time) {
-                return new Promise((resolve) => setTimeout(resolve, time));
-            }
+      
+      $(document).ready(function() {
 
-            var time = +new Date;
-
-            $(document).ready(function() {
-                
-                setInterval(function() {
+        setInterval(function() {
                     var now = +new Date;
                     var retraso = parseInt((now-time)/1000);
+                    
                     if ( retraso > 1.5) {
-
-                        $("#gear").attr("src","/services-static/img/disconnect.svg");
                         $("#message").text('disconnected');
-                        $("#status_image").attr("src","/services-static/img/spoon-disconnect.svg");
-                        $("#status_image").attr('title', "load balancer not found")
-
+                        $("#spoon").attr("href","/services-static/img/spoon-disconnect.svg");
+                        $(circles).hide(200);
+                        $("#loadbalancer").show(200);
+                        $("#loadbalancer").attr('fill','red');
+                        $("#start").hide(200);
                     }
-
 
                     $.ajax({
                         url: '/services/message',
                         success: function(data) {
-                            time = +new Date;
-                            
-                            $("#gear").attr("src","/services-static/img/" + data.gear);
-                            $("#message").text(data.message);
-                            $("#status_image").attr("src","/services-static/img/" + data.icon);
-                            $("#status_image").attr('title', data.tooltip)
-                            
-                            if ( data.message == "All services are running" ) {
-                                $("#image").attr('href',"/");
-                            } else {
-                                $("#image").removeAttr('href');
+             
+                            function missing_pms() {
+                                _missing = false;
+                                _message = false;
+                                _service = "";
+                                _nodes = 0;
+                                for (const [key, value] of Object.entries(data['services'])) { 
+                                    if ( key.startsWith('mf_pms-')) {
+                                        if (data['services'][key]["missing"]) {
+                                            _missing = true;
+                                            _service = key; // last service found in data
+                                        }
+                                        if (data['services'][key]["message"] !="" ) {
+                                            _message = true;
+                                            _service = key;  // last service found in data
+                                        }
+                                        _nodes += data['services'][key]["nodes"]
+                                    }
+                                }
+                                if (_message){
+                                    _missing=false;
+                                }
+
+                                if ( _missing ) {
+                                    $("#pms").attr('fill','red');
+                                    $("#pms").show(500);
+                                } else if ( _message ) {
+                                    $("#pms").attr('fill','orange');
+                                    $("#pms").hide(500);
+                                    $("#pms").show(500);
+                                } else {
+                                    $("#pms").attr('fill','#a9dfbf'); // GREEN
+                                    $("#pms").show(500);
+                                }
+
+                                if ( _nodes < 2 ) {
+                                    $("#nodes_pms").text( "" );
+                                } else {
+                                    $("#nodes_pms").text( _nodes );
+                                }
+                                return _service;
+                            }
+             
+                            function missing(id) {
+                                services=data['services']
+                                if (id=='loadbalancer') {
+                                    _missing= false;
+                                    _message = services["core_"+id]["message"];
+                                    _nodes = 1;
+                                } else {
+                                    _missing = services["mf_"+id]["missing"];
+                                    _message = services["mf_"+id]["message"];
+                                    _nodes = services["mf_"+id]["nodes"];
+                                }
+                                if ( _missing ) {
+                                    $("#"+id).attr('fill','red');
+                                    $("#"+id).show(500);
+                                } else if ( _message != "" ) {
+                                    $("#"+id).attr('fill','orange');
+                                    $("#"+id).hide(500);
+                                    $("#"+id).show(500);
+                                } else {
+                                    $("#"+id).attr('fill','#a9dfbf'); // GREEN
+                                    $("#"+id).show(500);
+                                }
+                                
+                                if ( _nodes < 2 ) {
+                                    $("#nodes_"+id).text( "" );
+                                } else {
+                                    $("#nodes_"+id).text( _nodes );
+                                }
+
                             }
 
+                            
+
+                            time = +new Date;
+                            
+                            missing("loadbalancer");
+                            missing("frontend");
+                            missing("backend");
+                            missing("beat");
+                            missing("worker");
+                            missing("public");
+                            missing("database");
+                            missing("datastore");
+                            message_pms = missing_pms();
+
+
+
+
+                            if (serv == "") {
+                                message_serv = data['last_message'];
+                            } else if ( serv == "loadbalancer" ){
+                                message_serv = 'core_'+serv;
+                            } else {
+                                message_serv = 'mf_'+serv;
+                            }
+
+                            if  (typeof(data) != "undefined") {
+                                if (serv == "pms"  && ( message_pms !="" ) ) {
+                                    message=data['services'][message_pms]['message'];
+                                    message_serv=message_pms
+                                    message_from = `${data['services'][message_pms]['container']}@${data['services'][message_pms]['node']}`;
+                                } else {
+                                    message=data['services'][message_serv]['message'];
+                                    message_from=`${data['services'][message_serv]['container']}@${data['services'][message_serv]['node']}`;
+                                }
+                            }
+                            
+
+
+                            if ( data['ok'] ) {
+                                    sprite=parseInt(((now)/1000) % 2)
+                                    $("#spoon").attr("href",`/services-static/img/spoon-ok-${sprite}.svg`);
+                                    $(".bocadillo").hide(200);
+                                    $("#start").show(100);
+                            } else if ( message_serv in data['services'] && data['services'][message_serv]['missing'] ) {
+                                    sprite=parseInt(((now)/1000) % 2)
+                                    $("#spoon").attr("href",`/services-static/img/spoon-starting-${sprite}.svg`);
+                                    $(".bocadillo").hide(200);
+                                    $("#start").hide(200);
+                            } else {
+                                    sprite=parseInt(((now)/1000) % 3)
+                                    $("#spoon").attr("href",`/services-static/img/spoon-checking-${sprite}.svg`);
+                                    $(".bocadillo").show(200);
+                                    $("#start").hide(200);                                    
+                            }
+
+
+
+                            if ( message == "" ) {
+                                $("#message").text('ready');
+                            } else {    
+                                $("#message").text(message);
+                            }
+
+                            $("#message_serv").text(message_serv);
+                            $("#message_from").text(message_from);
+                            
+
                             if  ( ! location.pathname.startsWith('/services/status') ) {
-                                if ( data.message == "All services are running" ) {
-                                    $("#message").finish();                                   
+                                if ( data["ok"]) {
+                                    //$("#message").finish();                                   
                                     $(location).attr('href',location.href);      
                                 }   
                             } 
@@ -181,63 +397,112 @@ def status_page(context):
                         },
                     });
                 }, 1000);
-            });
 
-            $( window ).load( function() {
-                $("#gear").attr("src","/services-static/img/disconnect.svg");
-                $("#gear").attr("src","/services-static/img/wait.svg");
-                $("#status_image").attr("src","/services-static/img/spoon-disconnect.svg");
-            });
+      });
 
-        </script>
+      $( window ).load( function() {
 
-        <style>
-            body {
-                width: 35em;
-                margin: 0 auto;
-                font-family: Tahoma, Verdana, Arial, sans-serif;
-            }
+                // forzar download image 
+                $("#spoon-disconnected").attr('href','/services-static/img/spoon-disconnect.svg');
+ 
+                $("#start").hide(1)
+                $("#start").attr('href','/services-static/img/start.svg');
 
-            .center-div
-            {
-                position: absolute;
-                margin: auto;
-                top: -20%;
-                right: 0;
-                bottom: 0;
-                left: 0;
-                width: 50%;
-                height: 50%;
-                border-radius: 40px;
-            }
-
-        </style>
-    </head>
-    <body>
-
-        <div id="box" class="center-div">
-            <p> </p>
-            <p> </p>
-            <div align="center">
-
-
-                <div align="center">
-                    <a id="image">
-                        <img id="gear" src="/services-static/img/disconnect.svg"  height="10%" width="10%"> 
-                    </a>
-                </div>   
-                
-                <div id="message" align="center" style="font-size: 1.8vw;">
-                    please wait
-                </div>
-
-                <div align="right"><img id="status_image" src="/services-static/img/spoon-disconnect.svg"  style="padding-right: 20%" height="20%" width="20%"> </div>   
+                $(circles).attr('fill','orange');
+                $(circles).hide(200);
+                $("#spoon").hide(200);
+                $("#spoon").attr('href','/services-static/img/spoon-welcome.svg');
+                $("#spoon").show(100);
+                welcome = [ "salut!", "Hi!", "¡hola!", "¡hola, co!", "kaixo!", "ola!", "Hallo! " ]
+                $("#message").text(welcome[Math.floor(Math.random() * 7)]);
 
                 
-            </div>
-        </div>
-    </body>
+            });
+    </script>
+  </head>  
+  <body>    
+ 
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="20 70 160 70">
+            
+      <image href="/services-static/img/background.svg" x=30 y=50 height="120" width="120" ></image>
 
+      <-- force download file spoon-disconnect.svg-->
+      <image id="spoon-disconnected" href="/" x=0 y=0 height="0" width="0" ></image>
+      
+      <image id="spoon" href="/" x=155 y=120 height="20" width="20" ></image>
+
+
+
+      <!-- bocadillo -->
+      <rect class="bocadillo" x="145" y="90" width="33" height="28" rx="2"  ry="2" fill="#FFFF99"/>
+      <line class="bocadillo" x1="160" y1="121" x2="158" y2="117" stroke="#FFFF99" />
+      <switch>
+        <foreignObject  x="147" y="90" width="30" height="25.5" font-size="2">
+          <p class="bocadillo" id="message"> one moment, please </p>
+        </foreignObject>
+     </switch>
+
+       <switch>   
+        <foreignObject  x="147" y="112" width="30" height="4" font-size="1.6">
+          <p class="bocadillo" id="message_serv">  </p>
+        </foreignObject>
+      </switch>
+
+
+       <switch>   
+        <foreignObject  x="147" y="113.8" width="30" height="4" font-size="1.2">
+          <p class="bocadillo" id="message_from">  </p>
+        </foreignObject>
+      </switch>
+
+
+      <image id="start" href="/" x=155 y=101 height="10" width="10" onclick="$(location).attr('href','/');"></image>
+
+      <circle id="loadbalancer"  cx="37.5" cy="110" r="1.5" fill="orange"
+            onmouseenter="serv='loadbalancer';" 
+            onmouseout="serv='';" />
+
+      <circle id="frontend"  cx="60" cy="110" r="1.5" fill="orange" 
+            onmouseenter="serv='frontend';" 
+            onmouseout="serv='';" />
+      <text id="nodes_frontend" x="60" y="111" text-anchor="middle" font-size="3"></text>
+
+      <circle id="backend"  cx="84" cy="92" r="1.5" fill="orange"
+            onmouseenter="serv='backend';" 
+            onmouseout="serv='';" />
+      <text id="nodes_backend" x="84" y="93" text-anchor="middle" font-size="3"></text>
+
+      <circle id="beat"  cx="84" cy="110" r="1.5" fill="orange"
+            onmouseenter="serv='beat';" 
+            onmouseout="serv='';" />
+      <text id="nodes_beat" x="84" y="111" text-anchor="middle" font-size="3"></text>
+
+      <circle id="worker"  cx="84" cy="128" r="1.5" fill="orange"
+            onmouseenter="serv='worker';" 
+            onmouseout="serv='';" />
+      <text id="nodes_worker" x="84" y="129" text-anchor="middle" font-size="3"></text>
+      
+      <circle id="public" cx="103" cy="100" r="1.5" fill="orange" 
+            onmouseenter="serv='public';" 
+            onmouseout="serv='';" />
+      <text id="nodes_public" x="103" y="101" text-anchor="middle" font-size="3"></text>
+
+      <circle id="pms"  cx="103" cy="119" r="1.5" fill="orange"
+            onmouseenter="serv='pms';" 
+            onmouseout="serv='';" />
+      <text id="nodes_pms" x="103" y="120" text-anchor="middle" font-size="3"></text>
+
+      <circle id="database"  cx="128" cy="101" r="1.5" fill="orange"
+            onmouseenter="serv='database';" 
+            onmouseout="serv='';" />
+
+      <circle id="datastore"  cx="128" cy="123" r="1.5" fill="orange"  
+            onmouseenter="serv='datastore';" 
+            onmouseout="serv='';" />
+
+    </svg>
+        
+  </body>
 </html>
 """
     return Template(template).render(context)
