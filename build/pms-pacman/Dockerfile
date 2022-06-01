@@ -19,9 +19,6 @@ RUN _TAG=$(cat /VERSION) && \
     useradd www-data &&\
     usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
-    patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && \
-    curl -LO "https://raw.githubusercontent.com/sickcodes/Docker-OSX/master/${patched_glibc}" && \
-    bsdtar -C / -xvf "${patched_glibc}"  && \
     chsh -s /bin/bash www-data  && \
     pacman -Sy  && \
     pacman --noconfirm --sync  $_DEPENDS  && \
