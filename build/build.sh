@@ -1,4 +1,3 @@
-
 function build
 {
     CONTEXT="$1"
@@ -12,7 +11,14 @@ function build
     cd - >/dev/null
 }
 
-for IMAGE in loadbalancer certbot datastore database backend frontend public pms-apt pms-yum pms-winget pms-pacman
+
+IMAGES="$1"
+if [ -z "${IMAGES}" ]
+then
+   IMAGES="loadbalancer certbot datastore database backend frontend public pms-apt pms-yum pms-winget pms-pacman"
+fi
+
+for IMAGE in $IMAGES
 do
    build $IMAGE
 done
