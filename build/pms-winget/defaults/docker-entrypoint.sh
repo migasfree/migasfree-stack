@@ -29,6 +29,17 @@ function reload_loadbalancer {
     curl -d "" -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null  
 }
 
+
+function send_message {
+    point="http://loadbalancer:8001/services/message"
+    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    do
+       sleep 2
+    done
+}
+
+
 # ENVIRONMENT VARIABLES FOR VOLUMES  
 function get_mount_paths {
     IFS=$'\n'
@@ -43,6 +54,9 @@ function get_mount_paths {
     IFS=""
 }
 
+send_message "starting ${SERVICE:(${#STACK})+1}"
+
+send_message "waiting backend"
 wait backend 8080
 
 get_mount_paths 
@@ -51,6 +65,7 @@ get_mount_paths
 
 if ! [ -f ${MIGASFREE_CERTIFICATES_DIR}/cert.pfx ]
 then
+    send_message "create cert.pfx neccesary for sign source.msix"
     openssl pkcs12 -export -in ${MIGASFREE_CERTIFICATES_DIR}/cert.crt  \
                          -inkey ${MIGASFREE_CERTIFICATES_DIR}/cert.key \
                          -out ${MIGASFREE_CERTIFICATES_DIR}/cert.pfx \
@@ -81,5 +96,6 @@ echo "
 
 cd /pms
 reload_loadbalancer
+send_message ""
 celery -A migasfree.core.tasks -b $BROKER_URL --result-backend=$BROKER_URL  worker -l INFO --uid=890 -Q $QUEUES --concurrency=1
 
