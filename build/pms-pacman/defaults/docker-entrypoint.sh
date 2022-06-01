@@ -25,6 +25,17 @@ function wait {
     exit
 }
 
+
+function send_message {
+    point="http://loadbalancer:8001/services/message"
+    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    do
+       sleep 2
+    done
+}
+
+
 function reload_loadbalancer {
     curl -d "" -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null 
 }
@@ -43,6 +54,9 @@ function get_mount_paths {
     IFS=""
 }
 
+send_message "starting ${SERVICE:(${#STACK})+1}"
+
+send_message "waiting backend"
 wait backend 8080
 
 get_mount_paths 
@@ -65,5 +79,6 @@ echo "
 
 cd /pms
 reload_loadbalancer
+send_message ""
 celery -A migasfree.core.tasks -b $BROKER_URL --result-backend=$BROKER_URL  worker -l INFO --uid=890 -Q $QUEUES --concurrency=1
 
