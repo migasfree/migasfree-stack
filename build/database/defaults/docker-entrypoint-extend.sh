@@ -1,9 +1,25 @@
 #!/bin/bash
 set -e
 
-function send_message {
-    curl -d "text=$1;container=$(hostname);service=$SERVICE;node=$NODE" -X POST http://loadbalancer:8001/services/message &> /dev/null
+function capture_message {
+    local _LAST="database system is ready to accept connections"
+    if [[ "$1" == *"$_LAST"* ]]
+    then
+        send_message ""
+    else
+        send_message "$1"
+    fi
 }
+
+function send_message {
+    point="http://loadbalancer:8001/services/message"
+    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    do
+       sleep 2
+    done
+}
+
 
 
 function set_TZ {
@@ -45,7 +61,7 @@ EOF
 fi
 
 
-
+send_message "starting ${SERVICE:(${#STACK})+1}"
 #set_TZ
 cron_init
 
@@ -65,7 +81,14 @@ echo "
 
 "
 
-send_message "starting database"
 
 # Run docker-entrypoint.sh (from postgres image)
-/usr/local/bin/docker-entrypoint.sh postgres
+#/usr/local/bin/docker-entrypoint.sh postgres
+
+
+# Capture stdout line by line
+stdbuf -oL bash /usr/local/bin/docker-entrypoint.sh postgres  |
+    while IFS= read -r line
+    do
+        capture_message "$line"
+    done
