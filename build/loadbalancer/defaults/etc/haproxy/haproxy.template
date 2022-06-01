@@ -177,7 +177,7 @@ backend mf_frontend
 
     balance roundrobin
     
-    http-request redirect scheme https unless { ssl_fc }
+    #http-request redirect scheme https unless { ssl_fc }
 
     #redirect scheme https code 307 if !{ ssl_fc }
 
