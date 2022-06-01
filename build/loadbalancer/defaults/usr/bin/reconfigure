@@ -1,2 +1,6 @@
 #!/bin/sh
-curl -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null
+
+until [ $(curl -s -o /dev/null  -w '%{http_code}' -X POST http://loadbalancer:8001/services/reconfigure) = "200" ]
+do 
+    sleep 1
+done
