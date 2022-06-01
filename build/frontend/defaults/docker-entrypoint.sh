@@ -21,9 +21,16 @@ function wait {
     exit
 }
 
+
 function send_message {
-    curl -d "text=$1;container=$(hostname);service=$SERVICE;node=$NODE" -X POST http://loadbalancer:8001/services/message &> /dev/null
+    point="http://loadbalancer:8001/services/message"
+    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    do
+       sleep 2
+    done
 }
+
 
 function reload_loadbalancer {
     curl -d "" -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null
@@ -65,6 +72,7 @@ server {
 EOF
 
 
+send_message "starting ${SERVICE:(${#STACK})+1}"
 
 # Hacking enviroment variable MIGASFREE_SERVER for production
 _FILES=$(grep -l __FQDN__ /usr/share/nginx/html/js/*)
@@ -73,6 +81,8 @@ do
     sed -i "s/__FQDN__/$FQDN/g" $_FILE 
 done
 
+
+send_message "waiting backend"
 wait backend 8080
 
 echo "
@@ -93,4 +103,5 @@ echo "
 
 echo "daemon off;" >> /etc/nginx/nginx.conf
 reload_loadbalancer
+send_message ""
 nginx 
