@@ -62,7 +62,12 @@ function get_migasfree_setting()
 
 
 function send_message {
-    curl -d "text=$1;container=$(hostname);service=$SERVICE;node=$NODE" -X POST http://loadbalancer:8001/services/message &> /dev/null
+    point="http://loadbalancer:8001/services/message"
+    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    do
+       sleep 2
+    done
 }
 
 
@@ -262,18 +267,21 @@ function migasfree_init
 # START
 # =====
 . /venv/bin/activate
+    
 
-wait $REDIS_HOST $REDIS_PORT 
+send_message "waiting datastore"
+wait $REDIS_HOST $REDIS_PORT
+
+send_message "waiting database" 
 wait $POSTGRES_HOST $POSTGRES_PORT
 
+send_message "starting ${SERVICE:(${#STACK})+1}"
 set_TZ
 
 get_mount_paths
 
 if [ "$SERVICE" = "mf_backend" ]
 then
-
-    send_message "starting $SERVICE"
 
     get_settings
 
