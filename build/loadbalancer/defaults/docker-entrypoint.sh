@@ -17,7 +17,12 @@ function get_mount_paths {
 }
 
 function send_message {
-    curl -d "text=$1;container=$(hostname);service=$SERVICE;node=$NODE" -X POST http://loadbalancer:8001/services/message &> /dev/null
+    point="http://loadbalancer:8001/services/message"
+    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    do
+       sleep .5
+    done
 }
 
 get_mount_paths
@@ -40,8 +45,12 @@ cd /usr/share/services/
 /usr/bin/python3 services.py 8001 >/dev/null &
 cd -
 
-sleep 1
+send_message "starting ${SERVICE:(${#STACK})+1}"
+
 reconfigure || :
+
+
+
 
 echo "
 
@@ -65,5 +74,7 @@ echo "
 # =============
 #haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -sf $(cat /run/haproxy.pid) -x /var/run/haproxy.sock
 
-
-haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -sf $(cat /run/haproxy.pid)
+send_message ""
+mkdir -p /var/run/haproxy/
+sleep 3
+haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg -p /var/run/haproxy.pid  #-sf $(cat /var/run/haproxy.pid)
