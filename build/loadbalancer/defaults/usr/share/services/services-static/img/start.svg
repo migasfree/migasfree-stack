@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="14.906993"
+   width="13.939372"
+   version="1.1"
+   id="svg4">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8">
+    <filter
+       style="color-interpolation-filters:sRGB"
+       id="filter1715"
+       x="-0.061249997"
+       width="1.1224999"
+       y="-0.058800001"
+       height="1.1176">
+      <feGaussianBlur
+         stdDeviation="0.30624999"
+         id="feGaussianBlur1717" />
+    </filter>
+  </defs>
+  <path
+     d="m 1.7758016,1.6719936 c -0.3155912,0 -0.5714286,0.2543837 -0.5714286,0.5681819 V 13.603812 c 0,0.313798 0.2558374,0.568181 0.5714286,0.568181 0.096257,0 0.1827011,-0.02922 0.2622768,-0.07102 L 12.892989,8.420263 c 0.182529,-0.09486 0.311384,-0.279297 0.311384,-0.498269 0,-0.218973 -0.128855,-0.403409 -0.311384,-0.498269 L 2.0380784,1.7430164 C 1.9585027,1.7012186 1.8720586,1.6719936 1.7758016,1.6719936 Z"
+     id="path2-3"
+     style="fill:#b3b3b3;fill-opacity:1;filter:url(#filter1715)" />
+  <path
+     d="M 0.5714286,0 C 0.2558374,0 0,0.2543837 0,0.5681819 V 11.931819 C 0,12.245617 0.2558374,12.5 0.5714286,12.5 c 0.096257,0 0.1827011,-0.02922 0.2622768,-0.07102 L 11.688616,6.748269 C 11.871145,6.6534092 12,6.4689729 12,6.2500002 12,6.0310275 11.871145,5.8465912 11.688616,5.7517315 L 0.8337054,0.0710228 C 0.7541297,0.029225 0.6676856,0 0.5714286,0 Z"
+     id="path2"
+     style="fill:#a9dfbf;fill-opacity:1" />
+  <text
+     transform="scale(0.87156217,1.1473651)"
+     id="text823"
+     y="7.1985297"
+     x="1.3290341"
+     style="font-style:normal;font-weight:normal;font-size:4.70168018px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.11754199px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       style="stroke-width:0.11754199px"
+       y="7.1985297"
+       x="1.3290341"
+       id="tspan821">GO</tspan></text>
+</svg>
