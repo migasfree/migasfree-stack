@@ -2,20 +2,21 @@ import os
 
 def get_secret_pass():
     password = ""
-    with open("/run/secrets/password_database","r") as f:
+    with open("/run/secrets/password_database", "r") as f:
         password = f.read()
+
     return password
 
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os. environ['POSTGRES_DB'],
-            'USER': os. environ['POSTGRES_USER'],
-            'PASSWORD': get_secret_pass(),
-            'HOST': os. environ['POSTGRES_HOST'],
-            'PORT': os. environ['POSTGRES_PORT'],
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ['POSTGRES_DB'],
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD': get_secret_pass(),
+        'HOST': os.environ['POSTGRES_HOST'],
+        'PORT': os.environ['POSTGRES_PORT'],
     }
+}
 
 LOGGING = {
     'version': 1,
@@ -53,8 +54,6 @@ LOGGING = {
     },
 }
 
-
-
 # DATASTORE
 # =========
 REDIS_HOST = 'datastore'
@@ -73,7 +72,6 @@ CACHES = {
     }
 }
 
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -90,11 +88,9 @@ CHANNEL_LAYERS = {
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
 DEBUG = False
 
-
-# Configuracion del correo
+# e-mail config
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'webmail.mydomain.es'
 EMAIL_PORT = 25
@@ -111,26 +107,25 @@ MEDIA_URL ="/public/"
 MIGASFREE_TMP_DIR = '/var/tmp'
 
 MIGASFREE_EXTERNAL_ACTIONS = {
-        "computer": {
-            "ping": {"title": "PING", "description": "check connectivity"},
-            "ssh": {"title": "SSH", "description": "remote control via ssh"},
-            "vnc": {"title": "VNC", "description": "remote control vnc", "many": False},
-            "sync": {"title": "SYNC", "description": "ssh -> run migasfree -u"},
-            "install": {
-                "title": "INSTALL",
-                "description": "ssh -> install a package",
-                "related": ["deployment", "computer"]
-            },
+    "computer": {
+        "ping": {"title": "PING", "description": "check connectivity"},
+        "ssh": {"title": "SSH", "description": "remote control via ssh"},
+        "vnc": {"title": "VNC", "description": "remote control vnc", "many": False},
+        "sync": {"title": "SYNC", "description": "ssh -> run migasfree -u"},
+        "install": {
+            "title": "INSTALL",
+            "description": "ssh -> install a package",
+            "related": ["deployment", "computer"]
         },
-        "error": {
-            "clean": {"title": "delete", "description": "delete errors"},
-        }
+    },
+    "error": {
+        "clean": {"title": "delete", "description": "delete errors"},
+    }
 }
 
 MIGASFREE_ORGANIZATION="ACME"
 MIGASFREE_HELP_DESK="Help Desk: 555 555 555"
 #MIGASFREE_COMPUTER_SEARCH_FIELDS=('name','id','ip_address','forwarded_ip_address')
 
-
-# Importante
+# Important!!!
 SESSION_COOKIE_AGE=1
