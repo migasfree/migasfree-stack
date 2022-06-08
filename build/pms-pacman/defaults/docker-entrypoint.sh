@@ -61,17 +61,22 @@ get_mount_paths
 
 echo "
 
+
+                   ●                          ●●
+                                             ●
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+        ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
+        ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
+                          ●
+                        ●●
+
         migasfree PMS-PACMAN
         celery $(celery --version)
         Container: $HOSTNAME
         Time zome: $TZ  $(date)
         Processes: $(nproc)
-               -------O--
-              \\         o \\
-               \\           \\
-                \\           \\
-                  -----------
-
 
 "
 
