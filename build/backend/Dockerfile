@@ -3,8 +3,6 @@ LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 
 COPY VERSION /VERSION
 
-# Quitados  dpkg-dev rpm createrepo   de _DEPENDS -> pms-apt
-
 ENV TERM=xterm \
     DEBIAN_FRONTEND=noninteractive \
     USER=root \
@@ -14,11 +12,9 @@ ENV TERM=xterm \
     _GID=890 \
     _BUILD_DEPENDS='git python3-dev libgpgme11-dev python3-all python3-all-dev unzip g++ gcc-8 libcairo2-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libpq-dev' \
     _DEPENDS='libzmq5 gnupg rng-tools curl  apt-utils bzip2 xz-utils libgpgme11 python3 python3-venv python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat libmagic1' \
-   _PIP_DEPENDS='daphne==3.0.2'
-   # _PIP_DEPENDS='gunicorn==20.0.4 uvicorn==0.13.4 uvloop==0.15.2 httptools==0.1.1 daphne==3.0.2'
+    _PIP_DEPENDS='daphne==3.0.2'
 
 RUN _TAG=$(cat /VERSION) && \
-    #sed --in-place "s/deb.debian.org/softlibre.unizar.es/g" /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends apt-utils && \
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
@@ -36,7 +32,6 @@ RUN _TAG=$(cat /VERSION) && \
     python3 -m pip install --no-cache-dir  --upgrade setuptools wheel && \
     pip install --no-cache-dir  $_PIP_DEPENDS
 
-
 RUN cd / && \
     . /venv/bin/activate &&\
     git clone  https://github.com/migasfree/migasfree-backend  &&\
@@ -46,7 +41,7 @@ RUN cd / && \
     rm -rf /migasfree-backend
 
 RUN  . /venv/bin/activate &&\
-    # Simbolic links to be copied from other containers && \
+    # Symbolic links to be copied from other containers && \
     # MIGASFREE MODULE && \
     MIGASFREE_MODULE_PATH=$(python3 -c "import migasfree;print(migasfree.__path__[0])") && \
     ln -s  $MIGASFREE_MODULE_PATH  /migasfree && \
@@ -58,9 +53,8 @@ RUN  . /venv/bin/activate &&\
     ln -s ${STATIC_REST_FRAMEWORK}/static/rest_framework /static/rest_framework && \
     STATIC_DRF_YASG=$(python3 -c "import drf_yasg;print(drf_yasg.__path__[0])") && \
     ln -s ${STATIC_DRF_YASG}/static/drf-yasg /static/drf-yasg
-    
 
-    # explicity set user/group IDs to www-data && \
+# explicity set user/group IDs to www-data && \
 RUN usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
     chsh -s /bin/bash www-data && \
@@ -72,9 +66,8 @@ RUN usermod -u $_UID www-data && \
     rm -rf /tmp/pip_build_root && \
     rm -rf /root/.cache
 
-
+COPY defaults/usr /usr
 COPY defaults/docker-entrypoint.sh /docker-entrypoint.sh
-
 
 FROM scratch
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
@@ -85,9 +78,9 @@ ENV TERM=xterm \
     LANG=en_US.UTF-8 \
     DJANGO_SETTINGS_MODULE=migasfree.settings.production \
     _UID=890 \
-    _GID=890 
+    _GID=890
 
-COPY  --from=builder /  /
+COPY --from=builder /  /
 
 ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
 EXPOSE 80
