@@ -82,17 +82,22 @@ wait backend 8080
 
 echo "
 
+
+                   ●                          ●●
+                                             ●
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+        ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
+        ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
+                          ●
+                        ●●
+
         migasfree FRONTEND
         $(nginx -v 2>&1)
         Container: $HOSTNAME
         Time zome: $TZ  $(date)
         Processes: $(nproc)
-               -------O--
-              \\         o \\
-               \\           \\
-                \\           \\
-                  -----------
-
 
 "
 
