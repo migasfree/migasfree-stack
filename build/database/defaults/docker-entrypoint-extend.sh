@@ -20,22 +20,21 @@ function send_message {
     done
 }
 
-
-
 function set_TZ {
-    if [ -z "$TZ" ]; then
-      TZ="Europe/Madrid"
+    if [ -z "$TZ" ]
+    then
+        TZ="Europe/Madrid"
     fi
     # /etc/timezone for TZ setting
     ln -fs /usr/share/zoneinfo/$TZ /etc/localtime || :
 }
 
-function cron_init
-{
-    if [ -z "$POSTGRES_CRON" ]; then
+function cron_init {
+    if [ -z "$POSTGRES_CRON" ]
+    then
         POSTGRES_CRON="0 0 * * *"
     fi
-    CRON=$(echo "$POSTGRES_CRON" |tr -d "'") # remove single quote
+    CRON=$(echo "$POSTGRES_CRON" | tr -d "'") # remove single quote
     echo "$CRON /usr/bin/backup" > /tmp/cron
     crontab /tmp/cron
     rm /tmp/cron
@@ -44,22 +43,21 @@ function cron_init
     crond
 }
 
-
-if ! [ -f /etc/migasfree-server/settings.py ] ; then
+if ! [ -f /etc/migasfree-server/settings.py ]
+then
     cat <<EOF>> /etc/migasfree-server/settings.py
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': '$POSTGRES_DB',
-            'USER': '$POSTGRES_USER',
-            'PASSWORD': '',
-            'HOST': '$POSTGRES_HOST',
-            'PORT': '$POSTGRES_PORT',
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': '$POSTGRES_DB',
+        'USER': '$POSTGRES_USER',
+        'PASSWORD': '',
+        'HOST': '$POSTGRES_HOST',
+        'PORT': '$POSTGRES_PORT',
     }
+}
 EOF
 fi
-
 
 send_message "starting ${SERVICE:(${#STACK})+1}"
 #set_TZ
@@ -81,13 +79,11 @@ echo "
 
 "
 
-
 # Run docker-entrypoint.sh (from postgres image)
 #/usr/local/bin/docker-entrypoint.sh postgres
 
-
 # Capture stdout line by line
-stdbuf -oL bash /usr/local/bin/docker-entrypoint.sh postgres  |
+stdbuf -oL bash /usr/local/bin/docker-entrypoint.sh postgres |
     while IFS= read -r line
     do
         capture_message "$line"
