@@ -19,7 +19,24 @@ do
     _STATUS=$(curl --write-out '%{http_code}' --silent --output /dev/null ${FQDN}/services/status)
     if [ "${_STATUS}" = "200" ]
     then
-        echo
+
+echo "
+
+
+                   ●                          ●●
+                                             ●
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+        ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
+        ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
+                          ●
+                        ●●
+
+
+        https://${FQDN}/services/status
+
+        "
         break
     fi
     echo -n "."
