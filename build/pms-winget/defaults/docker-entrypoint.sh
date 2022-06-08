@@ -76,6 +76,18 @@ export MIGASFREE_CERTIFICATE_SUBJECT=$(openssl x509 -noout -text -in ${MIGASFREE
 
 echo "
 
+
+                   ●                          ●●
+                                             ●
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+        ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
+        ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
+                          ●
+                        ●●
+
+
         migasfree service: ${SERVICE}
         queues: ${QUEUES}
 
@@ -83,12 +95,6 @@ echo "
         Container: $HOSTNAME
         Time zome: $TZ $(date)
         Processes: $(nproc)
-               -------O--
-              \\         o \\
-               \\           \\
-                \\           \\
-                  -----------
-
 
 "
 
