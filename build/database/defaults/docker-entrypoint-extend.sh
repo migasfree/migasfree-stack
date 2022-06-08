@@ -65,17 +65,22 @@ cron_init
 
 echo "
 
+
+                   ●                          ●●
+                                             ●
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+        ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
+        ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
+                          ●
+                        ●●
+
         migasfree DATABASE
         $(postgres -V)
         Container: $HOSTNAME
         Time zome: $TZ  $(date)
         Processes: $(nproc)
-               -------O--
-              \\         o \\
-               \\           \\
-                \\           \\
-                  -----------
-
 
 "
 
