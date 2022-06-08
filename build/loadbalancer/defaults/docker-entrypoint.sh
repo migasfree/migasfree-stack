@@ -53,17 +53,22 @@ reconfigure || :
 
 echo "
 
+
+                   ●                          ●●
+                                             ●
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+        ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
+        ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
+                          ●
+                        ●●
+
         migasfree BALANCER
         $(haproxy -v | head -1)
         Container: $HOSTNAME
         Time zome: $TZ $(date)
         Processes: $(nproc)
-               -------O--
-              \\         o \\
-               \\           \\
-                \\           \\
-                  -----------
-
 
 "
 
@@ -71,6 +76,8 @@ echo "
 # =============
 send_message ""
 mkdir -p /var/run/haproxy/
-sleep 3
+
+bash -c "sleep 1; curl -d '' -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null " &
+ 
 haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg \
     -p /var/run/haproxy.pid
