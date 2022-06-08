@@ -7,33 +7,33 @@ function wait {
     local _SERVER=$1
     local _PORT=$2
     local counter=0
+
     until [ $counter -gt 5 ]
     do
         nc -z $_SERVER $_PORT 2> /dev/null
-       if  [ $? = 0 ]
-       then
-           echo "$_SERVER:$_PORT is running."
-           return
-       else
-           echo "$_SERVER:$_PORT is not running after $counter seconds."
-           sleep 1
-       fi
+        if  [ $? = 0 ]
+        then
+            echo "$_SERVER:$_PORT is running."
+            return
+        else
+            echo "$_SERVER:$_PORT is not running after $counter seconds."
+            sleep 1
+        fi
         ((counter++))
     done
     echo "Rebooting container"
     exit
 }
 
-# ENVIRONMENT VARIABLES FOR VOLUMES  
+# ENVIRONMENT VARIABLES FOR VOLUMES
 function get_mount_paths {
     IFS=$'\n'
     for _M in $(mount|grep '^:/' )
     do
         local _KEY=$(echo -n "$_M"|awk '{print $1}')
         _KEY=${_KEY:2}
-        _KEY=${_KEY^^} 
+        _KEY=${_KEY^^}
         local _VALUE=$(echo -n "$_M"|awk '{print $3}')
-        #export PATH_${_KEY}=${_VALUE}
         export MIGASFREE_${_KEY}_DIR=${_VALUE}
     done
     IFS=""
@@ -41,44 +41,38 @@ function get_mount_paths {
 
 function set_TZ {
     #send_message "setting the time zone"
-    if [ -z "$TZ" ]; then
-      TZ="Europe/Madrid"
+    if [ -z "$TZ" ]
+    then
+        TZ="Europe/Madrid"
     fi
     # /etc/timezone for TZ setting
     ln -fs /usr/share/zoneinfo/$TZ /etc/localtime || :
 }
-
 
 function update_ca_certificates {
     send_message "updating the certificates"
     update-ca-certificates
 }
 
-
-function get_migasfree_setting()
-{
+function get_migasfree_setting() {
     echo -n $(DJANGO_SETTINGS_MODULE=migasfree.settings.production python3 -c "from django.conf import settings; print(settings.$1)")
 }
-
 
 function send_message {
     point="http://loadbalancer:8001/services/message"
     data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
     until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
     do
-       sleep 2
+        sleep 2
     done
 }
-
 
 function reload_loadbalancer {
     curl -d "" -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null
 }
 
-
 # owner resource user
-function owner()
-{
+function owner() {
     if [ ! -f "$1" -a ! -d "$1" ]
     then
         mkdir -p "$1"
@@ -91,10 +85,9 @@ function owner()
     fi
 }
 
-function get_settings
-{
+function get_settings {
     send_message "reading settings"
-    if ! [ -f $_SETTINGS ]
+    if ! [ -f "$_SETTINGS" ]
     then
         echo "
 def get_secret_pass():
@@ -121,11 +114,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     _USER=$(get_migasfree_setting "DATABASES['default']['USER']")
     _NAME=$(get_migasfree_setting "DATABASES['default']['NAME']")
     _PASSWORD=$(get_migasfree_setting "DATABASES['default']['PASSWORD']")
-
 }
 
-function set_permissions()
-{
+function set_permissions() {
     send_message "setting permissions"
     local _USER=www-data
 
@@ -137,61 +128,46 @@ function set_permissions()
     _KEYS_PATH=$(get_migasfree_setting MIGASFREE_KEYS_DIR)
     owner $_KEYS_PATH $_USER
     chmod 700 $_KEYS_PATH
-
-
 }
 
-function run_as_www-data
-{
+function run_as_www-data {
     su  www-data -s /bin/bash -c "$1"
 }
 
-function create_keys
-{
+function create_keys {
     send_message "checking keys"
     run_as_www-data 'export GPG_TTY=$(tty);DJANGO_SETTINGS_MODULE=migasfree.settings.production python3 -c "import django; django.setup(); from migasfree.secure import create_server_keys; create_server_keys()"'
 }
 
-function is_db_empty()
-{
+function is_db_empty() {
     send_message "checking database is empty"
-    #_RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(id) from auth_user;")
-    _RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(*) FROM information_schema.tables WHERE table_type='BASE TABLE' and table_schema='$_NAME ' ; ")   
+    _RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(*) FROM information_schema.tables WHERE table_type='BASE TABLE' and table_schema='$_NAME ' ; ")
     test $_RET -eq "$(echo "0")"
 }
 
-
-function is_db_exists()
-{
+function is_db_exists() {
     send_message "checking is exists database "
     PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 from pg_database WHERE datname='$_NAME'" 2>/dev/null | grep -q 1
     test $? -eq 0
 }
 
-
-function is_user_exists()
-{
+function is_user_exists() {
     send_message "checking user exists in database"
     PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 FROM pg_roles WHERE rolname='$_USER';" | grep -q 1
     test $? -eq 0
 }
 
-
-function create_user()
-{
+function create_user() {
     send_message "creating user in database"
     PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "CREATE USER $_USER WITH CREATEDB ENCRYPTED PASSWORD '$_PASSWORD';"
     test $? -eq 0
 }
 
-
-function create_database()
-{
+function create_database() {
     send_message "creating database"
     PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "CREATE DATABASE $_NAME WITH OWNER = $_USER ENCODING='UTF8';"
     test $? -eq 0
 }
-
 
 function migrate {
     send_message "running database migrations"
@@ -204,9 +180,7 @@ function migrate {
     fi
 }
 
-
-function apply_fixtures
-{
+function apply_fixtures {
     send_message "applying fixtures to database"
     python3 - << EOF
 import django
@@ -217,10 +191,10 @@ sequence_reset()
 EOF
 }
 
-
 function lock_server {
     send_message "expect other backend to start"
-    while [ -f  $_FILE_LOCK ] ; do
+    while [ -f  $_FILE_LOCK ]
+    do
         _CONTAINER_LOCKING=$(cat $_FILE_LOCK)
         wait $_CONTAINER_LOCKING 8080
         if ! [ $? = 0 ]
@@ -236,10 +210,7 @@ function unlock_server {
     rm $_FILE_LOCK
 }
 
-
-function migasfree_init
-{
-
+function migasfree_init {
     set_permissions
 
     create_keys
@@ -254,25 +225,23 @@ function migasfree_init
     #    su -c "django-admin showmigrations | grep '\[ \]' " www-data >/dev/null
     #    if [ $? = 0 ] # we have pending migrations
     #    then
-    #        migrate 
+    #        migrate
     #        apply_fixtures
     #    fi
     #)
 
     unlock_server
-
 }
 
 
 # START
 # =====
 . /venv/bin/activate
-    
 
 send_message "waiting datastore"
 wait $REDIS_HOST $REDIS_PORT
 
-send_message "waiting database" 
+send_message "waiting database"
 wait $POSTGRES_HOST $POSTGRES_PORT
 
 send_message "starting ${SERVICE:(${#STACK})+1}"
@@ -282,7 +251,6 @@ get_mount_paths
 
 if [ "$SERVICE" = "mf_backend" ]
 then
-
     get_settings
 
     update_ca_certificates
@@ -314,16 +282,15 @@ send_message ""
 
 if [ "$SERVICE" = "mf_beat" ]
 then
-    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule  --loglevel INFO 
+    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule  --loglevel INFO
 elif [ "$SERVICE" = "mf_worker" ]
 then
     DJANGO_SETTINGS_MODULE=migasfree.settings.production celery  --app=migasfree.celery.app worker --queues=default --uid 890 --without-gossip --concurrency=10 --loglevel INFO
 else
-    # TODO: daphne is running as root!!!  
-    # python3 -u  -> force the stdout and stderr streams to be unbuffered 
+    # TODO: daphne is running as root!!!
+    # python3 -u  -> force the stdout and stderr streams to be unbuffered
     su -c "python3 -u $(which daphne)  --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application" www-data
 fi
-
 
 #gunicorn --forwarded-allow-ips="loadbalancer,pms-apt,frontend,public,backend" \
 #        --user=$_UID --group=$_GID \
