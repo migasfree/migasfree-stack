@@ -11,14 +11,14 @@ function wait {
     until [ $counter -gt 5 ]
     do
         nc -z $_SERVER $_PORT 2> /dev/null
-       if  [ $? = 0 ]
-       then
-           echo "$_SERVER:$_PORT is running."
-           return
-       else
-           echo "$_SERVER:$_PORT is not running after $counter seconds."
-           sleep 1
-       fi
+        if [ $? = 0 ]
+        then
+            echo "$_SERVER:$_PORT is running."
+            return
+        else
+            echo "$_SERVER:$_PORT is not running after $counter seconds."
+            sleep 1
+        fi
         ((counter++))
     done
     echo "Rebooting container"
@@ -26,29 +26,27 @@ function wait {
 }
 
 function reload_loadbalancer {
-    curl -d "" -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null  
+    curl -d "" -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null
 }
-
 
 function send_message {
     point="http://loadbalancer:8001/services/message"
     data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
     until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
     do
-       sleep 2
+        sleep 2
     done
 }
 
-
-# ENVIRONMENT VARIABLES FOR VOLUMES  
+# ENVIRONMENT VARIABLES FOR VOLUMES
 function get_mount_paths {
     IFS=$'\n'
-    for _M in $(mount|grep '^:/' )
+    for _M in $(mount | grep '^:/' )
     do
-        local _KEY=$(echo -n "$_M"|awk '{print $1}')
+        local _KEY=$(echo -n "$_M" | awk '{print $1}')
         _KEY=${_KEY:2}
-        _KEY=${_KEY^^} 
-        local _VALUE=$(echo -n "$_M"|awk '{print $3}')
+        _KEY=${_KEY^^}
+        local _VALUE=$(echo -n "$_M" | awk '{print $3}')
         export MIGASFREE_${_KEY}_DIR=${_VALUE}
     done
     IFS=""
@@ -59,7 +57,7 @@ send_message "starting ${SERVICE:(${#STACK})+1}"
 send_message "waiting backend"
 wait backend 8080
 
-get_mount_paths 
+get_mount_paths
 
 # Create cert.pfx neccesary for sign source.msix
 
@@ -73,17 +71,17 @@ then
                          -passin pass:"" -passout pass:"" -descert
     chown 890:890 ${MIGASFREE_CERTIFICATES_DIR}/cert.pfx
 fi
+
 export MIGASFREE_CERTIFICATE_SUBJECT=$(openssl x509 -noout -text -in ${MIGASFREE_CERTIFICATES_DIR}/cert.crt |grep Subject:| awk -F: '{print $2}')
-#export MIGASFREE_CERTIFICATE_SUBJECT="CN=192.168.1.105, OU=Core, O=migasfree, L=ZARAGOZA, S=ZARAGOZA, C=ES"
 
 echo "
 
-        migasfree service: ${SERVICE} 
+        migasfree service: ${SERVICE}
         queues: ${QUEUES}
 
         celery $(celery --version)
         Container: $HOSTNAME
-        Time zome: $TZ  $(date)
+        Time zome: $TZ $(date)
         Processes: $(nproc)
                -------O--
               \\         o \\
@@ -97,5 +95,5 @@ echo "
 cd /pms
 reload_loadbalancer
 send_message ""
-celery -A migasfree.core.tasks -b $BROKER_URL --result-backend=$BROKER_URL  worker -l INFO --uid=890 -Q $QUEUES --concurrency=1
-
+celery -A migasfree.core.tasks -b $BROKER_URL --result-backend=$BROKER_URL \
+    worker -l INFO --uid=890 -Q $QUEUES --concurrency=1
