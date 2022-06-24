@@ -6,20 +6,20 @@ _SETTINGS=/var/lib/migasfree-backend/conf/settings.py
 function wait {
     local _SERVER=$1
     local _PORT=$2
-    local counter=0
+    local _COUNTER=0
 
-    until [ $counter -gt 5 ]
+    until [ $_COUNTER -gt 5 ]
     do
         nc -z $_SERVER $_PORT 2> /dev/null
-        if  [ $? = 0 ]
+        if [ $? -eq 0 ]
         then
             echo "$_SERVER:$_PORT is running."
             return
         else
-            echo "$_SERVER:$_PORT is not running after $counter seconds."
+            echo "$_SERVER:$_PORT is not running after $_COUNTER seconds."
             sleep 1
         fi
-        ((counter++))
+        ((_COUNTER++))
     done
     echo "Rebooting container"
     exit
@@ -28,19 +28,19 @@ function wait {
 # ENVIRONMENT VARIABLES FOR VOLUMES
 function get_mount_paths {
     IFS=$'\n'
-    for _M in $(mount|grep '^:/' )
+    for _M in $(mount | grep '^:/' )
     do
-        local _KEY=$(echo -n "$_M"|awk '{print $1}')
+        local _KEY=$(echo -n "$_M" | awk '{print $1}')
         _KEY=${_KEY:2}
         _KEY=${_KEY^^}
-        local _VALUE=$(echo -n "$_M"|awk '{print $3}')
+        local _VALUE=$(echo -n "$_M" | awk '{print $3}')
         export MIGASFREE_${_KEY}_DIR=${_VALUE}
     done
     IFS=""
 }
 
 function set_TZ {
-    #send_message "setting the time zone"
+    # send_message "setting the time zone"
     if [ -z "$TZ" ]
     then
         TZ="Europe/Madrid"
@@ -59,9 +59,9 @@ function get_migasfree_setting() {
 }
 
 function send_message {
-    point="http://loadbalancer:8001/services/message"
-    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
-    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    _POINT="http://loadbalancer:8001/services/message"
+    _DATA="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$_DATA" -H "Content-Type: application/json" -X POST $_POINT) = "200" ]
     do
         sleep 2
     done
@@ -105,7 +105,6 @@ DATABASES['default']['PASSWORD'] = get_secret_pass()
 # NECESSARY FOR SWAGGER AND REST-FRAMEWORK
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
 " > $_SETTINGS
     fi
 
@@ -130,13 +129,13 @@ function set_permissions() {
     chmod 700 $_KEYS_PATH
 }
 
-function run_as_www-data {
-    su  www-data -s /bin/bash -c "$1"
+function run_as_www_data {
+    su www-data -s /bin/bash -c "$1"
 }
 
 function create_keys {
     send_message "checking keys"
-    run_as_www-data 'export GPG_TTY=$(tty);DJANGO_SETTINGS_MODULE=migasfree.settings.production python3 -c "import django; django.setup(); from migasfree.secure import create_server_keys; create_server_keys()"'
+    run_as_www_data 'export GPG_TTY=$(tty);DJANGO_SETTINGS_MODULE=migasfree.settings.production python3 -c "import django; django.setup(); from migasfree.secure import create_server_keys; create_server_keys()"'
 }
 
 function is_db_empty() {
@@ -146,7 +145,7 @@ function is_db_empty() {
 }
 
 function is_db_exists() {
-    send_message "checking is exists database "
+    send_message "checking is exists database"
     PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 from pg_database WHERE datname='$_NAME'" 2>/dev/null | grep -q 1
     test $? -eq 0
 }
@@ -171,7 +170,7 @@ function create_database() {
 
 function migrate {
     send_message "running database migrations"
-        su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate auth" www-data
+    su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate auth" www-data
     if [ "$1" = "fake-initial" ]
     then
         su -c "DJANGO_SETTINGS_MODULE=migasfree.settings.production django-admin migrate --fake-initial" www-data
@@ -193,11 +192,11 @@ EOF
 
 function lock_server {
     send_message "expect other backend to start"
-    while [ -f  $_FILE_LOCK ]
+    while [ -f "$_FILE_LOCK" ]
     do
-        _CONTAINER_LOCKING=$(cat $_FILE_LOCK)
+        _CONTAINER_LOCKING=$(cat "$_FILE_LOCK")
         wait $_CONTAINER_LOCKING 8080
-        if ! [ $? = 0 ]
+        if [ $? -ne 0 ]
         then
             break
         fi
@@ -223,7 +222,7 @@ function migasfree_init {
 
     #is_db_empty && echo yes | cat - | migrate "fake-initial" || (
     #    su -c "django-admin showmigrations | grep '\[ \]' " www-data >/dev/null
-    #    if [ $? = 0 ] # we have pending migrations
+    #    if [ $? -eq 0 ] # we have pending migrations
     #    then
     #        migrate
     #        apply_fixtures
@@ -267,18 +266,18 @@ echo "
 
                    ●                          ●●
                                              ●
-         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●●
         ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
-        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●●
         ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
         ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
                           ●
                         ●●
 
-        migasfree  $SERVICE
+        migasfree $SERVICE
         $_PROCESS
         Container: $HOSTNAME
-        Time zome: $TZ  $(date)
+        Time zome: $TZ $(date)
 
 "
 
@@ -294,14 +293,5 @@ then
 else
     # TODO: daphne is running as root!!!
     # python3 -u  -> force the stdout and stderr streams to be unbuffered
-    su -c "python3 -u $(which daphne)  --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application" www-data
+    su -c "python3 -u $(which daphne) --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application" www-data
 fi
-
-#gunicorn --forwarded-allow-ips="loadbalancer,pms-apt,frontend,public,backend" \
-#        --user=$_UID --group=$_GID \
-#         --log-level=info  --error-logfile=- --access-logfile=- \
-#         --timeout=3600 \
-#         --worker-tmp-dir=/dev/shm \
-#         --workers=$((2* $(nproc) + 1 ))  --worker-connections=1000 \
-#         --bind=0.0.0.0:8080 \
-#         migasfree.asgi:application -k uvicorn.workers.UvicornWorker
