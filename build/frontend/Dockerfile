@@ -1,4 +1,3 @@
-#FROM node:13.14-alpine as build-stage
 FROM node:15.11-alpine3.13 as build-stage
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 COPY VERSION /VERSION
@@ -7,18 +6,13 @@ RUN _TAG=$(cat /VERSION) && \
         git clone  https://github.com/migasfree/migasfree-frontend  && \
         cd migasfree-frontend && \
         git checkout $_TAG && \
-        echo 'MIGASFREE_SERVER=https://__FQDN__' > /migasfree-frontend/.env 
-
-
-#COPY defaults/quasar.conf.js /migasfree-frontend/quasar.conf.js
-
+        echo 'MIGASFREE_SERVER=https://__FQDN__' > /migasfree-frontend/.env
 
 RUN cd migasfree-frontend && \
         cp package*.json /app && \
         yarn global add @quasar/cli && \
         yarn && \
-        quasar build 
-        
+        quasar build
 
 FROM nginx:1.17.5-alpine as production-stage
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
