@@ -1,4 +1,4 @@
-FROM node:15.11-alpine3.13 as build-stage
+FROM node:16-alpine as build-stage
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 COPY VERSION /VERSION
 RUN _TAG=$(cat /VERSION) && \
