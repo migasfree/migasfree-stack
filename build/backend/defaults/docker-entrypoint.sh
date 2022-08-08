@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export MIGASFREE_SECRET_DIR=/var/run/secrets
+
 _FILE_LOCK=/var/lib/migasfree-backend/conf/.init-server
 _SETTINGS=/var/lib/migasfree-backend/conf/settings.py
 
@@ -28,7 +30,7 @@ function wait {
 # ENVIRONMENT VARIABLES FOR VOLUMES
 function get_mount_paths {
     IFS=$'\n'
-    for _M in $(mount | grep '^:/' )
+    for _M in $(mount | grep '^:/')
     do
         local _KEY=$(echo -n "$_M" | awk '{print $1}')
         _KEY=${_KEY:2}
@@ -78,7 +80,7 @@ function owner() {
         mkdir -p "$1"
     fi
 
-    _OWNER=$(stat -c %U "$1" 2>/dev/null)
+    _OWNER=$(stat -c %U "$1" 2> /dev/null)
     if [ "$_OWNER" != "$2" ]
     then
         chown -R $2:$2 "$1"
@@ -92,7 +94,7 @@ function get_settings {
         echo "
 def get_secret_pass():
     password = ''
-    with open('/run/secret/password_database','r') as f:
+    with open('/run/secrets/password_database','r') as f:
         password = f.read()
     return password
 
@@ -120,7 +122,8 @@ function set_permissions() {
     local _USER=www-data
 
     # owner for repositories
-    _PUBLIC_PATH=$(get_migasfree_setting MIGASFREE_PUBLIC_DIR)    #  '/var/lib/migasfree-backend/public'
+    _PUBLIC_PATH=$(get_migasfree_setting MIGASFREE_PUBLIC_DIR)
+    # '/var/lib/migasfree-backend/public'
     owner $_PUBLIC_PATH $_USER
 
     # owner for keys
