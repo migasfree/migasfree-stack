@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import os
-import platform
 import web
 import json
 import time
@@ -12,29 +11,6 @@ import _thread
 from web.httpserver import StaticMiddleware
 from datetime import datetime
 from jinja2 import Template
-
-
-with open('/etc/haproxy/haproxy.template') as f:
-    haproxy_template = f.read()
-
-urls = (
-    '/favicon.ico', 'icon',
-    '/services/status/?', 'status',
-    '/services/manifest', 'manifest',
-    '/services/message', 'message',
-    '/services/reconfigure', 'reconfigure',
-)
-
-global_data = {
-    'services': {},
-    'message': '',
-    'need_reload': True,
-    'extensions': [],
-    'ok': False,
-    'now': datetime.now()
-}
-
-fileconfig = '/etc/haproxy/haproxy.cfg'
 
 
 def check_running():
@@ -48,9 +24,7 @@ def check_running():
 class icon:
     def GET(self):
         raise web.seeother(
-            "https://{}/services-static/img/spoon-ok-0.svg".format(
-                os.environ['FQDN']
-            )
+            f"https://{os.environ['FQDN']}/services-static/img/spoon-ok-0.svg"
         )
 
 
@@ -97,8 +71,8 @@ class message:
             message = False
 
             for _service in services:
-                if "mf_" + _service not in global_data['services']:
-                    global_data['services']["mf_" + _service] = {
+                if f'mf_{_service}' not in global_data['services']:
+                    global_data['services'][f'mf_{_service}'] = {
                         'message': '',
                         'node': '',
                         'container': '',
@@ -107,14 +81,14 @@ class message:
 
                 # missing
                 nodes = len(get_nodes(_service))
-                global_data['services']["mf_" + _service]['missing'] = (nodes < 1)
-                global_data['services']["mf_" + _service]['nodes' ] = nodes
+                global_data['services'][f'mf_{_service}']['missing'] = (nodes < 1)
+                global_data['services'][f'mf_{_service}']['nodes' ] = nodes
 
-                if global_data['services']["mf_" + _service]['missing']:
-                    global_data["need_reload"] = True
+                if global_data['services'][f'mf_{_service}']['missing']:
+                    global_data['need_reload'] = True
                     missing=True
 
-                if global_data['services']["mf_" + _service]["message"]:
+                if global_data['services'][f'mf_{_service}']['message']:
                     message = True
 
                 global_data['ok'] = False
@@ -141,10 +115,10 @@ class message:
 class reconfigure:
     def POST(self):
         data = {
-            "text": "reconfigure",
-            "service": os.environ["SERVICE"],
-            "node": os.environ["NODE"],
-            "container": os.environ["HOSTNAME"]
+            'text': 'reconfigure',
+            'service': os.environ['SERVICE'],
+            'node': os.environ['NODE'],
+            'container': os.environ['HOSTNAME']
         }
 
         make_global_data(data)
@@ -152,29 +126,29 @@ class reconfigure:
         reload_haproxy()
 
         time.sleep(1)
-        data["text"] = ''
+        data['text'] = ''
         make_global_data(data)
 
 
 def make_global_data(data):
-    global_data["ok"] = False
+    global_data['ok'] = False
 
     if 'service' in data:
         if data['service'] not in global_data['services']:
-                global_data['services'][data['service']] = {
-                    'message': '',
-                    'node': '',
-                    'container': '',
-                    'missing': True
-                }
+            global_data['services'][data['service']] = {
+                'message': '',
+                'node': '',
+                'container': '',
+                'missing': True
+            }
 
         if 'text' in data:
-            global_data['services'][data['service']]["message"] = data["text"]
-            global_data['last_message'] = data["service"]
+            global_data['services'][data['service']]['message'] = data['text']
+            global_data['last_message'] = data['service']
         if 'node' in data:
-            global_data['services'][data['service']]["node"] = data['node']
+            global_data['services'][data['service']]['node'] = data['node']
         if 'container' in data:
-            global_data['services'][data['service']]["container"] = data['container']
+            global_data['services'][data['service']]['container'] = data['container']
 
 
 def status_page(context):
@@ -230,7 +204,7 @@ def status_page(context):
     <script src="/services-static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
-      function sleep (time) {
+      function sleep(time) {
         return new Promise((resolve) => setTimeout(resolve, time));
       }
 
@@ -239,7 +213,7 @@ def status_page(context):
       var serv = ""
 
       $(document).ready(function() {
-        setInterval(function() {
+        setInterval(function () {
           var now = +new Date;
           var retraso = parseInt((now-time)/1000);
 
@@ -394,7 +368,7 @@ def status_page(context):
         }, 1000);
       });
 
-      $(window).load(function() {
+      $(window).load(function () {
         // force download image
         $("#spoon-disconnected").attr('href', '/services-static/img/spoon-disconnect.svg');
 
@@ -562,20 +536,20 @@ def execute(cmd, verbose=False, interactive=True):
 
 
 def get_extensions():
-    pms_enabled = os.environ["PMS_ENABLED"]
+    pms_enabled = os.environ['PMS_ENABLED']
     extensions = []
     _code, _out,_err = execute(
-        "curl -X GET backend:8080/api/v1/public/pms/",
+        'curl -X GET backend:8080/api/v1/public/pms/',
         interactive=False
     )
     if _code == 0:
         try:
-            allpms = json.loads(_out.decode("utf-8"))
+            all_pms = json.loads(_out.decode('utf-8'))
         except:
-            return "".join(set(extensions))
-        for pms in allpms:
-            if "pms-{}".format(pms) in pms_enabled:
-                for extension in allpms[pms]["extensions"]:
+            return ''.join(set(extensions))
+        for pms in all_pms:
+            if f'pms-{pms}' in pms_enabled:
+                for extension in all_pms[pms]['extensions']:
                     extensions.append(extension)
 
     return list(set(extensions))
@@ -584,53 +558,55 @@ def get_extensions():
 def config_nginx():
     fileconfig = os.path.join(
         os.environ['MIGASFREE_CONF_DIR'],
-        "locations.d",
-        "external-deployments.conf"
+        'locations.d',
+        'external-deployments.conf'
     )
     template = """
         # External Deployments. Auto-generated from loadbalancer (in services.py -> config_nginx)
         # ========================================================================
     {% for extension in extensions %}
         location ~* /src/?(.*){{extension}}$ {
-        alias /var/migasfree/public/$1{{extension}};
-        error_page 404 = @backend;
+            alias /var/migasfree/public/$1{{extension}};
+            error_page 404 = @backend;
         }
     {% endfor %}
         # ========================================================================
     """
 
-    with open(fileconfig, "w") as f:
+    with open(fileconfig, 'w') as f:
         f.write(Template(template).render(
             {'extensions': global_data['extensions']}
         ))
 
 
 def config_haproxy():
-    context = {}
+    context = {
+        'cerbot': os.environ['HTTPSMODE'] == 'auto',
+        'mf_public': get_nodes('public'),
+        'mf_backend': get_nodes('backend'),
+        'mf_frontend': get_nodes('frontend')
+    }
 
-    context["cerbot"] = (os.environ["HTTPSMODE"] == "auto")
-
-    context["mf_public"] = get_nodes("public")
-
-    context["mf_backend"] = get_nodes("backend")
-    if len(global_data['extensions']) == 0 and len(context["mf_backend"] ) > 0:
+    if len(global_data['extensions']) == 0 and len(context['mf_backend']) > 0:
         global_data['extensions'] = get_extensions()
         if len(global_data['extensions']) > 0:
             config_nginx()
 
     if len(global_data['extensions']) == 0:
-        context["extensions"] = ".deb .rpm"
+        context['extensions'] = '.deb .rpm'
     else:
-        context["extensions"] = "." + " .".join(global_data['extensions'])
+        context['extensions'] = '.' + ' .'.join(global_data['extensions'])
 
-    context["mf_frontend"] = get_nodes("frontend")
+    with open('/etc/haproxy/haproxy.template') as f:
+        haproxy_template = f.read()
 
-    with open(fileconfig, "w") as f:
+    fileconfig = '/etc/haproxy/haproxy.cfg'
+    with open(fileconfig, 'w') as f:
         f.write(Template(haproxy_template).render(context))
 
 
 def reload_haproxy():
-    #https://www.haproxy.com/blog/haproxy-1-9-has-arrived/
+    # https://www.haproxy.com/blog/haproxy-1-9-has-arrived/
     _code, _out,_err = execute(
         "echo '@master reload' | socat /var/run/haproxy-master-socket stdio",
         interactive=False
@@ -640,11 +616,11 @@ def reload_haproxy():
 def get_nodes(service):
     nodes = []
     _code, _out,_err = execute(
-        "dig tasks.{service} | grep ^tasks.{service} | awk '{{print $5}}'".format(service=service),
+        f"dig tasks.{service} | grep ^tasks.{service} | awk '{{print $5}}'",
         interactive=False
     )
     if _code == 0:
-        for node in _out.decode("utf-8").replace("\n", " ").split(" "):
+        for node in _out.decode('utf-8').replace('\n', ' ').split(' '):
             if node:
                 nodes.append(node)
 
@@ -673,7 +649,24 @@ class servicesStaticMiddleware(StaticMiddleware):
         StaticMiddleware.__init__(self, app, prefix)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    urls = (
+        '/favicon.ico', 'icon',
+        '/services/status/?', 'status',
+        '/services/manifest', 'manifest',
+        '/services/message', 'message',
+        '/services/reconfigure', 'reconfigure',
+    )
+
+    global_data = {
+        'services': {},
+        'message': '',
+        'need_reload': True,
+        'extensions': [],
+        'ok': False,
+        'now': datetime.now()
+    }
+
     _thread.start_new_thread(check_running, ())
 
     config_haproxy()
