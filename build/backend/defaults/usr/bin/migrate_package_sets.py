@@ -20,7 +20,7 @@ if __name__ == '__main__':
     package_sets = []
 
     for root, dirnames, filenames in os.walk(settings.MEDIA_ROOT):
-        for filename in fnmatch.filter(dirnames, 'stores'):
+        for filename in fnmatch.filter(dirnames, get_setting('MIGASFREE_STORE_TRAILING_PATH')):
             locations.append(os.path.join(root, filename))
 
     for location in locations:
@@ -43,7 +43,17 @@ if __name__ == '__main__':
     if len(package_sets) > 0:
         API_URL = f'{SERVER_URL}/api/v1/token'
         AUTH_TOKEN = get_auth_token()
-        print(get_setting('MIGASFREE_SECRET_DIR'))
 
         for item in package_sets:
-            print(item)
+            req = requests.get(
+                f'{API_URL}/package-sets/',
+                {
+                    'name': item['name'],
+                    'project__name': item['package'],
+                    'store__name': item['store']
+                },
+                headers={'Authorization': AUTH_TOKEN}
+            )
+
+            package_set = req.json()
+            print(package_set)
