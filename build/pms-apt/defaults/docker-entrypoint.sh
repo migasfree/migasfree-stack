@@ -41,7 +41,7 @@ function reload_loadbalancer {
 # ENVIRONMENT VARIABLES FOR VOLUMES
 function get_mount_paths {
     IFS=$'\n'
-    for _M in $(mount|grep '^:/' )
+    for _M in $(mount | grep '^:/')
     do
         local _KEY=$(echo -n "$_M" | awk '{print $1}')
         _KEY=${_KEY:2}
@@ -64,9 +64,9 @@ echo "
 
                    ●                          ●●
                                              ●
-         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●●
         ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
-        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●●
         ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
         ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
                           ●
