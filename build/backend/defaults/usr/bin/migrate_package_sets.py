@@ -7,6 +7,7 @@ import requests
 
 from django.conf import settings
 from migasfree.utils import get_secret, get_setting
+from migasfree.core.pms import get_pms
 
 SERVER_URL = f'http://{get_setting("MIGASFREE_FQDN")}'
 
@@ -39,7 +40,6 @@ if __name__ == '__main__':
                             'packages': _filenames
                         })
 
-
     if len(package_sets) > 0:
         API_URL = f'{SERVER_URL}/api/v1/token'
         AUTH_TOKEN = get_auth_token()
@@ -49,11 +49,33 @@ if __name__ == '__main__':
                 f'{API_URL}/package-sets/',
                 {
                     'name': item['name'],
-                    'project__name': item['package'],
-                    'store__name': item['store']
+                    'project__name__icontains': item['project'],
+                    'store__name__icontains': item['store']
                 },
                 headers={'Authorization': AUTH_TOKEN}
             )
 
-            package_set = req.json()
-            print(package_set)
+            response = req.json()
+            if response['count'] == 1:
+                package_set = response['results'][0]
+                print(package_set)  # DEBUG
+
+                files = []
+                for package in item['packages']:
+                    files.append(
+                        (
+                            'files',
+                            (
+                                package,
+                                open(os.path.join(item['location'], package), 'rb'),
+                                get_pms(package_set['project']['pms']).mimetypes[0]
+                            )
+                        )
+                    )
+
+                response = requests.patch(
+                    f'/package-sets/{package_set["id"]}',
+                    files=files
+                )
+                print(response.text)  # DEBUG
+                print(response)  # DEBUG
