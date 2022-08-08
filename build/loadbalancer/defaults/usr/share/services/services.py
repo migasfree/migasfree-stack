@@ -208,14 +208,14 @@ def status_page(context):
         return new Promise((resolve) => setTimeout(resolve, time));
       }
 
-      var time = +new Date;
-      var circles = "#loadbalancer, #frontend, #backend, #beat, #worker, #public, #pms, #database, #datastore";
-      var serv = ""
+      let time = +new Date;
+      let circles = "#loadbalancer, #frontend, #backend, #beat, #worker, #public, #pms, #database, #datastore";
+      let serv = ""
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         setInterval(function () {
-          var now = +new Date;
-          var retraso = parseInt((now-time)/1000);
+          let now = +new Date;
+          let retraso = parseInt((now - time) / 1000);
 
           if (retraso > 1.5) {
             $("#message").text('disconnected');
@@ -228,21 +228,22 @@ def status_page(context):
 
           $.ajax({
             url: '/services/message',
-            success: function(data) {
+            success: function (data) {
               function missing_pms() {
-                _missing = false;
-                _message = false;
-                _service = "";
-                _nodes = 0;
+                let _missing = false;
+                let _message = false;
+                let _service = "";
+                let _nodes = 0;
+
                 for (const [key, value] of Object.entries(data['services'])) {
                   if (key.startsWith('mf_pms-')) {
                     if (data['services'][key]["missing"]) {
-                        _missing = true;
-                        _service = key; // last service found in data
+                      _missing = true;
+                      _service = key; // last service found in data
                     }
                     if (data['services'][key]["message"] != "" ) {
-                        _message = true;
-                        _service = key; // last service found in data
+                      _message = true;
+                      _service = key; // last service found in data
                     }
                     _nodes += data['services'][key]["nodes"]
                   }
@@ -268,40 +269,46 @@ def status_page(context):
                 } else {
                   $("#nodes_pms").text(_nodes);
                 }
+
                 return _service;
               }
 
               function missing(id) {
-                services = data['services']
+                let services = data["services"];
+                let _missing = false;
+                let _message = "";
+                let _nodes = 0;
+
                 if (id == 'loadbalancer') {
                   _missing = false;
-                  _message = services["core_" + id]["message"];
+                  _message = services[`core_${id}`]["message"];
                   _nodes = 1;
                 } else {
-                  _missing = services["mf_" + id]["missing"];
-                  _message = services["mf_" + id]["message"];
-                  _nodes = services["mf_" + id]["nodes"];
+                  _missing = services[`mf_${id}`]["missing"];
+                  _message = services[`mf_${id}`]["message"];
+                  _nodes = services[`mf_${id}`]["nodes"];
                 }
+
                 if (_missing) {
-                  $("#" + id).attr('fill', 'red');
-                  $("#" + id).show(500);
+                  $(`#${id}`).attr('fill', 'red');
+                  $(`#${id}`).show(500);
                 } else if (_message != "") {
-                  $("#" + id).attr('fill', 'orange');
-                  $("#" + id).hide(500);
-                  $("#" + id).show(500);
+                  $(`#${id}`).attr('fill', 'orange');
+                  $(`#${id}`).hide(500);
+                  $(`#${id}`).show(500);
                 } else {
-                  $("#" + id).attr('fill', '#a9dfbf'); // GREEN
-                  $("#" + id).show(500);
+                  $(`#${id}`).attr('fill', '#a9dfbf'); // GREEN
+                  $(`#${id}`).show(500);
                 }
 
                 if (_nodes < 2) {
-                  $("#nodes_" + id).text("");
+                  $(`#nodes_${id}`).text("");
                 } else {
-                  $("#nodes_" + id).text(_nodes);
+                  $(`#nodes_${id}`).text(_nodes);
                 }
               }
 
-              time = +new Date;
+              let time = +new Date;
 
               missing("loadbalancer");
               missing("frontend");
@@ -311,14 +318,15 @@ def status_page(context):
               missing("public");
               missing("database");
               missing("datastore");
-              message_pms = missing_pms();
+
+              let message_pms = missing_pms();
+              let message_from = "";
+              let message_serv = `mf_${serv}`;
 
               if (serv == "") {
                 message_serv = data['last_message'];
               } else if (serv == "loadbalancer") {
-                message_serv = 'core_' + serv;
-              } else {
-                message_serv = 'mf_' + serv;
+                message_serv = `core_${serv}`;
               }
 
               if (typeof(data) != "undefined") {
@@ -332,18 +340,19 @@ def status_page(context):
                 }
               }
 
+              let sprite;
               if (data['ok']) {
-                sprite = parseInt(((now)/1000) % 2)
+                sprite = parseInt((now / 1000) % 2);
                 $("#spoon").attr("href", `/services-static/img/spoon-ok-${sprite}.svg`);
                 $(".bocadillo").hide(200);
                 $("#start").show(100);
               } else if (message_serv in data['services'] && data['services'][message_serv]['missing']) {
-                sprite = parseInt(((now)/1000) % 2)
+                sprite = parseInt((now / 1000) % 2);
                 $("#spoon").attr("href", `/services-static/img/spoon-starting-${sprite}.svg`);
                 $(".bocadillo").hide(200);
                 $("#start").hide(200);
               } else {
-                sprite = parseInt(((now)/1000) % 3)
+                sprite = parseInt((now / 1000) % 3);
                 $("#spoon").attr("href", `/services-static/img/spoon-checking-${sprite}.svg`);
                 $(".bocadillo").show(200);
                 $("#start").hide(200);
@@ -380,7 +389,8 @@ def status_page(context):
         $("#spoon").hide(200);
         $("#spoon").attr('href', '/services-static/img/spoon-welcome.svg');
         $("#spoon").show(100);
-        welcome = ["salut!", "Hi!", "¡hola!", "¡hola, co!", "kaixo!", "ola!", "Hallo!"]
+
+        const welcome = ["salut!", "Hi!", "¡hola!", "¡hola, co!", "kaixo!", "ola!", "Hallo!"];
         $("#message").text(welcome[Math.floor(Math.random() * 7)]);
       });
     </script>
@@ -397,6 +407,7 @@ def status_page(context):
       <!-- bocadillo -->
       <rect class="bocadillo" x="145" y="90" width="33" height="28" rx="2" ry="2" fill="#FFFF99" />
       <line class="bocadillo" x1="160" y1="121" x2="158" y2="117" stroke="#FFFF99" />
+
       <switch>
         <foreignObject x="147" y="90" width="30" height="25.5" font-size="2">
           <p class="bocadillo" id="message"> one moment, please </p>
