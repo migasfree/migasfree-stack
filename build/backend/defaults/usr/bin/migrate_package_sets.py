@@ -6,14 +6,22 @@ import fnmatch
 import requests
 
 from django.conf import settings
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 from migasfree.utils import get_secret, get_setting
 from migasfree.core.pms import get_pms
 
 SERVER_URL = f'http://{get_setting("MIGASFREE_FQDN")}'
+API_URL = f'{SERVER_URL}/api/v1/token'
 
 
 def get_auth_token():
-    return f'Token {get_secret("token_admin")}'
+    # return f'Token {get_secret("token_admin")}'
+    return 'Token 8e557843d6d7b5b13b720361e88c2c75be580101'
+
+
+def headers():
+    return {'Authorization': get_auth_token()}
 
 
 if __name__ == '__main__':
@@ -41,9 +49,6 @@ if __name__ == '__main__':
                         })
 
     if len(package_sets) > 0:
-        API_URL = f'{SERVER_URL}/api/v1/token'
-        AUTH_TOKEN = get_auth_token()
-
         for item in package_sets:
             req = requests.get(
                 f'{API_URL}/package-sets/',
@@ -52,13 +57,13 @@ if __name__ == '__main__':
                     'project__name__icontains': item['project'],
                     'store__name__icontains': item['store']
                 },
-                headers={'Authorization': AUTH_TOKEN}
+                headers=headers()
             )
 
             response = req.json()
             if response['count'] == 1:
                 package_set = response['results'][0]
-                print(package_set)  # DEBUG
+                print(f'Migrating {package_set["name"]}...')
 
                 files = []
                 for package in item['packages']:
@@ -68,14 +73,25 @@ if __name__ == '__main__':
                             (
                                 package,
                                 open(os.path.join(item['location'], package), 'rb'),
-                                get_pms(package_set['project']['pms']).mimetypes[0]
+                                get_pms(package_set['project']['pms']).mimetype[0]
                             )
                         )
                     )
 
+                mp_encoder = MultipartEncoder(files)
+
                 response = requests.patch(
-                    f'/package-sets/{package_set["id"]}',
-                    files=files
+                    f'{API_URL}/package-sets/{package_set["id"]}',
+                    data=mp_encoder,
+                    headers={
+                        'Authorization': get_auth_token(),
+                        'Content-Type': mp_encoder.content_type
+                    }
                 )
-                print(response.text)  # DEBUG
-                print(response)  # DEBUG
+
+                if response.status_code == requests.codes.ok:
+                    print(f'Package set {package_set["name"]} migrated successfully!!!')
+                else:
+                    print(f'Package set {package_set["name"]} NOT migrated!')
+
+                print()
