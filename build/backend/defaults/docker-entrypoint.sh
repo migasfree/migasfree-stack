@@ -61,8 +61,8 @@ function get_migasfree_setting() {
 }
 
 function send_message {
-    _POINT="http://loadbalancer:8001/services/message"
-    _DATA="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    local _POINT="http://loadbalancer:8001/services/message"
+    local _DATA="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
     until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$_DATA" -H "Content-Type: application/json" -X POST $_POINT) = "200" ]
     do
         sleep 2
@@ -94,8 +94,9 @@ function get_settings {
         echo "
 def get_secret_pass():
     password = ''
-    with open('/run/secrets/password_database','r') as f:
+    with open('/run/secrets/password_database', 'r') as f:
         password = f.read()
+
     return password
 
 DATABASES['default']['HOST'] = os.getenv('POSTGRES_HOST', 'database')
@@ -122,12 +123,12 @@ function set_permissions() {
     local _USER=www-data
 
     # owner for repositories
-    _PUBLIC_PATH=$(get_migasfree_setting MIGASFREE_PUBLIC_DIR)
+    local _PUBLIC_PATH=$(get_migasfree_setting MIGASFREE_PUBLIC_DIR)
     # '/var/lib/migasfree-backend/public'
     owner $_PUBLIC_PATH $_USER
 
     # owner for keys
-    _KEYS_PATH=$(get_migasfree_setting MIGASFREE_KEYS_DIR)
+    local _KEYS_PATH=$(get_migasfree_setting MIGASFREE_KEYS_DIR)
     owner $_KEYS_PATH $_USER
     chmod 700 $_KEYS_PATH
 }
@@ -143,31 +144,31 @@ function create_keys {
 
 function is_db_empty() {
     send_message "checking database is empty"
-    _RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(*) FROM information_schema.tables WHERE table_type='BASE TABLE' and table_schema='$_NAME ' ; ")
+    local _RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(*) FROM information_schema.tables WHERE table_type='BASE TABLE' and table_schema='$_NAME ' ; ")
     test $_RET -eq "$(echo "0")"
 }
 
 function is_db_exists() {
     send_message "checking is exists database"
-    PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 from pg_database WHERE datname='$_NAME'" 2>/dev/null | grep -q 1
+    local PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 from pg_database WHERE datname='$_NAME'" 2> /dev/null | grep -q 1
     test $? -eq 0
 }
 
 function is_user_exists() {
     send_message "checking user exists in database"
-    PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 FROM pg_roles WHERE rolname='$_USER';" | grep -q 1
+    local PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 FROM pg_roles WHERE rolname='$_USER';" | grep -q 1
     test $? -eq 0
 }
 
 function create_user() {
     send_message "creating user in database"
-    PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "CREATE USER $_USER WITH CREATEDB ENCRYPTED PASSWORD '$_PASSWORD';"
+    local PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "CREATE USER $_USER WITH CREATEDB ENCRYPTED PASSWORD '$_PASSWORD';"
     test $? -eq 0
 }
 
 function create_database() {
     send_message "creating database"
-    PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "CREATE DATABASE $_NAME WITH OWNER = $_USER ENCODING='UTF8';"
+    local PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "CREATE DATABASE $_NAME WITH OWNER = $_USER ENCODING='UTF8';"
     test $? -eq 0
 }
 
@@ -187,7 +188,9 @@ function apply_fixtures {
     python3 - << EOF
 import django
 django.setup()
+
 from migasfree.fixtures import create_initial_data, sequence_reset
+
 create_initial_data()
 sequence_reset()
 EOF
@@ -289,10 +292,10 @@ send_message ""
 
 if [ "$SERVICE" = "mf_beat" ]
 then
-    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule  --loglevel INFO
+    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery -A migasfree beat --uid=890 --pidfile /var/tmp/celery.pid --schedule /var/tmp/celerybeat-schedule --loglevel INFO
 elif [ "$SERVICE" = "mf_worker" ]
 then
-    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery  --app=migasfree.celery.app worker --queues=default --uid 890 --without-gossip --concurrency=10 --loglevel INFO
+    DJANGO_SETTINGS_MODULE=migasfree.settings.production celery --app=migasfree.celery.app worker --queues=default --uid 890 --without-gossip --concurrency=10 --loglevel INFO
 else
     # TODO: daphne is running as root!!!
     # python3 -u  -> force the stdout and stderr streams to be unbuffered
