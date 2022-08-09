@@ -34,13 +34,14 @@ RUN _TAG=$(cat /VERSION) && \
 
 RUN cd / && \
     . /venv/bin/activate &&\
-    git clone https://github.com/migasfree/migasfree-backend  &&\
+    git clone https://github.com/migasfree/migasfree-backend && \
     cd migasfree-backend &&\
-    pip install --no-cache-dir -r requirements/production.txt &&\
+    pip install --no-cache-dir -r requirements/production.txt && \
+    pip install --no-cache-dir requests_toolbelt && \
     python3 setup.py install && \
     rm -rf /migasfree-backend
 
-RUN . /venv/bin/activate &&\
+RUN . /venv/bin/activate && \
     # Symbolic links to be copied from other containers && \
     # MIGASFREE MODULE && \
     MIGASFREE_MODULE_PATH=$(python3 -c "import migasfree;print(migasfree.__path__[0])") && \
@@ -80,7 +81,7 @@ ENV TERM=xterm \
     _UID=890 \
     _GID=890
 
-COPY --from=builder /  /
+COPY --from=builder / /
 
 ENTRYPOINT ["/bin/bash", "/docker-entrypoint.sh"]
 EXPOSE 80
