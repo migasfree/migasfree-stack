@@ -1,11 +1,13 @@
 import os
 
+
 def get_secret_pass():
-    password = ""
-    with open("/run/secrets/password_database", "r") as f:
+    password = ''
+    with open('/run/secrets/password_database', 'r') as f:
         password = f.read()
 
     return password
+
 
 DATABASES = {
     'default': {
@@ -63,11 +65,11 @@ BROKER_URL = 'redis://%s:%d/%d' % (REDIS_HOST, REDIS_PORT, REDIS_DB)
 CELERY_BROKER_URL = BROKER_URL
 CELERY_RESULT_BACKEND = BROKER_URL
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": BROKER_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': BROKER_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
@@ -81,10 +83,9 @@ CHANNEL_LAYERS = {
     }
 }
 
-
 # NECESSARY FOR SWAGGER AND REST-FRAMEWORK
 # Setup support for proxy headers
-#SWAGGER_SETTINGS['DEFAULT_INFO']='import.path.to.urls.api_info'
+# SWAGGER_SETTINGS['DEFAULT_INFO'] = 'import.path.to.urls.api_info'
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -99,9 +100,9 @@ EMAIL_HOST_PASSWORD = ""
 DEFAULT_FROM_EMAIL = "migasfree-server <noreply@mydomain.es>"
 ADMINS = [('mymame', 'myuser@mydomain.es'),]
 
-#MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR,'public')
-#STATIC_ROOT = '/var/lib/migasfree-backend/static'
-#MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
+# MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'public')
+# STATIC_ROOT = '/var/lib/migasfree-backend/static'
+# MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
 
 MEDIA_URL ="/public/"
 MIGASFREE_TMP_DIR = '/var/tmp'
@@ -123,9 +124,9 @@ MIGASFREE_EXTERNAL_ACTIONS = {
     }
 }
 
-MIGASFREE_ORGANIZATION="ACME"
-MIGASFREE_HELP_DESK="Help Desk: 555 555 555"
-#MIGASFREE_COMPUTER_SEARCH_FIELDS=('name','id','ip_address','forwarded_ip_address')
+MIGASFREE_ORGANIZATION = "ACME"
+MIGASFREE_HELP_DESK = "Help Desk: 555 555 555"
+# MIGASFREE_COMPUTER_SEARCH_FIELDS = ('name', 'id', 'ip_address', 'forwarded_ip_address')
 
 # Important!!!
-SESSION_COOKIE_AGE=1
+SESSION_COOKIE_AGE = 1
