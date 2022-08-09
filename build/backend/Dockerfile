@@ -11,7 +11,7 @@ ENV TERM=xterm \
     _UID=890 \
     _GID=890 \
     _BUILD_DEPENDS='git python3-dev libgpgme11-dev python3-all python3-all-dev unzip g++ gcc-8 libcairo2-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libpq-dev' \
-    _DEPENDS='libzmq5 gnupg rng-tools curl  apt-utils bzip2 xz-utils libgpgme11 python3 python3-venv python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat libmagic1' \
+    _DEPENDS='libzmq5 gnupg rng-tools curl apt-utils bzip2 xz-utils libgpgme11 python3 python3-venv python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat libmagic1' \
     _PIP_DEPENDS='daphne==3.0.2'
 
 RUN _TAG=$(cat /VERSION) && \
@@ -28,23 +28,23 @@ RUN _TAG=$(cat /VERSION) && \
     apt-get install -y --no-install-recommends $_DEPENDS && \
     python3 -m venv /venv &&\
     . /venv/bin/activate  &&\
-    python3 -m pip install --no-cache-dir  --upgrade pip && \
-    python3 -m pip install --no-cache-dir  --upgrade setuptools wheel && \
-    pip install --no-cache-dir  $_PIP_DEPENDS
+    python3 -m pip install --no-cache-dir --upgrade pip && \
+    python3 -m pip install --no-cache-dir --upgrade setuptools wheel && \
+    pip install --no-cache-dir $_PIP_DEPENDS
 
 RUN cd / && \
     . /venv/bin/activate &&\
-    git clone  https://github.com/migasfree/migasfree-backend  &&\
+    git clone https://github.com/migasfree/migasfree-backend  &&\
     cd migasfree-backend &&\
-    pip install  --no-cache-dir  -r  requirements/production.txt &&\
+    pip install --no-cache-dir -r requirements/production.txt &&\
     python3 setup.py install && \
     rm -rf /migasfree-backend
 
-RUN  . /venv/bin/activate &&\
+RUN . /venv/bin/activate &&\
     # Symbolic links to be copied from other containers && \
     # MIGASFREE MODULE && \
     MIGASFREE_MODULE_PATH=$(python3 -c "import migasfree;print(migasfree.__path__[0])") && \
-    ln -s  $MIGASFREE_MODULE_PATH  /migasfree && \
+    ln -s $MIGASFREE_MODULE_PATH /migasfree && \
     # STATIC FILES && \
     mkdir /static && \
     STATIC_DJANGO=$(python3 -c "import django;print(django.__path__[0])") && \
