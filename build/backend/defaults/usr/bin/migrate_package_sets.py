@@ -16,8 +16,7 @@ API_URL = f'{SERVER_URL}/api/v1/token'
 
 
 def get_auth_token():
-    # return f'Token {get_secret("token_admin")}'
-    return 'Token 8e557843d6d7b5b13b720361e88c2c75be580101'
+    return f'Token {get_secret("token_admin")}'
 
 
 def headers():
@@ -72,22 +71,22 @@ if __name__ == '__main__':
                             'files',
                             (
                                 package,
-                                open(os.path.join(item['location'], package), 'rb'),
+                                open(os.path.join(item['location'], package), 'rb').read(),
                                 get_pms(package_set['project']['pms']).mimetype[0]
                             )
                         )
                     )
 
-                mp_encoder = MultipartEncoder(files)
-
+                mp_encoder = MultipartEncoder(fields=files)
                 response = requests.patch(
-                    f'{API_URL}/package-sets/{package_set["id"]}',
+                    f'{API_URL}/package-sets/{package_set["id"]}/',
                     data=mp_encoder,
                     headers={
                         'Authorization': get_auth_token(),
                         'Content-Type': mp_encoder.content_type
                     }
                 )
+                print(response.text)
 
                 if response.status_code == requests.codes.ok:
                     print(f'Package set {package_set["name"]} migrated successfully!!!')
