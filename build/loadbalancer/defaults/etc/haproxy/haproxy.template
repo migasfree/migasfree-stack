@@ -2,92 +2,82 @@ global
     maxconn 4096
     maxpipes 1024
     log fd@2 local2
-    #log 127.0.0.1 local0
-    #log 127.0.0.1 local1 notice
-    # tune.bufsize 32768   # workaround -> 414 Request-URI Too Large
+    # log 127.0.0.1 local0
+    # log 127.0.0.1 local1 notice
+    # tune.bufsize 32768  # workaround -> 414 Request-URI Too Large
     tune.ssl.default-dh-param 2048
     ssl-server-verify none
     pidfile /run/haproxy.pid
-    
+
     # Enable HAProxy runtime API
     stats socket :9999 level admin expose-fd listeners
-    
-    master-worker
-    #external-check
 
+    master-worker
+    # external-check
 
 
 defaults
     log global
-    mode    http
+    mode http
     option httplog
     option dontlognull
     option http-keep-alive
     timeout connect 20s
-    timeout client  10m
-    timeout server  10m
+    timeout client 10m
+    timeout server 10m
 
-    #https://github.com/Jonathan-Rosewood/haproxy-custom-errors
+    # https://github.com/Jonathan-Rosewood/haproxy-custom-errors
     errorfile 429 /etc/haproxy/errors-custom/429.http
     errorfile 502 /etc/haproxy/errors-custom/502.http
     errorfile 503 /etc/haproxy/errors-custom/503.http
 
+
 frontend http
     bind *:80
-
     bind :443 ssl crt /usr/local/etc/haproxy/certificates/"${FQDN}".pem
-    
+
     # Certificate autosigned and CA-FILE
-    #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt verify optional crt-ignore-err all
+    # bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt verify optional crt-ignore-err all
     # Certificate and CA-FILE
-    #bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt    
+    # bind *:443 ssl crt /certs/cert.pem ca-file /certs/ca.crt
 
     http-request add-header X-Forwarded-Proto https
 
     # ACL Certbot
     acl certbot path_beg /.well-known/acme-challenge/
-    
+
     mode http
-#    acl certificates_check url_beg /.well-known
-#    use_backend certificates if certificates_check
-
-
+    # acl certificates_check url_beg /.well-known
+    # use_backend certificates if certificates_check
 
     # DDOS
     http-request track-sc0 src table per_ip_rates
     http-request deny deny_status 429 if { sc_http_req_rate(0) gt 500 }
 
-    http-request set-var(txn.path) path   # for services_cache
+    http-request set-var(txn.path) path  # for services_cache
 
     # WEBSOCKETS. Routing based on websocket protocol header
     acl hdr_connection_upgrade hdr(Connection) -i upgrade
     acl hdr_upgrade_websocket hdr(Upgrade) -i websocket
 
-    acl url_backend  path_beg  /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/ /alerts/
-    
+    acl url_backend path_beg /api/ /rest-auth/ /token-auth-jwt/ /token-auth/ /token-refresh/ /admin/ /grapelly/ /markdownx/ /redocs/ /graphql/ /docs/ /api-docs/ /redoc/ /alerts/
+
     # api v4 COMPATIBILITY
-    acl url_backend  path_beg /get_key_repositories /get_properties /get_computer_info /repository-url-template
-    http-request replace-path /admin/server/computer/(.*)/change /computers/results/\1    # migasfree-play 1.x 
-
-
+    acl url_backend path_beg /get_key_repositories /get_properties /get_computer_info /repository-url-template
+    http-request replace-path /admin/server/computer/(.*)/change /computers/results/\1    # migasfree-play 1.x
 
     # frontend
-    # ======
-    acl url_root path / 
+    # ========
+    acl url_root path /
     acl url_empty path_len 0
-  
-    #acl url_frontend path_beg  /app/
-   
-
-
+    # acl url_frontend path_beg /app/
 
     # public
     # ======
     acl url_public path_beg /public/ /static/ /pool/ /repo/  # (/repo = retrocompatibility)
 
-
     # services static
-    # ==================
+    # ===============
     acl url_services path_beg /services
     acl url_services_static path_beg /services-static /favicon.ico
 
@@ -96,34 +86,28 @@ frontend http
     # external sources
     # ================
     acl url_src path_beg /src/
-    #acl url_packages path_end .deb .rpm .yaml .msix
+    # acl url_packages path_end .deb .rpm .yaml .msix
     acl url_packages path_end {{ extensions }}
 
     use_backend mf_frontend if url_root or url_empty
     use_backend mf_backend if url_backend || hdr_connection_upgrade || hdr_upgrade_websocket
     use_backend services if is_GET url_services || url_services_static
-    use_backend mf_public if url_public || url_packages || url_src 
+    use_backend mf_public if url_public || url_packages || url_src
 {% if certbot %}
     use_backend core_certbot if certbot
 {% endif %}
 
     default_backend mf_frontend
-    #default_backend services
+    # default_backend services
 
 {% if certbot %}
-backend core_certbot
+    backend core_certbot
     server core_certbot core_certbot:380
 {% endif %}
-
-#backend certificates
-#    mode http
-#    balance leastconn
-#    server letsencrypt letsencrypt:80 check init-addr last,libc,none
 
 
 backend mf_public
     mode http
-
     balance roundrobin
 
     # checks
@@ -135,7 +119,7 @@ backend mf_public
     # NODES
     # ======
     {% for node in mf_public %}
-    server {{ node }} {{ node }}:80  check port 80 inter 2000 rise 1 fall 1
+        server {{ node }} {{ node }}:80 check port 80 inter 2000 rise 1 fall 1
     {% endfor %}
 
     server 127.0.0.1 127.0.0.1:8001 backup
@@ -143,30 +127,27 @@ backend mf_public
 
 backend mf_backend
     mode http
-
     balance roundrobin
 
-
     # For SWAGGER and REST-FRAMEWORK. It is also necessary "SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')" in settings.py
-    http-request add-header X-Forwarded-Proto https   
+    http-request add-header X-Forwarded-Proto https
 
-    #option forwardfor
-    #http-request set-header X-Forwarded-For %[src]
+    # option forwardfor
+    # http-request set-header X-Forwarded-For %[src]
 
-
-    #cookie SRVNAME insert  secure # https://thisinterestsme.com/haproxy-sticky-sessions/
+    # cookie SRVNAME insert secure # https://thisinterestsme.com/haproxy-sticky-sessions/
 
     # checks
-    #option external-check
-    #external-check command /usr/bin/check-backend
+    # option external-check
+    # external-check command /usr/bin/check-backend
 
     option tcp-check
 
     # NODES
     # ======
     {% for node in mf_backend %}
-    # server {{ node }} {{ node }}:8080 cookie BE_{{ node }} check inter 2000 rise 1 fall 1
-    server {{ node }} {{ node }}:8080 check port 8080 inter 2000 rise 1 fall 1
+        # server {{ node }} {{ node }}:8080 cookie BE_{{ node }} check inter 2000 rise 1 fall 1
+        server {{ node }} {{ node }}:8080 check port 8080 inter 2000 rise 1 fall 1
     {% endfor %}
 
     # server 127.0.0.1 127.0.0.1:8001 backup
@@ -174,22 +155,21 @@ backend mf_backend
 
 backend mf_frontend
     mode http
-
     balance roundrobin
-    
-    #http-request redirect scheme https unless { ssl_fc }
 
-    #redirect scheme https code 307 if !{ ssl_fc }
+    # http-request redirect scheme https unless { ssl_fc }
+
+    # redirect scheme https code 307 if !{ ssl_fc }
 
     # checks
-    #option external-check
-    #external-check command /usr/bin/check-frontend
+    # option external-check
+    # external-check command /usr/bin/check-frontend
     option tcp-check
 
     # NODES
     # ======
     {% for node in mf_frontend %}
-    server {{ node }} {{ node }}:80  check port 80 inter 2000 rise 1 fall 1
+        server {{ node }} {{ node }}:80 check port 80 inter 2000 rise 1 fall 1
     {% endfor %}
 
     server 127.0.0.1 127.0.0.1:8001 backup
@@ -197,18 +177,15 @@ backend mf_frontend
 
 backend services
     mode http
-    
+
     acl url_services_cache var(txn.path) -m beg /services-static /favicon.ico
     acl url_status var(txn.path) -m beg /services/status
 
-    #balance roundrobin
+    # balance roundrobin
     http-response set-header Cache-Control public,max-age=604800,immutable if url_services_cache || url_status
 
     server 127.0.0.1 127.0.0.1:8001
 
 
-
 backend per_ip_rates
     stick-table type ip size 1m expire 10m store http_req_rate(10s)
-
-
