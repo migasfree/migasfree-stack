@@ -7,7 +7,8 @@ set -e
 mkdir -p "$LIVE_CERT_FOLDER"
 
 # Abort, if already running.
-if [[ -n "$(ps | grep inotifywait | grep -v grep)" ]]; then
+if [[ -n "$(ps | grep inotifywait | grep -v grep)" ]]
+then
     echo "Already watching directory: $LIVE_CERT_FOLDER" >&2
     exit y
 fi
@@ -30,11 +31,13 @@ inotifywait \
     --quiet \
     --recursive \
     "$LIVE_CERT_FOLDER" |
+
 while read CHANGED
 do
     echo "$CHANGED"
     NOW="$(date +%s)"
-    if (( NOW > IGNORE_UNTIL )); then
+    if (( NOW > IGNORE_UNTIL ))
+    then
         (( IGNORE_UNTIL = NOW + IGNORE_SECS ))
         (sleep $IGNORE_SECS; install-certs; reconfigure ) &
     fi
