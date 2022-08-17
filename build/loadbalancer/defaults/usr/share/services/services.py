@@ -614,6 +614,7 @@ def config_haproxy():
     fileconfig = '/etc/haproxy/haproxy.cfg'
     with open(fileconfig, 'w') as f:
         f.write(Template(haproxy_template).render(context))
+        f.write('\n')
 
 
 def reload_haproxy():
