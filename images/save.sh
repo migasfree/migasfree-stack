@@ -18,4 +18,4 @@ do
     docker save --output ./migasfree-${_IMG}-${_VERSION}.tar migasfree/${_IMG}:${_VERSION}
 done
 
-chmod -R 644 ./
+chmod -R 644 ./*.tar
