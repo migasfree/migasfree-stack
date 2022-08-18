@@ -1,7 +1,7 @@
 #!/bin/bash
 
 _VERSION=5.0
-for _IMG in loadbalancer public database datastore client certbot pms-apt  pms-yum pms-winget pms-pacman
+for _IMG in loadbalancer public database datastore client certbot pms-apt pms-yum pms-winget pms-pacman
 do
     docker save --output ./migasfree-${_IMG}-${_VERSION}.tar migasfree/${_IMG}:${_VERSION}
 done
@@ -18,4 +18,4 @@ do
     docker save --output ./migasfree-${_IMG}-${_VERSION}.tar migasfree/${_IMG}:${_VERSION}
 done
 
-chmod -R 777 ./
+chmod -R 644 ./
