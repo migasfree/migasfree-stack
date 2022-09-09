@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ../config/env/globals
+. ../config/env/stack
 
 DB_V5=$(docker ps | grep ${STACK}_database | awk '{print $1}')
 BE_V5=$(docker ps | grep ${STACK}_backend | awk '{print $1}' | head -n 1)
@@ -56,8 +56,8 @@ then
     echo "DATA MIGRATION"
     echo "=============="
 
-    _REPLICAS_BE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' mf_backend)
-    _REPLICAS_FE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' mf_frontend)
+    _REPLICAS_BE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' ${STACK}_backend)
+    _REPLICAS_FE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' ${STACK}_frontend)
     bash ../run/scale.sh ${STACK}_backend 0
     bash ../run/scale.sh ${STACK}_frontend 0
     echo "***** BACKEND & FRONTEND: DISABLED *****"
@@ -70,14 +70,13 @@ then
 
     # SUMMARIZE SYNCS
     # ================
-    BE_V5=$(docker ps | grep ${STACK}_backend | awk '{print $1}' | head -n 1)
     let _COUNTER=0
     while true
     do
         _YEAR=$(date -d "now -$_COUNTER year" +"%Y")
 
         echo "Calculate syncronizations ${_YEAR} ..."
-        /usr/bin/time -f "Time ${_YEAR}: %E" docker exec ${BE_V5} bash -c "django-admin refresh_redis_syncs --since $_YEAR --until $_YEAR > /dev/null"
+        /usr/bin/time -f "Time ${_YEAR}: %E" docker exec ${BE_V5} bash -c ". /venv/activate; django-admin refresh_redis_syncs --since $_YEAR --until $_YEAR > /dev/null"
 
         if [ "$_YEAR" = "2010" ]
         then
