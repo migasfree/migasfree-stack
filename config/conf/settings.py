@@ -130,3 +130,9 @@ MIGASFREE_HELP_DESK = "Help Desk: 555 555 555"
 
 # Important!!!
 SESSION_COOKIE_AGE = 1
+
+CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ['*']
+
+# Uncomment and fill with FQDN value
+# CSRF_TRUSTED_ORIGINS = ['fill_FQDN_value']
