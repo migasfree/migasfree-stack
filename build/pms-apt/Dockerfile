@@ -11,11 +11,11 @@ ENV TERM=xterm \
     LC_CTYPE=C.UTF-8 \
     LANG=C.UTF-8 \
     _UID=890 \
-    _GID=890 
+    _GID=890
 
 RUN _TAG=$(cat /VERSION) && \
     _BUILD_DEPENDS=' python3-setuptools python3-pip wget' && \
-    _DEPENDS='gnupg dpkg-dev gzip python3 netcat curl' && \
+    _DEPENDS='gnupg dpkg-dev gzip python3 netcat curl apt-utils' && \
     _PIP_DEPENDS='requests celery[redis]' && \
     usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
@@ -27,7 +27,7 @@ RUN _TAG=$(cat /VERSION) && \
     mkdir /pms && \
     apt-get -y purge $_BUILD_DEPENDS && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* 
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=migasfree/backend:master /migasfree /pms/migasfree
 
