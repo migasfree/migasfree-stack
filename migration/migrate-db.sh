@@ -76,7 +76,7 @@ then
         _YEAR=$(date -d "now -$_COUNTER year" +"%Y")
 
         echo "Calculate syncronizations ${_YEAR} ..."
-        /usr/bin/time -f "Time ${_YEAR}: %E" docker exec ${BE_V5} bash -c ". /venv/activate; django-admin refresh_redis_syncs --since $_YEAR --until $_YEAR > /dev/null"
+        /usr/bin/time -f "Time ${_YEAR}: %E" docker exec ${BE_V5} bash -c ". /venv/bin/activate; django-admin refresh_redis_syncs --since $_YEAR --until $_YEAR > /dev/null"
 
         if [ "$_YEAR" = "2010" ]
         then
