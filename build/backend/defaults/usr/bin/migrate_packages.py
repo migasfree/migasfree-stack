@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import sys
 import shutil
 import fnmatch
 import requests
@@ -23,7 +24,7 @@ def headers():
     return {'Authorization': get_auth_token()}
 
 
-if __name__ == '__main__':
+def migrate_package_sets():
     locations = []
     package_sets = []
 
@@ -94,3 +95,75 @@ if __name__ == '__main__':
                     print(f'Package set {package_set["name"]} NOT migrated!')
 
                 print()
+
+
+def get_projects():
+    req = requests.get(
+        f'{API_URL}/projects/',
+        headers=headers()
+    )
+    if req.status_code != requests.codes.ok:
+        print('Invalid credentials. Review token.')
+        sys.exit(1)
+
+    response = req.json()
+    if 'detail' in response:
+        print(response['detail'])
+        sys.exit(1)
+
+    req = requests.get(
+        f'{API_URL}/projects/',
+        {
+            'page_size': response['count']
+        },
+        headers=headers()
+    )
+    response = req.json()
+
+    return response['results']
+
+def update_projects(projects):
+    for prj in projects:
+        if prj['pms'].startswith('apt'):
+            prj['pms'] = 'apt'
+
+        req = requests.post(f'{API_URL}/projects/', prj, headers=headers())
+        if req.status_code == requests.codes.ok:
+            print(f'Project {prj["name"]} updated')
+        else:
+            print(f'Project {prj["name"]} update failed!!!')
+
+
+def regenerate_metadata():
+    req = requests.get(
+        f'{API_URL}/deployments/internal-sources/',
+        headers=headers()
+    )
+    response = req.json()
+
+    req = requests.get(
+        f'{API_URL}/deployments/internal-sources/',
+        {
+            'page_size': response['count']
+        },
+        headers=headers()
+    )
+    response = req.json()
+    for deploy in response['results']:
+        req = request.get(
+            f'{API_URL}/deployments/internal-sources/{deploy["id"]}/metadata/',
+            headers=headers()
+        )
+        if req.status_code == requests.codes.ok:
+            print(f'Deployment {deploy["name"]} regenerated')
+        else:
+            print(f'Deployment {deploy["name"]} regenerating failed!!!')
+
+
+if __name__ == '__main__':
+    projects = get_projects()
+    update_projects(projects)
+    # move old stores structure to new ones
+    # upload packages again
+    migrate_package_sets()
+    regenerate_metadata()
