@@ -24,13 +24,52 @@ def headers():
     return {'Authorization': get_auth_token()}
 
 
-def migrate_package_sets():
+def get_locations():
     locations = []
-    package_sets = []
 
     for root, dirnames, filenames in os.walk(settings.MEDIA_ROOT):
         for filename in fnmatch.filter(dirnames, get_setting('MIGASFREE_STORE_TRAILING_PATH')):
             locations.append(os.path.join(root, filename))
+
+    return locations
+
+
+def migrate_structure():
+    # move old stores structure to new ones
+    pass
+
+
+def migrate_packages():
+    locations = get_locations()
+    packages = []
+
+    for location in locations:
+        for root, _, filenames in os.walk(location):
+            packages.append({
+                # TODO
+            })
+
+    if len(packages) > 0:
+        for item in packages:
+            req = requests.get(
+                f'{API_URL}/packages/',
+                {
+                    # TODO
+                },
+                headers=headers()
+            )
+
+            response = req.json()
+            if response['count'] == 1:
+                package_set = response['results'][0]
+                print(f'Migrating {package_set["name"]}...')
+
+                 # TODO
+
+
+def migrate_package_sets():
+    locations = get_locations()
+    package_sets = []
 
     for location in locations:
         len_location = len(location.replace(settings.MEDIA_ROOT, '').split('/'))
@@ -122,6 +161,7 @@ def get_projects():
 
     return response['results']
 
+
 def update_projects(projects):
     for prj in projects:
         if prj['pms'].startswith('apt'):
@@ -163,7 +203,7 @@ def regenerate_metadata():
 if __name__ == '__main__':
     projects = get_projects()
     update_projects(projects)
-    # move old stores structure to new ones
-    # upload packages again
+    migrate_structure()
+    migrate_packages()
     migrate_package_sets()
     regenerate_metadata()
