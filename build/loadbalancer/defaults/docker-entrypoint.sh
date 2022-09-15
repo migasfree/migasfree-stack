@@ -16,7 +16,7 @@ function get_mount_paths {
 }
 
 function send_message {
-    point="http://loadbalancer:8001/services/message"
+    point="http://localhost:8001/services/message"
     data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
     until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
     do
@@ -47,10 +47,6 @@ cd /usr/share/services/
 /usr/bin/python3 services.py 8001 >/dev/null &
 cd -
 
-send_message "starting ${SERVICE:(${#STACK})+1}"
-
-reconfigure || :
-
 echo "
 
 
@@ -74,10 +70,7 @@ echo "
 
 # load balancer
 # =============
-send_message ""
 mkdir -p /var/run/haproxy/
-
-bash -c "sleep 1; curl -d '' -X POST http://loadbalancer:8001/services/reconfigure &> /dev/null " &
  
-haproxy -W -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg \
+haproxy -W -db -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg \
     -p /var/run/haproxy.pid
