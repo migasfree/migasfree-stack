@@ -7,6 +7,8 @@ import time
 import socket
 import subprocess
 import _thread
+import fcntl
+import select
 
 from web.httpserver import StaticMiddleware
 from datetime import datetime
@@ -18,7 +20,7 @@ def check_running():
         if not ckeck_server(os.environ['FQDN'], 443):
             config_haproxy()
             reload_haproxy()
-        time.sleep(10)
+        time.sleep(2)
 
 
 class icon:
@@ -30,7 +32,7 @@ class icon:
 
 class status:
     def GET(self):
-        param = web.input()
+        #param = web.input()
         return status_page(global_data)
 
 
@@ -620,7 +622,7 @@ def config_haproxy():
 def reload_haproxy():
     # https://www.haproxy.com/blog/haproxy-1-9-has-arrived/
     _code, _out,_err = execute(
-        "echo '@master reload' | socat /var/run/haproxy-master-socket stdio",
+        "echo '@master reload' | /usr/bin/socat /var/run/haproxy-master-socket stdio",
         interactive=False
     )
 
@@ -679,9 +681,12 @@ if __name__ == '__main__':
         'now': datetime.now()
     }
 
-    _thread.start_new_thread(check_running, ())
+    #_thread.start_new_thread(check_running, ())
 
     config_haproxy()
+    time.sleep(2)
+    reload_haproxy()
+
     app = web.application(urls, globals(), autoreload=False)
     app.notfound = notfound
     app.run(servicesStaticMiddleware)
