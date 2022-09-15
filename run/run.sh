@@ -12,7 +12,7 @@ fi
 ./templates/process
 
 docker stack deploy --compose-file core.yml core
-echo -n "waiting core "
+echo -n "waiting core, please wait "
 while true
 do
     _STATUS=$(curl --write-out '%{http_code}' --silent --output /dev/null ${FQDN}/services/status)
