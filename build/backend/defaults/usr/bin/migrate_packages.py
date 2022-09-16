@@ -44,27 +44,37 @@ def migrate_packages():
     packages = []
 
     for location in locations:
+        len_location = len(location.replace(settings.MEDIA_ROOT, '').split('/'))
         for root, _, filenames in os.walk(location):
-            packages.append({
-                # TODO
-            })
+            for _file in filenames:
+                len_candidate = len(os.path.join(root, _file).replace(settings.MEDIA_ROOT, '').split('/'))
+                if len_location == (len_candidate - 2):
+                    parts = root.replace(settings.MEDIA_ROOT, '').split('/')
+                    packages.append({
+                        'location': os.path.join(root, _file),
+                        'fullname': _file,
+                        'project': parts[1],
+                        'store': parts[-1],
+                    })
 
     if len(packages) > 0:
         for item in packages:
             req = requests.get(
                 f'{API_URL}/packages/',
                 {
-                    # TODO
+                    'fullname__icontains': item['fullname'],
+                    'project__name__icontains': item['project'],
+                    'store__name__icontains': item['store']
                 },
                 headers=headers()
             )
 
             response = req.json()
             if response['count'] == 1:
-                package_set = response['results'][0]
-                print(f'Migrating {package_set["name"]}...')
+                package = response['results'][0]
+                print(f'Migrating {package["fullname"]}...')
 
-                 # TODO
+                # TODO
 
 
 def migrate_package_sets():
