@@ -34,13 +34,11 @@ function cron_init {
     then
         POSTGRES_CRON="0 0 * * *"
     fi
-    CRON=$(echo "$POSTGRES_CRON" | tr -d "'") # remove single quote
-    echo "$CRON /usr/bin/backup" > /tmp/cron
+    echo "$(echo "$POSTGRES_CRON" | tr -d '"') /usr/bin/backup" > /tmp/cron
     crontab /tmp/cron
     rm /tmp/cron
 
-    #start daemond crond
-    crond
+    crond -l 2 -f > /dev/stdout 2> /dev/stderr &
 }
 
 if ! [ -f /etc/migasfree-server/settings.py ]
@@ -68,9 +66,9 @@ echo "
 
                    ●                          ●●
                                              ●
-         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●●
         ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
-        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●●
         ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
         ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
                           ●
@@ -79,7 +77,7 @@ echo "
         migasfree DATABASE
         $(postgres -V)
         Container: $HOSTNAME
-        Time zome: $TZ  $(date)
+        Time zome: $TZ $(date)
         Processes: $(nproc)
 
 "
