@@ -47,14 +47,21 @@ cd /usr/share/services/
 /usr/bin/python3 services.py 8001 >/dev/null &
 cd -
 
+while [ ! -f /etc/haproxy/haproxy.cfg ]
+do
+    echo "Checking HA Proxy conf"
+    sleep 1
+done
+echo "HA Proxy conf OK"
+
 echo "
 
 
                    ●                          ●●
                                              ●
-         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●● 
+         ●●● ●●    ●    ●●     ●●●     ●●●  ●●●●  ●●●  ●●●    ●●●
         ●   ●  ●   ●   ●  ●       ●   ●      ●   ●    ●   ●  ●   ●
-        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●● 
+        ●   ●  ●   ●   ●  ●    ●●●●    ●●    ●   ●    ●●●●   ●●●●
         ●   ●  ●   ●   ●  ●   ●   ●      ●   ●   ●    ●      ●
         ●   ●  ●   ●    ●●●    ●●●    ●●●    ●   ●     ●●●    ●●●
                           ●
@@ -71,6 +78,6 @@ echo "
 # load balancer
 # =============
 mkdir -p /var/run/haproxy/
- 
+
 haproxy -W -db -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg \
     -p /var/run/haproxy.pid
