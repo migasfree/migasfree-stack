@@ -6,21 +6,12 @@ import json
 import time
 import socket
 import subprocess
-import _thread
 import fcntl
 import select
 
 from web.httpserver import StaticMiddleware
 from datetime import datetime
 from jinja2 import Template
-
-
-def check_running():
-    while True:
-        if not ckeck_server(os.environ['FQDN'], 443):
-            config_haproxy()
-            reload_haproxy()
-        time.sleep(2)
 
 
 class icon:
@@ -681,11 +672,7 @@ if __name__ == '__main__':
         'now': datetime.now()
     }
 
-    #_thread.start_new_thread(check_running, ())
-
     config_haproxy()
-    time.sleep(2)
-    reload_haproxy()
 
     app = web.application(urls, globals(), autoreload=False)
     app.notfound = notfound
