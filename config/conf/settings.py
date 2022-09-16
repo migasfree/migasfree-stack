@@ -100,12 +100,9 @@ EMAIL_HOST_PASSWORD = ""
 DEFAULT_FROM_EMAIL = "migasfree-server <noreply@mydomain.es>"
 ADMINS = [('mymame', 'myuser@mydomain.es'),]
 
-# MIGASFREE_PUBLIC_DIR = os.path.join(MIGASFREE_PROJECT_DIR, 'public')
-# STATIC_ROOT = '/var/lib/migasfree-backend/static'
-# MEDIA_ROOT = MIGASFREE_PUBLIC_DIR
-
 MEDIA_URL ="/public/"
 MIGASFREE_TMP_DIR = '/var/tmp'
+MIGASFREE_SECRET_DIR = '/var/run/secrets'
 
 MIGASFREE_EXTERNAL_ACTIONS = {
     "computer": {
