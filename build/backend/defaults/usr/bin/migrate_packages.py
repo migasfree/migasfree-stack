@@ -5,15 +5,23 @@ import sys
 import shutil
 import fnmatch
 import requests
+import json
 
 from django.conf import settings
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
-from migasfree.utils import get_secret, get_setting
+from migasfree.utils import get_secret, get_setting, write_file
 from migasfree.core.pms import get_pms
+from migasfree.core.validators import build_magic
+from migasfree.secure import wrap, unwrap
 
 SERVER_URL = f'http://{get_setting("MIGASFREE_FQDN")}'
 API_URL = f'{SERVER_URL}/api/v1/token'
+UPLOAD_PKG_URL = f'{SERVER_URL}/api/v1/safe/packages/'
+
+PRIVATE_KEY = os.path.join(get_setting('MIGASFREE_KEYS_DIR'), 'migasfree-packager.pri')
+PUBLIC_KEY = os.path.join(get_setting('MIGASFREE_KEYS_DIR'), 'migasfree-server.pub')
+TMP_PATH = '/tmp'
 
 
 def get_auth_token():
@@ -37,6 +45,52 @@ def get_locations():
 def migrate_structure():
     # move old stores structure to new ones
     pass
+
+
+def upload_package(data, upload_files):
+    data = json.dumps({
+        'msg': wrap(
+            data,
+            sign_key=PRIVATE_KEY,
+            encrypt_key=PUBLIC_KEY
+        ),
+        'project': data['project']
+    })
+
+    my_magic = build_magic()
+
+    files = []
+    for _file in upload_files:
+        content = read_file(_file)
+
+        tmp_file = os.path.join(TMP_PATH, os.path.basename(_file))
+        write_file(tmp_file, content[0:1023])  # only header
+        mime = my_magic.file(tmp_file)
+        os.remove(tmp_file)
+
+        files.append(
+            ('file', (_file, content, mime))
+        )
+
+    data = json.loads(data)
+
+    fields = data
+    fields.update(dict(files))
+    data = MultipartEncoder(fields=fields)
+    headers['content-type'] = data.content_type
+
+    req = requests.post(url, data=data, headers=headers)
+
+    if 'msg' in req.json():
+        response = unwrap(
+            req.json()['msg'],
+            decrypt_key=PRIVATE_KEY,
+            verify_key=PUBLIC_KEY
+        )
+
+        return response
+
+    return 'error'
 
 
 def migrate_packages():
@@ -73,6 +127,15 @@ def migrate_packages():
             if response['count'] == 1:
                 package = response['results'][0]
                 print(f'Migrating {package["fullname"]}...')
+                ret = upload_package(
+                    data={
+                        'project': item['project'],
+                        'store': item['store'],
+                        'is_package': True
+                    },
+                    upload_files=[item['location']]
+                )
+                print(ret)  # DEBUG
 
                 # TODO
 
