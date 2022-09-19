@@ -1,6 +1,9 @@
 #!/bin/sh
 
 until [ $(curl -s -o /dev/null  -w '%{http_code}' -X POST http://localhost:8001/services/reconfigure) = "200" ]
-do 
+do
+    echo "Services not configured"
     sleep 1
 done
+
+echo "Configured services!!!"
