@@ -10,7 +10,7 @@ import json
 from django.conf import settings
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
-from migasfree.utils import get_secret, get_setting, write_file
+from migasfree.utils import get_secret, get_setting, read_file, write_file
 from migasfree.core.pms import get_pms
 from migasfree.core.validators import build_magic
 from migasfree.secure import wrap, unwrap
@@ -77,9 +77,9 @@ def upload_package(data, upload_files):
     fields = data
     fields.update(dict(files))
     data = MultipartEncoder(fields=fields)
-    headers['content-type'] = data.content_type
+    headers = {'content-type': data.content_type}
 
-    req = requests.post(url, data=data, headers=headers)
+    req = requests.post(UPLOAD_PKG_URL, data=data, headers=headers)
 
     if 'msg' in req.json():
         response = unwrap(
@@ -90,7 +90,7 @@ def upload_package(data, upload_files):
 
         return response
 
-    return 'error'
+    return req.json()
 
 
 def migrate_packages():
@@ -129,8 +129,8 @@ def migrate_packages():
                 print(f'Migrating {package["fullname"]}...')
                 ret = upload_package(
                     data={
-                        'project': item['project'],
-                        'store': item['store'],
+                        'project': package['project']['name'],
+                        'store': package['store']['name'],
                         'is_package': True
                     },
                     upload_files=[item['location']]
@@ -240,11 +240,12 @@ def update_projects(projects):
         if prj['pms'].startswith('apt'):
             prj['pms'] = 'apt'
 
-        req = requests.post(f'{API_URL}/projects/', prj, headers=headers())
+        prj['platform'] = prj['platform']['id']
+        req = requests.patch(f'{API_URL}/projects/{prj["id"]}/', prj, headers=headers())
         if req.status_code == requests.codes.ok:
             print(f'Project {prj["name"]} updated')
         else:
-            print(f'Project {prj["name"]} update failed!!!')
+            print(f'Project {prj["name"]} update failed!!! ({req.status_code})')
 
 
 def regenerate_metadata():
@@ -263,7 +264,7 @@ def regenerate_metadata():
     )
     response = req.json()
     for deploy in response['results']:
-        req = request.get(
+        req = requests.get(
             f'{API_URL}/deployments/internal-sources/{deploy["id"]}/metadata/',
             headers=headers()
         )
