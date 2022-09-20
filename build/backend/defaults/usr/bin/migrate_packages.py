@@ -22,6 +22,7 @@ UPLOAD_PKG_URL = f'{SERVER_URL}/api/v1/safe/packages/'
 PRIVATE_KEY = os.path.join(get_setting('MIGASFREE_KEYS_DIR'), 'migasfree-packager.pri')
 PUBLIC_KEY = os.path.join(get_setting('MIGASFREE_KEYS_DIR'), 'migasfree-server.pub')
 TMP_PATH = '/tmp'
+OLD_STORE_TRAILING = 'STORES'
 
 
 def get_auth_token():
@@ -42,9 +43,22 @@ def get_locations():
     return locations
 
 
-def migrate_structure():
-    # move old stores structure to new ones
-    pass
+def migrate_structure(projects):
+    for prj in projects:
+        source = os.path.join(
+            settings.MEDIA_ROOT,
+            prj['name'],
+            OLD_STORE_TRAILING
+        )
+        if os.path.exists(source):
+            target = os.path.join(
+                settings.MEDIA_ROOT,
+                prj['slug'],
+                get_setting('MIGASFREE_STORE_TRAILING_PATH')
+            )
+            shutil.move(source, target)
+            print(f'{source} migrated to {target} path')
+            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, prj['name']))
 
 
 def upload_package(data, upload_files):
@@ -101,7 +115,9 @@ def migrate_packages():
         len_location = len(location.replace(settings.MEDIA_ROOT, '').split('/'))
         for root, _, filenames in os.walk(location):
             for _file in filenames:
-                len_candidate = len(os.path.join(root, _file).replace(settings.MEDIA_ROOT, '').split('/'))
+                len_candidate = len(
+                    os.path.join(root, _file).replace(settings.MEDIA_ROOT, '').split('/')
+                )
                 if len_location == (len_candidate - 2):
                     parts = root.replace(settings.MEDIA_ROOT, '').split('/')
                     packages.append({
@@ -275,7 +291,7 @@ def regenerate_metadata():
 if __name__ == '__main__':
     projects = get_projects()
     update_projects(projects)
-    migrate_structure()
+    migrate_structure(projects)
     migrate_packages()
     migrate_package_sets()
     regenerate_metadata()
