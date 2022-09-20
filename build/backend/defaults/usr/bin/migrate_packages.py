@@ -137,8 +137,6 @@ def migrate_packages():
                 )
                 print(ret)  # DEBUG
 
-                # TODO
-
 
 def migrate_package_sets():
     locations = get_locations()
