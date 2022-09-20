@@ -325,7 +325,7 @@ def status_page(context):
               if (typeof(data) != "undefined") {
                 if (serv == "pms" && message_pms != "") {
                   message = data['services'][message_pms]['message'];
-                  message_serv = message_pms
+                  message_serv = message_pms;
                   message_from = `${data['services'][message_pms]['container']}@${data['services'][message_pms]['node']}`;
                 } else {
                   message = data['services'][message_serv]['message'];
