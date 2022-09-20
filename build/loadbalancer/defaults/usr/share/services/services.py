@@ -301,7 +301,7 @@ def status_page(context):
                 }
               }
 
-              let time = +new Date;
+              time = +new Date;
 
               missing("loadbalancer");
               missing("frontend");
