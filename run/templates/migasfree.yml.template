@@ -39,7 +39,7 @@ ${SERVICES_PMS}
             replicas: ${REPLICAS_BACKEND}
         secrets:
             - source: password_database
-            - source: token_admin
+            - source: token_pms
         depends_on:
             - database
             - datastore
@@ -49,11 +49,11 @@ ${SERVICES_PMS}
             - public:/var/lib/migasfree-backend/public
             - keys:/var/lib/migasfree-backend/keys
             - tmp:/var/lib/migasfree-backend/tmp
-            - plugins:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree/core/pms/plugins 
+            - plugins:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree/core/pms/plugins
 
             # ONLY FOR DEVELOPMENT
             # - /store/desarrollo/git/migasfree-backend/migasfree:/venv/lib/python3.7/site-packages/migasfree_backend-5.0-py3.7.egg/migasfree
- 
+
         networks:
             - mf_network
 
@@ -105,7 +105,7 @@ ${SERVICES_PMS}
         image: migasfree/database:$(cat ../../build/database/VERSION)
         env_file:
             - ../config/env/general
-            - ../config/env/stack 
+            - ../config/env/stack
         environment:
             - POSTGRES_PASSWORD_FILE=/run/secrets/password_database
         secrets:
@@ -151,8 +151,8 @@ networks:
 secrets:
     password_database:
         file: ../config/secrets/password_database
-    token_admin:
-        file: ../config/secrets/token_admin
+    token_pms:
+        file: ../config/secrets/token_pms
 
 
 volumes:
@@ -217,4 +217,3 @@ volumes:
             type: nfs4
             o: addr=${NFS_SERVER},rw
             device: :/certificates
-

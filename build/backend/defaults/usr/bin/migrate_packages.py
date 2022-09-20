@@ -25,7 +25,7 @@ TMP_PATH = '/tmp'
 
 
 def get_auth_token():
-    return f'Token {get_secret("token_admin")}'
+    return f'Token {get_secret("token_pms")}'
 
 
 def headers():

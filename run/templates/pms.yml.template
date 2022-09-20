@@ -10,7 +10,7 @@
             - backend
             - datastore
         secrets:
-            - source: token_admin
+            - source: token_pms
         volumes:
             - keys:/var/lib/migasfree-backend/keys
             - public:/var/lib/migasfree-backend/public
@@ -20,7 +20,7 @@
 
             # ONLY FOR DEVELOPMENT
             # - /store/desarrollo/git/migasfree-backend/migasfree:/pms/migasfree
- 
-            
+
+
         networks:
             - mf_network
