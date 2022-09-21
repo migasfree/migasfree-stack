@@ -18,6 +18,7 @@ RUN _TAG=$(cat /VERSION) && \
     apt-get update && \
     apt-get install -y --no-install-recommends apt-utils && \
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
+    echo "es_ES.UTF-8 UTF-8" >> /etc/locale.gen && \
     apt-get install -y --no-install-recommends locales && \
     dpkg-reconfigure locales && \
     update-locale LANG=$LANG && \
