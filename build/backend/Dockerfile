@@ -12,7 +12,7 @@ ENV TERM=xterm \
     _GID=890 \
     _BUILD_DEPENDS='git python3-dev libgpgme11-dev python3-all python3-all-dev unzip g++ gcc-9 libcairo2-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libpq-dev' \
     _DEPENDS='libzmq5 gnupg rng-tools curl apt-utils bzip2 xz-utils libgpgme11 python3 python3-venv python3-minimal python3-pip p7zip-full vim wget postgresql-client netcat libmagic1' \
-    _PIP_DEPENDS='daphne==3.0.2'
+    _PIP_DEPENDS='uvicorn[standard]==0.18.3'
 
 RUN _TAG=$(cat /VERSION) && \
     apt-get update && \
