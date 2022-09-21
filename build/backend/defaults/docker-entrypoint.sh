@@ -297,7 +297,5 @@ elif [ "$SERVICE" = "mf_worker" ]
 then
     DJANGO_SETTINGS_MODULE=migasfree.settings.production celery --app=migasfree.celery.app worker --queues=default --uid 890 --without-gossip --concurrency=10 --loglevel INFO
 else
-    # TODO: daphne is running as root!!!
-    # python3 -u  -> force the stdout and stderr streams to be unbuffered
-    su -c "python3 -u $(which daphne) --verbosity 2 -b 0.0.0.0 -p 8080 migasfree.asgi:application" www-data
+    su -c "uvicorn migasfree.asgi:application --host 0.0.0.0 --port 8080 --workers $(nproc)" www-data
 fi
