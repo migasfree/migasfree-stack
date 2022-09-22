@@ -254,6 +254,7 @@ FROM auth_user_groups') AS T(
     group_id int
     );
 
+/*
 \echo 'auth_user_user_permissions'
 \! send_message 'database migration: auth_user_user_permissions'
 DELETE FROM auth_user_user_permissions;
@@ -266,6 +267,7 @@ FROM auth_user_user_permissions') AS T(
     user_id int,
     permission_id int
     );
+*/
 
 \echo 'authtoken_token'
 \! send_message 'database migration: authtoken_token'
