@@ -1,1 +1,16 @@
-curl -d "text=$1" -X POST http://localhost:8001/services/message &> /dev/null
+#!/bin/bash
+
+function send_message {
+    local _TEXT="$1"
+    local _POINT="http://localhost:8001/services/message"
+    local _DATA="{ \"text\":\"$_TEXT\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$_DATA" -H "Content-Type: application/json" -X POST $_POINT) = "200" ]
+    do
+        sleep 2
+    done
+}
+
+send_message "$1"
+
+reconfigure
+
