@@ -1,6 +1,6 @@
 /*
     ====================================
-    TEMPLATE: MIGRATION DATABASE FROM V4 
+    TEMPLATE: MIGRATION DATABASE FROM V4
     ====================================
 */
 
@@ -30,7 +30,7 @@ INSERT INTO app_catalog_application
  FROM dblink('REMOTE', 'select
      id, name, description, created_at, score, icon, level, category
 FROM catalog_application') AS T(
-    id int, 
+    id int,
     name varchar(50),
     description text,
     created_at  timestamp with time zone,
@@ -175,6 +175,7 @@ FROM auth_group') AS T(
     name varchar(150)
     );
 
+/*
 \echo 'auth_group_permissions'
 \! send_message 'database migration: auth_group_permissions'
 DELETE FROM auth_group_permissions;
@@ -204,9 +205,9 @@ FROM auth_permission') AS T(
     id int,
     name varchar(255),
     content_type_id int,
-    codename varchar(250) 
+    codename varchar(250)
     );
-
+*/
 \echo 'auth_user'
 \! send_message 'database migration: auth_user'
 DELETE FROM auth_user;
@@ -237,7 +238,7 @@ FROM auth_user') AS T(
     is_active bool,
     date_joined timestamp with time zone
     );
-        
+
 \echo 'auth_user_groups'
 \! send_message 'database migration: auth_user_groups'
 DELETE FROM auth_user_groups;
@@ -280,15 +281,15 @@ FROM authtoken_token') AS T(
     created timestamp with time zone,
     user_id int
     );
-    
-    
+
+
 -- CLIENT
 \echo 'client_computer'
 \! send_message 'database migration: client_computer'
 DELETE FROM client_computer;
 INSERT INTO client_computer
   SELECT
-    id,    
+    id,
     uuid,
     status,
     name,
@@ -312,7 +313,7 @@ INSERT INTO client_computer
     project_id,
     sync_user_id
  FROM dblink('REMOTE', 'select
-    id, 
+    id,
     uuid,
     status,
     name,
@@ -344,7 +345,7 @@ FROM server_computer') AS T(
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
     ip_address inet,
-    forwarded_ip_address inet, 
+    forwarded_ip_address inet,
     last_hardware_capture timestamp with time zone,
     sync_start_date timestamp with time zone,
     sync_end_date timestamp with time zone,
@@ -406,7 +407,7 @@ DELETE FROM client_fault;
 INSERT INTO client_fault
     SELECT T.*
  FROM dblink('REMOTE', 'select
-    id, 
+    id,
     created_at,
     result,
     checked,
@@ -414,7 +415,7 @@ INSERT INTO client_fault
     fault_definition_id,
     project_id
 FROM server_fault') AS T(
-    id int, 
+    id int,
     created_at timestamp with time zone,
     result text,
     checked bool,
@@ -454,7 +455,7 @@ INSERT INTO client_faultdefinition_excluded_attributes
     faultdefinition_id,
     attribute_id
 FROM server_faultdefinition_excluded_attributes') AS T(
-    id int, 
+    id int,
     faultdefinition_id int,
     attribute_id int
     );
@@ -469,7 +470,7 @@ INSERT INTO client_faultdefinition_included_attributes
     faultdefinition_id,
     attribute_id
 FROM server_faultdefinition_included_attributes') AS T(
-    id int, 
+    id int,
     faultdefinition_id int,
     attribute_id int
     );
@@ -484,7 +485,7 @@ INSERT INTO client_faultdefinition_users
     faultdefinition_id,
     userprofile_id
 FROM server_faultdefinition_users') AS T(
-    id int, 
+    id int,
     faultdefinition_id int,
     userprofile_id int
     );
@@ -687,10 +688,10 @@ INSERT INTO core_deployment_available_packages
     A.deployment_id,
     A.package_id
 FROM server_deployment_available_packages AS A
-INNER JOIN server_package AS P ON P.id=A.package_id 
-        WHERE 
-                P.name  like ''%.deb'' 
-                OR P.name like ''%.rpm'' 
+INNER JOIN server_package AS P ON P.id=A.package_id
+        WHERE
+                P.name  like ''%.deb''
+                OR P.name like ''%.rpm''
                 OR P.name like ''%.exe''
                 OR P.name like ''%.gip''
 ') AS T(
@@ -709,10 +710,10 @@ INSERT INTO core_deployment_available_package_sets
     A.deployment_id,
     A.package_id
 FROM server_deployment_available_packages AS A
-INNER JOIN server_package AS P ON P.id=A.package_id 
+INNER JOIN server_package AS P ON P.id=A.package_id
         WHERE NOT (
-                P.name  like ''%.deb'' 
-                OR P.name like ''%.rpm'' 
+                P.name  like ''%.deb''
+                OR P.name like ''%.rpm''
                 OR P.name like ''%.exe''
                 OR P.name like ''%.gip''
                 )
@@ -816,7 +817,7 @@ FROM server_domain_tags') AS T(
 \! send_message 'database migration: core_package'
 DELETE FROM core_package;
 INSERT INTO core_package
-    SELECT T.* 
+    SELECT T.*
  FROM dblink('REMOTE', 'select
     id,
     name,
@@ -825,10 +826,10 @@ INSERT INTO core_package
     '''',
     project_id,
     store_id
-FROM server_package 
-        WHERE 
-                name  like ''%.deb'' 
-                OR name like ''%.rpm'' 
+FROM server_package
+        WHERE
+                name  like ''%.deb''
+                OR name like ''%.rpm''
                 OR name like ''%.exe''
                 OR name like ''%.gip''
                  ') AS T(
@@ -845,17 +846,17 @@ FROM server_package
 \! send_message 'database migration: core_packageset'
 DELETE FROM core_packageset;
 INSERT INTO core_packageset
-    SELECT T.* 
+    SELECT T.*
  FROM dblink('REMOTE', 'select
     id,
     name,
     '''',
     project_id,
     store_id
-FROM server_package 
+FROM server_package
         WHERE not (
-                name  like ''%.deb'' 
-                OR name like ''%.rpm'' 
+                name  like ''%.deb''
+                OR name like ''%.rpm''
                 OR name like ''%.exe''
                 OR name like ''%.gip'' )
                  ') AS T(
@@ -875,7 +876,7 @@ INSERT INTO core_platform
 -- TODO Revisar campo "slug" y "pms"
 \echo 'core_project'
 \! send_message 'database migration: core_project'
-DELETE FROM core_project;     
+DELETE FROM core_project;
 INSERT INTO core_project
     SELECT T.id,T.name,T.name,T.pms,'amd64',T.auto_register_computers,T.platform FROM dblink('REMOTE',
         'select
@@ -895,21 +896,21 @@ INSERT INTO core_project
                         platform int);
 
 \echo 'core_property'
-DELETE FROM core_property;           
-INSERT INTO core_property                                
-    SELECT *                                                   
- FROM dblink('REMOTE', 'select  
-        server_property.id,                                             
-        server_property.prefix,           
-        server_property.name,                            
-        server_property.enabled,                               
-        server_property.kind,         
-        server_property.sort,            
-        server_property.auto_add,        
-        server_property.language,       
-        server_property.code                         
+DELETE FROM core_property;
+INSERT INTO core_property
+    SELECT *
+ FROM dblink('REMOTE', 'select
+        server_property.id,
+        server_property.prefix,
+        server_property.name,
+        server_property.enabled,
+        server_property.kind,
+        server_property.sort,
+        server_property.auto_add,
+        server_property.language,
+        server_property.code
  FROM server_property') AS T(id int, prefix varchar(3), name varchar(50), enabled bool, kind varchar(1), sort varchar(10),auto_add bool, language int,code text);
- 
+
 \echo 'core_schedule'
 \! send_message 'database migration: core_schedule'
 DELETE FROM core_schedule;
@@ -1050,7 +1051,7 @@ FROM server_userprofile_domains') AS T(
     userprofile_id int,
     domain_id int
     );
-  
+
 --   DEVICES
 \echo 'device_capability'
 \! send_message 'database migration: device_capability'
@@ -1268,19 +1269,19 @@ VACUUM FULL FREEZE ANALYZE;
 RESET ALL SEQUENCES
 ===================
 https://tapoueh.org/blog/2010/02/resetting-sequences.-all-of-them-please/
-SELECT 'select ' 
-        || trim(trailing ')' 
+SELECT 'select '
+        || trim(trailing ')'
            from replace(pg_get_expr(d.adbin, d.adrelid),
                         'nextval', 'setval'))
         || ', (select max( ' || a.attname || ') from only '
-        || nspname || '.' || relname || '));' 
-  FROM pg_class c 
-       JOIN pg_namespace n on n.oid = c.relnamespace 
+        || nspname || '.' || relname || '));'
+  FROM pg_class c
+       JOIN pg_namespace n on n.oid = c.relnamespace
        JOIN pg_attribute a on a.attrelid = c.oid
-       JOIN pg_attrdef d on d.adrelid = a.attrelid 
+       JOIN pg_attrdef d on d.adrelid = a.attrelid
                           and d.adnum = a.attnum
-                          and a.atthasdef 
- WHERE relkind = 'r' and a.attnum > 0 
+                          and a.atthasdef
+ WHERE relkind = 'r' and a.attnum > 0
        and pg_get_expr(d.adbin, d.adrelid) ~ '^nextval';
 
 */
@@ -1317,7 +1318,7 @@ SELECT 'select '
  select setval('core_deployment_available_package_sets_id_seq'::regclass, (select max( id) from only public.core_deployment_available_package_sets));
  select setval('core_deployment_available_packages_id_seq'::regclass, (select max( id) from only public.core_deployment_available_packages));
  select setval('core_deployment_excluded_attributes_id_seq'::regclass, (select max( id) from only public.core_deployment_excluded_attributes));
- select setval('core_deployment_included_attributes_id_seq'::regclass, (select max( id) from only public.core_deployment_included_attributes));  
+ select setval('core_deployment_included_attributes_id_seq'::regclass, (select max( id) from only public.core_deployment_included_attributes));
  select setval('core_attributeset_id_seq'::regclass, (select max( id) from only public.core_attributeset));
  select setval('core_attributeset_excluded_attributes_id_seq'::regclass, (select max( id) from only public.core_attributeset_excluded_attributes));
  select setval('core_attributeset_included_attributes_id_seq'::regclass, (select max( id) from only public.core_attributeset_included_attributes));
