@@ -13,6 +13,22 @@ from web.httpserver import StaticMiddleware
 from datetime import datetime
 from jinja2 import Template
 
+FILECONFIG = "/etc/haproxy/haproxy.cfg"
+FILECONFIG_TEMPLATE = "/etc/haproxy/haproxy.template"
+with open(FILECONFIG_TEMPLATE) as f:
+    HAPROXY_TEMPLATE = f.read()
+
+FILECONFIG_NGINX =  os.path.join(
+        os.environ['MIGASFREE_CONF_DIR'],
+        'locations.d',
+        'external-deployments.conf'
+    )
+
+
+# Global Variable 
+# ============
+global_data = {'services': {}, 'message': '', 'need_reload': True, "extensions": [], "ok": False, "now": datetime.now()}
+
 
 class icon:
     def GET(self):
@@ -560,11 +576,6 @@ def get_extensions():
 
 
 def config_nginx():
-    fileconfig = os.path.join(
-        os.environ['MIGASFREE_CONF_DIR'],
-        'locations.d',
-        'external-deployments.conf'
-    )
     template = """
         # External Deployments. Auto-generated from loadbalancer (in services.py -> config_nginx)
         # ========================================================================
@@ -577,7 +588,7 @@ def config_nginx():
         # ========================================================================
     """
 
-    with open(fileconfig, 'w') as f:
+    with open(FILECONFIG_NGINX, 'w') as f:
         f.write(Template(template).render(
             {'extensions': global_data['extensions']}
         ))
@@ -601,12 +612,8 @@ def config_haproxy():
     else:
         context['extensions'] = '.' + ' .'.join(global_data['extensions'])
 
-    with open('/etc/haproxy/haproxy.template') as f:
-        haproxy_template = f.read()
-
-    fileconfig = '/etc/haproxy/haproxy.cfg'
-    with open(fileconfig, 'w') as f:
-        f.write(Template(haproxy_template).render(context))
+    with open(FILECONFIG, 'w') as f:
+        f.write(Template(HAPROXY_TEMPLATE).render(context))
         f.write('\n')
 
 
