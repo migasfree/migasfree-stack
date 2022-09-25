@@ -17,9 +17,7 @@ RUN apk add --update --no-cache $BUILD_DEPENDS $RUNTIME_DEPENDS && \
 
 
 COPY defaults/usr/share/services /usr/share/services
-COPY defaults/usr/bin/install-certs /usr/bin/install-certs
-COPY defaults/usr/bin/message /usr/bin/message
-COPY defaults/usr/bin/reconfigure /usr/bin/reconfigure
+COPY defaults/usr/bin /usr/bin
 COPY defaults/etc/haproxy /etc/haproxy
 COPY defaults/docker-entrypoint.sh /docker-entrypoint.sh
 
