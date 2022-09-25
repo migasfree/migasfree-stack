@@ -402,19 +402,19 @@ def status_page(context):
       <line class="bocadillo" x1="160" y1="121" x2="158" y2="117" stroke="#FFFF99" />
 
       <switch>
-        <foreignObject x="147" y="90" width="30" height="25.5" font-size="2">
+        <foreignObject x="147.5" y="90" width="30" height="25.5" font-size="2">
           <p class="bocadillo" id="message"> one moment, please </p>
         </foreignObject>
       </switch>
 
       <switch>
-        <foreignObject x="147" y="112" width="30" height="4" font-size="1.6">
+        <foreignObject x="147.5" y="111.5" width="30" height="4" font-size="1.6">
           <p class="bocadillo" id="message_serv">  </p>
         </foreignObject>
       </switch>
 
       <switch>
-        <foreignObject x="147" y="113.8" width="30" height="4" font-size="1.2">
+        <foreignObject x="147.5" y="113.9" width="30" height="4" font-size="1.2">
           <p class="bocadillo" id="message_from">  </p>
         </foreignObject>
       </switch>
