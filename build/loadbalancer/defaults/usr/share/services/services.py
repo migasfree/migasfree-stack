@@ -611,9 +611,8 @@ def config_haproxy():
 
 
 def reload_haproxy():
-    # https://www.haproxy.com/blog/haproxy-1-9-has-arrived/
     _code, _out,_err = execute(
-        "echo '@master reload' | /usr/bin/socat /var/run/haproxy-master-socket stdio",
+        "/usr/bin/reload",
         interactive=False
     )
 
