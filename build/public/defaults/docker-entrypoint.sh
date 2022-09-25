@@ -16,7 +16,7 @@ function wait {
         ((counter++))
     done
     echo "Rebooting container"
-    exit
+    exit 1
 }
 
 function send_message {

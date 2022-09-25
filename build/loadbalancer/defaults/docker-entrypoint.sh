@@ -15,17 +15,7 @@ function get_mount_paths {
     IFS=""
 }
 
-function send_message {
-    point="http://localhost:8001/services/message"
-    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
-    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
-    do
-        sleep .5
-    done
-}
-
 get_mount_paths
-env
 
 # If not certificate, haproxy don't start and/or certbot can't challenge complete
 # Create a self-certificate to init
@@ -47,12 +37,10 @@ cd /usr/share/services/
 /usr/bin/python3 services.py 8001 >/dev/null &
 cd -
 
-while [ ! -f /etc/haproxy/haproxy.cfg ]
-do
-    echo "Checking HA Proxy conf"
-    sleep 1
-done
-echo "HA Proxy conf OK"
+message "Initial configuration"
+
+echo "Checking configuration"
+haproxy -c -f /etc/haproxy/haproxy.cfg
 
 echo "
 
@@ -79,5 +67,7 @@ echo "
 # =============
 mkdir -p /var/run/haproxy/
 
-haproxy -W -db -S /var/run/haproxy-master-socket -f /etc/haproxy/haproxy.cfg \
-    -p /var/run/haproxy.pid
+message ""
+
+haproxy -W -db -S /var/run/haproxy/haproxy-master-socket -f /etc/haproxy/haproxy.cfg \
+    -p /var/run/haproxy/haproxy.pid

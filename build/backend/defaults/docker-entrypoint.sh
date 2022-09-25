@@ -24,7 +24,7 @@ function wait {
         ((_COUNTER++))
     done
     echo "Rebooting container"
-    exit
+    exit 1
 }
 
 # ENVIRONMENT VARIABLES FOR VOLUMES

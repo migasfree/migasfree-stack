@@ -21,7 +21,7 @@ function wait {
         ((counter++))
     done
     echo "Rebooting container"
-    exit
+    exit 1
 }
 
 function reload_loadbalancer {
