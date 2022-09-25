@@ -39,9 +39,6 @@ cd -
 
 message "Initial configuration"
 
-echo "Checking configuration"
-haproxy -c -f /etc/haproxy/haproxy.cfg
-
 echo "
 
 
