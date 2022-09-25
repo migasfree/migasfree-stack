@@ -1,11 +1,12 @@
 #!/bin/bash
 
+source ../config/env/general
+source ../config/env/stack
+
 _SERVICE=$1
 _NUM=$2
 
 docker service scale ${_SERVICE}=${_NUM}
-
-_CMD="echo '@master reload' | socat /var/run/haproxy-master-socket stdio"
 
 _BALANCER=$(docker ps | grep loadbalancer | awk '{print $1}')
 

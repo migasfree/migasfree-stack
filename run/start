@@ -1,5 +1,22 @@
+#!/bin/bash
+
+function reload {
+    CORE_CONTAINER=$(docker ps --filter name=core_loadbalancer --format "{{.ID}}")
+    docker exec -ti $CORE_CONTAINER bash -c "reload"
+}
+
+
 source ../config/env/general
 source ../config/env/stack
+
+if [ "$1" = "mf" ]  # Only start stack mf
+then
+   docker stack deploy mf --compose-file migasfree.yml
+   exit
+fi
+
+# NFS
+./nfs-server
 
 # NETWORK
 docker network ls | grep ${STACK}_network
@@ -12,7 +29,9 @@ fi
 ./templates/process
 
 docker stack deploy --compose-file core.yml core
-echo -n "waiting core, please wait "
+
+docker stack deploy --compose-file migasfree.yml ${STACK}
+
 while true
 do
     _STATUS=$(curl --write-out '%{http_code}' --silent --output /dev/null ${FQDN}/services/status)
@@ -32,13 +51,12 @@ do
                         ●●
 
 
-        https://${FQDN}/services/status
+        Visit: https://${FQDN}/services/status
 
         "
         break
     fi
-    echo -n "."
+
+    reload
     sleep 1
 done
-
-docker stack deploy --compose-file migasfree.yml ${STACK}

@@ -1,6 +1,13 @@
-#/bin/bash
+#!/bin/bash
 
 source ../config/env/general
+
+if [ "$1" = "mf" ]  # Only stop stack mf
+then
+   docker stack rm mf
+   exit
+fi
+
 
 docker stack rm mf
 while docker ps | grep "mf_" > /dev/null
