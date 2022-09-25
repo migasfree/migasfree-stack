@@ -13,6 +13,8 @@ services:
             - ../config/env/stack
         deploy:
             replicas: 1
+            restart_policy:
+                condition: on-failure
         networks:
             - mf_network
         volumes:

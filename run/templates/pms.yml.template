@@ -3,6 +3,8 @@
         image: migasfree/${_PMS}:${_PMS_TAG}
         deploy:
             replicas: 1
+            restart_policy:
+                condition: on-failure
         env_file:
             - ../config/env/general
             - ../config/env/stack

@@ -7,6 +7,8 @@ ${SERVICES_PMS}
         image: migasfree/public:$(cat ../../build/public/VERSION)
         deploy:
             replicas: ${REPLICAS_PUBLIC}
+            restart_policy:
+                condition: on-failure
         env_file:
             - ../config/env/general
             - ../config/env/stack
@@ -20,6 +22,8 @@ ${SERVICES_PMS}
         image: migasfree/frontend:$(cat ../../build/frontend/VERSION)
         deploy:
             replicas: ${REPLICAS_FRONTEND}
+            restart_policy:
+                condition: on-failure
         env_file:
             - ../config/env/general
             - ../config/env/stack
@@ -37,6 +41,8 @@ ${SERVICES_PMS}
               - 'MIGASFREE_FQDN=$FQDN'
         deploy:
             replicas: ${REPLICAS_BACKEND}
+            restart_policy:
+                condition: on-failure
         secrets:
             - source: password_database
             - source: token_pms
@@ -66,6 +72,8 @@ ${SERVICES_PMS}
               - 'MIGASFREE_FQDN=$FQDN'
         deploy:
             replicas:  ${REPLICAS_WORKER}
+            restart_policy:
+                condition: on-failure
         secrets:
             - source: password_database
         depends_on:
@@ -88,6 +96,8 @@ ${SERVICES_PMS}
               - 'MIGASFREE_FQDN=$FQDN'
         deploy:
             replicas: 1
+            restart_policy:
+                condition: on-failure
         secrets:
             - source: password_database
         depends_on:
@@ -112,6 +122,8 @@ ${SERVICES_PMS}
             - source: password_database
         deploy:
             replicas: 1
+            restart_policy:
+                condition: on-failure
         volumes:
             - type: tmpfs
               target: /dev/shm
@@ -137,6 +149,8 @@ ${SERVICES_PMS}
             - source: password_database
         deploy:
             replicas: 1
+            restart_policy:
+                condition: on-failure
         volumes:
             - datastore:/data
         networks:
