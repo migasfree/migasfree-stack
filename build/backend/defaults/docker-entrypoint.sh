@@ -297,5 +297,5 @@ elif [ "$SERVICE" = "mf_worker" ]
 then
     DJANGO_SETTINGS_MODULE=migasfree.settings.production celery --app=migasfree.celery.app worker --queues=default --uid 890 --without-gossip --concurrency=10 --loglevel INFO
 else
-    su -c "uvicorn migasfree.asgi:application --host 0.0.0.0 --port 8080 --workers $(nproc)" www-data
+    su -c "uvicorn migasfree.asgi:application --host 0.0.0.0 --port 8080 --workers $((2* $(nproc) + 1 ))" www-data
 fi
