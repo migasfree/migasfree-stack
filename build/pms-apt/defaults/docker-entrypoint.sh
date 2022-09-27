@@ -7,8 +7,8 @@ export MIGASFREE_SECRET_DIR=/var/run/secrets
 function wait {
     local _SERVER=$1
     local _PORT=$2
-    local counter=0
-    until [ $counter -gt 5 ]
+    local _COUNTER=0
+    until [ $_COUNTER -gt 5 ]
     do
         nc -z $_SERVER $_PORT 2> /dev/null
         if [ $? = 0 ]
@@ -16,19 +16,20 @@ function wait {
             echo "$_SERVER:$_PORT is running."
             return
         else
-            echo "$_SERVER:$_PORT is not running after $counter seconds."
+            echo "$_SERVER:$_PORT is not running after $_COUNTER seconds."
             sleep 1
         fi
-        ((counter++))
+        ((_COUNTER++))
     done
     echo "Rebooting container"
     exit 1
 }
 
 function send_message {
-    point="http://loadbalancer:8001/services/message"
-    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
-    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    local _POINT="http://loadbalancer:8001/services/message"
+    local _DATA="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$_DATA" -H "Content-Type: application/json" -X POST $_POINT) = "200" ]
     do
         sleep 2
     done
