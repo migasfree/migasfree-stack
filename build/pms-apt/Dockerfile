@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 
 COPY VERSION /VERSION
