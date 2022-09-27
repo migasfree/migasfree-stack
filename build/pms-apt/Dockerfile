@@ -15,7 +15,7 @@ ENV TERM=xterm \
 
 RUN _TAG=$(cat /VERSION) && \
     _BUILD_DEPENDS=' python3-setuptools python3-pip wget' && \
-    _DEPENDS='gnupg dpkg-dev gzip python3 netcat curl apt-utils' && \
+    _DEPENDS='gnupg dpkg-dev gzip python3 netcat-openbsd curl apt-utils' && \
     _PIP_DEPENDS='requests celery[redis]' && \
     usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
