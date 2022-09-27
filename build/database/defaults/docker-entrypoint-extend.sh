@@ -1,8 +1,10 @@
 #!/bin/bash
+
 set -e
 
 function capture_message {
     local _LAST="database system is ready to accept connections"
+
     if [[ "$1" == *"$_LAST"* ]]
     then
         send_message ""
@@ -12,9 +14,10 @@ function capture_message {
 }
 
 function send_message {
-    point="http://loadbalancer:8001/services/message"
-    data="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
-    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$data" -H "Content-Type: application/json" -X POST $point) = "200" ]
+    local _POINT="http://loadbalancer:8001/services/message"
+    local _DATA="{ \"text\":\"$1\", \"service\":\"$SERVICE\" ,\"node\":\"$NODE\",\"container\":\"$HOSTNAME\" }"
+
+    until [ $(curl -s -o /dev/null  -w '%{http_code}' -d "$_DATA" -H "Content-Type: application/json" -X POST $_POINT) = "200" ]
     do
        sleep 2
     done
@@ -87,7 +90,7 @@ echo "
 
 # Capture stdout line by line
 stdbuf -oL bash /usr/local/bin/docker-entrypoint.sh postgres |
-    while IFS= read -r line
+    while IFS= read -r _LINE
     do
-        capture_message "$line"
+        capture_message "$_LINE"
     done
