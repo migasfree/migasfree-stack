@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM ubuntu:22.04
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 
 COPY VERSION /VERSION
