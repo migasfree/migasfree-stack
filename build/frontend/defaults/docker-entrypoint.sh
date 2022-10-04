@@ -41,21 +41,21 @@ server {
     listen       80;
     server_name  localhost 127.0.0.1 frontend $(hostname);
 
-    #charset koi8-r;
-    #access_log  /var/log/nginx/host.access.log  main;
-
     access_log  /dev/stdout  main;
     error_log /dev/stderr warn;
-
-    #location / {
-    #    root   /usr/share/nginx/html;
-    #    index  index.html index.htm;
-    #}
 
     # mode history: https://router.vuejs.org/guide/essentials/history-mode.html#example-server-configurations
     location / {
         root   /usr/share/nginx/html;
         try_files \$uri \$uri/ /index.html;
+    }
+
+    location /index.html {
+        # /index.html no cache
+        root /usr/share/nginx/html;
+        add_header Cache-Control "private, no-cache, no-store, must-revalidate";
+        add_header Expires "Sat, 01 Jan 2000 00:00:00 GMT";
+        add_header Pragma no-cache;
     }
 
     #error_page  404              /404.html;
