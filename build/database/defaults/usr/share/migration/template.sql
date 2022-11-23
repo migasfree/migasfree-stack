@@ -968,177 +968,185 @@ INSERT INTO device_device
     );
 
 \echo 'device_device_available_for_attributes'
-\! send_message 'database migration: device_device_available_for_attributes'
 DELETE FROM device_device_available_for_attributes;
 INSERT INTO device_device_available_for_attributes
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id, device_id, attribute_id
-FROM server_device_available_for_attributes') AS T(id int, device_id int, attribute_id int);
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, device_id, attribute_id FROM server_device_available_for_attributes'
+    ) AS T(
+        id int,
+        device_id int,
+        attribute_id int
+    );
 
 \echo 'device_driver'
-\! send_message 'database migration: device_driver'
 DELETE FROM device_driver;
 INSERT INTO device_driver
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id, name, packages_to_install, feature_id, model_id, project_id
-FROM server_devicedriver') AS T(id int, name varchar(100), packages_to_install text,capability_id int, model_id int, project_id int);
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, name, packages_to_install, feature_id, model_id, project_id FROM server_devicedriver'
+    ) AS T(
+        id int,
+        name varchar(100),
+        packages_to_install text,
+        capability_id int,
+        model_id int,
+        project_id int
+    );
 
 \echo 'device_logical'
-\! send_message 'database migration: device_logical'
 DELETE FROM device_logical;
 INSERT INTO device_logical
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id, alternative_feature_name, feature_id, device_id
-FROM server_devicelogical') AS T(id int, alternative_capability_name varchar(50), capability_id int, device_id int);
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, alternative_feature_name, feature_id, device_id FROM server_devicelogical'
+    ) AS T(
+        id int,
+        alternative_capability_name varchar(50),
+        capability_id int,
+        device_id int
+    );
 
 \echo 'device_logical_attributes'
-\! send_message 'database migration: device_logical_attributes'
 DELETE FROM device_logical_attributes;
 INSERT INTO device_logical_attributes
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id, devicelogical_id, attribute_id
-FROM server_devicelogical_attributes') AS T(id int, logical_id int, attribute_id int);
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, devicelogical_id, attribute_id FROM server_devicelogical_attributes'
+    ) AS T(
+        id int,
+        logical_id int,
+        attribute_id int
+    );
 
 \echo 'device_manufacturer'
-\! send_message 'database migration: device_manufacturer'
 DELETE FROM device_manufacturer;
 INSERT INTO device_manufacturer
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    *
-FROM server_devicemanufacturer') AS T(id int, name varchar(50));
+    FROM dblink(
+        'REMOTE',
+        'SELECT * FROM server_devicemanufacturer'
+    ) AS T(
+        id int,
+        name varchar(50)
+    );
 
 \echo 'device_model'
-\! send_message 'database migration: device_model'
 DELETE FROM device_model;
 INSERT INTO device_model
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id, name,device_type_id, manufacturer_id
-FROM server_devicemodel') AS T(id int, name varchar(50), device_type_id int, manufacter_id int);
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, name,device_type_id, manufacturer_id FROM server_devicemodel'
+    ) AS T(
+        id int,
+        name varchar(50),
+        device_type_id int,
+        manufacter_id int
+    );
 
 \echo 'device_model_connections'
-\! send_message 'database migration: device_model_connections'
 DELETE FROM device_model_connections;
 INSERT INTO device_model_connections
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    *
-FROM server_devicemodel_connections') AS T(id int, model_id int, connection_id int);
+    FROM dblink(
+        'REMOTE',
+        'SELECT * FROM server_devicemodel_connections'
+    ) AS T(
+        id int,
+        model_id int,
+        connection_id int
+    );
 
 \echo 'device_type'
-\! send_message 'database migration: device_type'
 DELETE FROM device_type;
 INSERT INTO device_type
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    *
-FROM server_devicetype') AS T(id int, name varchar(50));
-
+    FROM dblink(
+        'REMOTE',
+        'SELECT * FROM server_devicetype'
+    ) AS T(
+        id int,
+        name varchar(50)
+    );
 
 -- HARDWARE
 \echo 'hardware_capability'
-\! send_message 'database migration: hardware_capability'
 DELETE FROM hardware_capability;
 INSERT INTO hardware_capability
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id,
-    name,
-    description,
-    node_id
-FROM server_hwcapability') AS T(
-    id int,
-    name text,
-    description text,
-    node_id int
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, name, description, node_id FROM server_hwcapability'
+    ) AS T(
+        id int,
+        name text,
+        description text,
+        node_id int
     );
 
 \echo 'hardware_configuration'
-\! send_message 'database migration: hardware_configuration'
 DELETE FROM hardware_configuration;
 INSERT INTO hardware_configuration
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id,
-    name,
-    value,
-    node_id
-FROM server_hwconfiguration') AS T(
-    id int,
-    name text,
-    value text,
-    node_id int
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, name, value, node_id FROM server_hwconfiguration'
+    ) AS T(
+        id int,
+        name text,
+        value text,
+        node_id int
     );
 
 \echo 'hardware_logicalname'
-\! send_message 'database migration: hardware_logicalname'
 DELETE FROM hardware_logicalname;
 INSERT INTO hardware_logicalname
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id,
-    name,
-    node_id
-FROM server_hwlogicalname') AS T(
-    id int,
-    name text,
-    node_id int
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, name, node_id FROM server_hwlogicalname'
+    ) AS T(
+        id int,
+        name text,
+        node_id int
     );
 
 \echo 'hardware_node'
-\! send_message 'database migration: hardware_node'
 DELETE FROM hardware_node;
 INSERT INTO hardware_node
     SELECT T.*
- FROM dblink('REMOTE', 'select
-    id,
-    level,
-    width,
-    name,
-    class_name,
-    enabled,
-    claimed,
-    description,
-    vendor,
-    product,
-    version,
-    serial,
-    bus_info,
-    physid,
-    slot,
-    size,
-    capacity,
-    clock,
-    dev,
-    computer_id,
-    parent_id
-FROM server_hwnode') AS T(
-    id int,
-    level int,
-    width bigint,
-    name text,
-    class_name text,
-    enabled bool,
-    claimed bool,
-    description text,
-    vendor text,
-    product text,
-    version text,
-    serial text,
-    bus_info text,
-    physid text,
-    slot text,
-    size bigint,
-    capacity bigint,
-    clock bigint,
-    dev text,
-    computer_id int,
-    parent_id int
+    FROM dblink(
+        'REMOTE',
+        'SELECT id, level, width, name, class_name, enabled, claimed, description,
+        vendor, product, version, serial, bus_info, physid, slot, size, capacity,
+        clock, dev, computer_id, parent_id FROM server_hwnode'
+    ) AS T(
+        id int,
+        level int,
+        width bigint,
+        name text,
+        class_name text,
+        enabled bool,
+        claimed bool,
+        description text,
+        vendor text,
+        product text,
+        version text,
+        serial text,
+        bus_info text,
+        physid text,
+        slot text,
+        size bigint,
+        capacity bigint,
+        clock bigint,
+        dev text,
+        computer_id int,
+        parent_id int
     );
 
 /* massive data */
