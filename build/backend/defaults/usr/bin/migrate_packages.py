@@ -43,7 +43,8 @@ def get_locations():
     return locations
 
 
-def migrate_structure(projects):
+def migrate_structure():
+    projects = get_projects()
     for prj in projects:
         source = os.path.join(
             settings.MEDIA_ROOT,
@@ -56,7 +57,11 @@ def migrate_structure(projects):
                 prj['slug'],
                 get_setting('MIGASFREE_STORE_TRAILING_PATH')
             )
-            shutil.move(source, target)
+
+            contents = os.listdir(source)
+            for item in contents:
+                shutil.move(os.path.join(source, item), target)
+
             print(f'{source} migrated to {target} path')
             shutil.rmtree(os.path.join(settings.MEDIA_ROOT, prj['name']))
 
@@ -249,7 +254,8 @@ def get_projects():
     return response['results']
 
 
-def update_projects(projects):
+def update_projects():
+    projects = get_projects()
     for prj in projects:
         if prj['pms'].startswith('apt'):
             prj['pms'] = 'apt'
@@ -289,9 +295,8 @@ def regenerate_metadata():
 
 
 if __name__ == '__main__':
-    projects = get_projects()
-    update_projects(projects)
-    migrate_structure(projects)
+    update_projects()
+    migrate_structure()
     migrate_packages()
     migrate_package_sets()
     regenerate_metadata()
