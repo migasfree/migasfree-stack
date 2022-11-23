@@ -68,6 +68,8 @@ then
     bash ../run/scale.sh ${STACK}_frontend $_REPLICAS_FE
     echo "***** BACKEND & FRONTEND: ENABLED *****"
 
+    BE_V5=$(docker ps | grep ${STACK}_backend | awk '{print $1}' | head -n 1)
+
     # SUMMARIZE SYNCS
     # ================
     let _COUNTER=0
