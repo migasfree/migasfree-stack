@@ -7,7 +7,7 @@
 CREATE EXTENSION IF NOT EXISTS dblink;
 SELECT dblink_connect(
     'REMOTE',
-    'host=@OLD_HOST@ port=@OLD_PORT@ dbname=@OLD_DB@ user=@OLD_USER@ password=@OLD_PWD@ keepalives_idle=86400 keepalives_interval=86400'
+    'host=@OLD_HOST@ port=@OLD_PORT@ dbname=@OLD_DB@ user=@OLD_USER@ password=@OLD_PWD@'
 );
 
 \set FETCH_COUNT 1000
@@ -43,6 +43,10 @@ INSERT INTO app_catalog_application
         level varchar(1),
         category int
     );
+SELECT setval(
+    'app_catalog_application_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_application)
+);
 
 \echo 'app_catalog_application_available_for_attributes'
 DELETE FROM app_catalog_application_available_for_attributes;
@@ -57,6 +61,10 @@ INSERT INTO app_catalog_application_available_for_attributes
         application_id int,
         attribute_id int
     );
+SELECT setval(
+    'app_catalog_application_available_for_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_application_available_for_attributes)
+);
 
 \echo 'app_catalog_packagesbyproject'
 DELETE FROM app_catalog_packagesbyproject;
@@ -72,6 +80,10 @@ INSERT INTO app_catalog_packagesbyproject
         application_id int,
         project_id int
     );
+SELECT setval(
+    'app_catalog_packagesbyproject_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_packagesbyproject)
+);
 
 \echo 'app_catalog_policy'
 DELETE FROM app_catalog_policy;
@@ -88,6 +100,10 @@ INSERT INTO app_catalog_policy
         exclusive bool,
         comment text
     );
+SELECT setval(
+    'app_catalog_policy_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policy)
+);
 
 \echo 'app_catalog_policy_excluded_attributes'
 DELETE FROM app_catalog_policy_excluded_attributes;
@@ -102,6 +118,10 @@ INSERT INTO app_catalog_policy_excluded_attributes
         policy_id int,
         attribute_id int
     );
+SELECT setval(
+    'app_catalog_policy_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policy_excluded_attributes)
+);
 
 \echo 'app_catalog_policy_included_attributes'
 DELETE FROM app_catalog_policy_included_attributes;
@@ -116,6 +136,10 @@ INSERT INTO app_catalog_policy_included_attributes
         policy_id int,
         attribute_id int
     );
+SELECT setval(
+    'app_catalog_policy_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policy_included_attributes)
+);
 
 \echo 'app_catalog_policygroup'
 DELETE FROM app_catalog_policygroup;
@@ -130,6 +154,10 @@ INSERT INTO app_catalog_policygroup
         priority int,
         policy_id int
     );
+SELECT setval(
+    'app_catalog_policygroup_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup)
+);
 
 \echo 'app_catalog_policygroup_applications'
 DELETE FROM app_catalog_policygroup_applications;
@@ -144,6 +172,10 @@ INSERT INTO app_catalog_policygroup_applications
         policygroup_id int,
         application_id int
     );
+SELECT setval(
+    'app_catalog_policygroup_applications_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_applications)
+);
 
 \echo 'app_catalog_policygroup_excluded_attributes'
 DELETE FROM app_catalog_policygroup_excluded_attributes;
@@ -158,6 +190,10 @@ INSERT INTO app_catalog_policygroup_excluded_attributes
         policygroup_id int,
         attribute_id int
     );
+SELECT setval(
+    'app_catalog_policygroup_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_excluded_attributes)
+);
 
 \echo 'app_catalog_policygroup_included_attributes'
 DELETE FROM app_catalog_policygroup_included_attributes;
@@ -172,6 +208,10 @@ INSERT INTO app_catalog_policygroup_included_attributes
         policygroup_id int,
         attribute_id int
     );
+SELECT setval(
+    'app_catalog_policygroup_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_included_attributes)
+);
 
 -- AUTH
 \echo 'auth_group'
@@ -185,6 +225,10 @@ INSERT INTO auth_group
         id int,
         name varchar(150)
     );
+SELECT setval(
+    'auth_group_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_group)
+);
 
 /*
 \echo 'auth_group_permissions'
@@ -199,7 +243,13 @@ INSERT INTO auth_group_permissions
         group_id int,
         permission_id int
     );
+*/
+SELECT setval(
+    'auth_group_permissions_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_group_permissions)
+);
 
+/*
 \echo 'auth_permission'
 DELETE FROM auth_permission;
 INSERT INTO auth_permission
@@ -215,6 +265,10 @@ INSERT INTO auth_permission
         codename varchar(250)
     );
 */
+SELECT setval(
+    'auth_permission_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_permission)
+);
 
 \echo 'auth_user'
 DELETE FROM auth_user;
@@ -238,6 +292,10 @@ INSERT INTO auth_user
         is_active bool,
         date_joined timestamp with time zone
     );
+SELECT setval(
+    'auth_user_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_user)
+);
 
 \echo 'auth_user_groups'
 DELETE FROM auth_user_groups;
@@ -251,6 +309,10 @@ INSERT INTO auth_user_groups
         user_id int,
         group_id int
     );
+SELECT setval(
+    'auth_user_groups_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_user_groups)
+);
 
 /*
 \echo 'auth_user_user_permissions'
@@ -266,6 +328,10 @@ INSERT INTO auth_user_user_permissions
         permission_id int
     );
 */
+SELECT setval(
+    'auth_user_user_permissions_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_user_user_permissions)
+);
 
 \echo 'authtoken_token'
 DELETE FROM authtoken_token;
@@ -323,6 +389,10 @@ INSERT INTO client_computer
         project_id int,
         sync_user_id int
     );
+SELECT setval(
+    'client_computer_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_computer)
+);
 
 \echo 'client_computer_tags'
 DELETE FROM client_computer_tags;
@@ -336,6 +406,10 @@ INSERT INTO client_computer_tags
         computer_id int,
         serverattribute_id int
     );
+SELECT setval(
+    'client_computer_tags_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_computer_tags)
+);
 
 \echo 'client_error'
 DELETE FROM client_error;
@@ -353,6 +427,10 @@ INSERT INTO client_error
         computer_id int,
         project_id int
     );
+SELECT setval(
+    'client_error_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_error)
+);
 
 \echo 'client_fault'
 DELETE FROM client_fault;
@@ -371,6 +449,10 @@ INSERT INTO client_fault
         fault_definition_id int,
         project_id int
     );
+SELECT setval(
+    'client_fault_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_fault)
+);
 
 \echo 'client_faultdefinition'
 DELETE FROM client_faultdefinition;
@@ -388,6 +470,10 @@ INSERT INTO client_faultdefinition
         language int,
         code text
     );
+SELECT setval(
+    'client_faultdefinition_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition)
+);
 
 \echo 'client_faultdefinition_excluded_attributes'
 DELETE FROM client_faultdefinition_excluded_attributes;
@@ -402,6 +488,10 @@ INSERT INTO client_faultdefinition_excluded_attributes
         faultdefinition_id int,
         attribute_id int
     );
+SELECT setval(
+    'client_faultdefinition_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_excluded_attributes)
+);
 
 \echo 'client_faultdefinition_included_attributes'
 DELETE FROM client_faultdefinition_included_attributes;
@@ -416,6 +506,10 @@ INSERT INTO client_faultdefinition_included_attributes
         faultdefinition_id int,
         attribute_id int
     );
+SELECT setval(
+    'client_faultdefinition_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_included_attributes)
+);
 
 \echo 'client_faultdefinition_users'
 DELETE FROM client_faultdefinition_users;
@@ -430,6 +524,10 @@ INSERT INTO client_faultdefinition_users
         faultdefinition_id int,
         userprofile_id int
     );
+SELECT setval(
+    'client_faultdefinition_users_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_users)
+);
 
 \echo 'client_migration'
 DELETE FROM client_migration;
@@ -444,6 +542,10 @@ INSERT INTO client_migration
         computer_id int,
         project_id int
     );
+SELECT setval(
+    'client_migration_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_migration)
+);
 
 \echo 'client_notification'
 DELETE FROM client_notification;
@@ -458,10 +560,18 @@ INSERT INTO client_notification
         message text,
         checked bool
     );
+SELECT setval(
+    'client_notification_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_notification)
+);
 
 -- ONLY DELETE client_packagehistory
 \echo 'client_packagehistory'
 DELETE FROM client_packagehistory;
+SELECT setval(
+    'client_packagehistory_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_packagehistory)
+);
 
 \echo 'client_statuslog'
 DELETE FROM client_statuslog;
@@ -476,6 +586,10 @@ INSERT INTO client_statuslog
         status varchar(20),
         computer_id int
     );
+SELECT setval(
+    'client_statuslog_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_statuslog)
+);
 
 \echo 'client_user'
 DELETE FROM client_user;
@@ -488,7 +602,10 @@ INSERT INTO client_user
         name varchar(50),
         fullname varchar(100)
     );
-
+SELECT setval(
+    'client_user_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_user)
+);
 
 -- CORE
 \echo 'core_attribute'
@@ -508,6 +625,10 @@ INSERT INTO core_attribute
         latitude double precision,
         property_att int
     );
+SELECT setval(
+    'core_attribute_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attribute)
+);
 
 \echo 'core_attributeset'
 DELETE FROM core_attributeset;
@@ -525,6 +646,10 @@ INSERT INTO core_attributeset
         longitude double precision,
         latitude double precision
     );
+SELECT setval(
+    'core_attributeset_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attributeset)
+);
 
 \echo 'core_attributeset_excluded_attributes'
 DELETE FROM core_attributeset_excluded_attributes;
@@ -538,6 +663,10 @@ INSERT INTO core_attributeset_excluded_attributes
         attributeset_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_attributeset_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attributeset_excluded_attributes)
+);
 
 \echo 'core_attributeset_included_attributes'
 DELETE FROM core_attributeset_included_attributes;
@@ -551,8 +680,11 @@ INSERT INTO core_attributeset_included_attributes
         attributeset_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_attributeset_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attributeset_included_attributes)
+);
 
--- TODO DEPLOYMENT
 \echo 'core_deployment'
 DELETE FROM core_deployment;
 INSERT INTO core_deployment
@@ -587,6 +719,10 @@ INSERT INTO core_deployment
         project_id int,
         schedule_id int
     );
+SELECT setval(
+    'core_deployment_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment)
+);
 
 \echo 'core_deployment_available_packages'
 DELETE FROM core_deployment_available_packages;
@@ -608,6 +744,10 @@ INSERT INTO core_deployment_available_packages
         deployment_id int,
         package_id int
     );
+SELECT setval(
+    'core_deployment_available_packages_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_available_packages)
+);
 
 \echo 'core_deployment_available_package_sets'
 DELETE FROM core_deployment_available_package_sets;
@@ -629,6 +769,10 @@ INSERT INTO core_deployment_available_package_sets
         deployment_id int,
         packageset_id int
     );
+SELECT setval(
+    'core_deployment_available_package_sets_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_available_package_sets)
+);
 
 \echo 'core_deployment_excluded_attributes'
 DELETE FROM core_deployment_excluded_attributes;
@@ -643,6 +787,10 @@ INSERT INTO core_deployment_excluded_attributes
         deployment_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_deployment_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_excluded_attributes)
+);
 
 \echo 'core_deployment_included_attributes'
 DELETE FROM core_deployment_included_attributes;
@@ -657,6 +805,10 @@ INSERT INTO core_deployment_included_attributes
         deployment_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_deployment_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_included_attributes)
+);
 
 \echo 'core_domain'
 DELETE FROM core_domain;
@@ -670,6 +822,10 @@ INSERT INTO core_domain
         name varchar(50),
         comment text
     );
+SELECT setval(
+    'core_domain_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain)
+);
 
 \echo 'core_domain_excluded_attributes'
 DELETE FROM core_domain_excluded_attributes;
@@ -683,6 +839,10 @@ INSERT INTO core_domain_excluded_attributes
         domain_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_domain_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain_excluded_attributes)
+);
 
 \echo 'core_domain_included_attributes'
 DELETE FROM core_domain_included_attributes;
@@ -696,6 +856,10 @@ INSERT INTO core_domain_included_attributes
         domain_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_domain_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain_included_attributes)
+);
 
 \echo 'core_domain_tags'
 DELETE FROM core_domain_tags;
@@ -709,6 +873,10 @@ INSERT INTO core_domain_tags
         domain_id int,
         serverattribute_id int
     );
+SELECT setval(
+    'core_domain_tags_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain_tags)
+);
 
 \echo 'core_package'
 DELETE FROM core_package;
@@ -733,6 +901,10 @@ INSERT INTO core_package
         project_id int,
         store_id int
     );
+SELECT setval(
+    'core_package_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_package)
+);
 
 \echo 'core_packageset'
 DELETE FROM core_packageset;
@@ -754,6 +926,10 @@ INSERT INTO core_packageset
         project_id int,
         store_id int
     );
+SELECT setval(
+    'core_packageset_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_packageset)
+);
 
 \echo 'core_platform'
 DELETE FROM core_platform;
@@ -765,8 +941,12 @@ INSERT INTO core_platform
         id int,
         name varchar(50)
     );
+SELECT setval(
+    'core_platform_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_platform)
+);
 
--- TODO Revisar campo "slug" y "pms"
+-- TODO Review slug field
 \echo 'core_project'
 DELETE FROM core_project;
 INSERT INTO core_project
@@ -786,6 +966,10 @@ INSERT INTO core_project
         auto_register_computers bool,
         platform int
     );
+SELECT setval(
+    'core_project_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_project)
+);
 
 \echo 'core_property'
 DELETE FROM core_property;
@@ -806,6 +990,10 @@ INSERT INTO core_property
         language int,
         code text
     );
+SELECT setval(
+    'core_property_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_property)
+);
 
 \echo 'core_schedule'
 DELETE FROM core_schedule;
@@ -819,6 +1007,10 @@ INSERT INTO core_schedule
         name varchar(50),
         description text
     );
+SELECT setval(
+    'core_schedule_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_schedule)
+);
 
 \echo 'core_scheduledelay'
 DELETE FROM core_scheduledelay;
@@ -833,6 +1025,10 @@ INSERT INTO core_scheduledelay
         duration int,
         schedule_id int
     );
+SELECT setval(
+    'core_scheduledelay_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scheduledelay)
+);
 
 \echo 'core_scheduledelay_attributes'
 DELETE FROM core_scheduledelay_attributes;
@@ -847,6 +1043,10 @@ INSERT INTO core_scheduledelay_attributes
         scheduledelay_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_scheduledelay_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scheduledelay_attributes)
+);
 
 \echo 'core_scope'
 DELETE FROM core_scope;
@@ -861,6 +1061,10 @@ INSERT INTO core_scope
         domain_id int,
         user_id int
     );
+SELECT setval(
+    'core_scope_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scope)
+);
 
 \echo 'core_scope_excluded_attributes'
 DELETE FROM core_scope_excluded_attributes;
@@ -874,6 +1078,10 @@ INSERT INTO core_scope_excluded_attributes
         scope_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_scope_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scope_excluded_attributes)
+);
 
 \echo 'core_scope_included_attributes'
 DELETE FROM core_scope_included_attributes;
@@ -887,6 +1095,10 @@ INSERT INTO core_scope_included_attributes
         scope_id int,
         attribute_id int
     );
+SELECT setval(
+    'core_scope_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scope_included_attributes)
+);
 
 \echo 'core_store'
 DELETE FROM core_store;
@@ -901,6 +1113,10 @@ INSERT INTO core_store
         slug varchar(50),
         project_id int
     );
+SELECT setval(
+    'core_store_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_store)
+);
 
 \echo 'core_userprofile'
 DELETE FROM core_userprofile;
@@ -928,8 +1144,12 @@ INSERT INTO core_userprofile_domains
         userprofile_id int,
         domain_id int
     );
+SELECT setval(
+    'core_userprofile_domains_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_userprofile_domains)
+);
 
---   DEVICES
+-- DEVICES
 \echo 'device_capability'
 DELETE FROM device_capability;
 INSERT INTO device_capability
@@ -941,6 +1161,10 @@ INSERT INTO device_capability
         id int,
         name varchar(50)
     );
+SELECT setval(
+    'device_capability_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_capability)
+);
 
 \echo 'device_connection'
 DELETE FROM device_connection;
@@ -955,6 +1179,10 @@ INSERT INTO device_connection
         fields varchar(100),
         device_type_id int
     );
+SELECT setval(
+    'device_connection_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_connection)
+);
 
 \echo 'device_device'
 DELETE FROM device_device;
@@ -970,6 +1198,10 @@ INSERT INTO device_device
         connection_id int,
         model_id int
     );
+SELECT setval(
+    'device_device_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_device)
+);
 
 \echo 'device_device_available_for_attributes'
 DELETE FROM device_device_available_for_attributes;
@@ -983,6 +1215,10 @@ INSERT INTO device_device_available_for_attributes
         device_id int,
         attribute_id int
     );
+SELECT setval(
+    'device_device_available_for_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_device_available_for_attributes)
+);
 
 \echo 'device_driver'
 DELETE FROM device_driver;
@@ -999,6 +1235,10 @@ INSERT INTO device_driver
         model_id int,
         project_id int
     );
+SELECT setval(
+    'device_driver_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_driver)
+);
 
 \echo 'device_logical'
 DELETE FROM device_logical;
@@ -1013,6 +1253,10 @@ INSERT INTO device_logical
         capability_id int,
         device_id int
     );
+SELECT setval(
+    'device_logical_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_logical)
+);
 
 \echo 'device_logical_attributes'
 DELETE FROM device_logical_attributes;
@@ -1026,6 +1270,10 @@ INSERT INTO device_logical_attributes
         logical_id int,
         attribute_id int
     );
+SELECT setval(
+    'device_logical_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_logical_attributes)
+);
 
 \echo 'device_manufacturer'
 DELETE FROM device_manufacturer;
@@ -1038,6 +1286,10 @@ INSERT INTO device_manufacturer
         id int,
         name varchar(50)
     );
+SELECT setval(
+    'device_manufacturer_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_manufacturer)
+);
 
 \echo 'device_model'
 DELETE FROM device_model;
@@ -1052,6 +1304,10 @@ INSERT INTO device_model
         device_type_id int,
         manufacter_id int
     );
+SELECT setval(
+    'device_model_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_model)
+);
 
 \echo 'device_model_connections'
 DELETE FROM device_model_connections;
@@ -1065,6 +1321,10 @@ INSERT INTO device_model_connections
         model_id int,
         connection_id int
     );
+SELECT setval(
+    'device_model_connections_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_model_connections)
+);
 
 \echo 'device_type'
 DELETE FROM device_type;
@@ -1077,6 +1337,10 @@ INSERT INTO device_type
         id int,
         name varchar(50)
     );
+SELECT setval(
+    'device_type_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_type)
+);
 
 -- HARDWARE
 \echo 'hardware_capability'
@@ -1092,6 +1356,10 @@ INSERT INTO hardware_capability
         description text,
         node_id int
     );
+SELECT setval(
+    'hardware_capability_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_capability)
+);
 
 \echo 'hardware_configuration'
 DELETE FROM hardware_configuration;
@@ -1106,6 +1374,10 @@ INSERT INTO hardware_configuration
         value text,
         node_id int
     );
+SELECT setval(
+    'hardware_configuration_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_configuration)
+);
 
 \echo 'hardware_logicalname'
 DELETE FROM hardware_logicalname;
@@ -1119,6 +1391,10 @@ INSERT INTO hardware_logicalname
         name text,
         node_id int
     );
+SELECT setval(
+    'hardware_logicalname_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_logicalname)
+);
 
 \echo 'hardware_node'
 DELETE FROM hardware_node;
@@ -1152,6 +1428,10 @@ INSERT INTO hardware_node
         computer_id int,
         parent_id int
     );
+SELECT setval(
+    'hardware_node_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_node)
+);
 
 /* massive data */
 \echo 'client_computer_sync_attributes'
@@ -1166,6 +1446,10 @@ INSERT INTO client_computer_sync_attributes
         computer_id int,
         attribute_id int
     );
+SELECT setval(
+    'client_computer_sync_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_computer_sync_attributes)
+);
 
 \echo 'client_synchronization'
 DELETE FROM client_synchronization;
@@ -1185,6 +1469,10 @@ INSERT INTO client_synchronization
         project_id int,
         user_id int
     );
+SELECT setval(
+    'client_synchronization_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_synchronization)
+);
 
 SET session_replication_role TO 'origin';
 \echo 'Reindex Database'
@@ -1225,300 +1513,12 @@ SELECT setval(
     (SELECT MAX(id) FROM ONLY public.django_content_type)
 );
 SELECT setval(
-    'auth_permission_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.auth_permission)
-);
-SELECT setval(
-    'auth_group_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.auth_group)
-);
-SELECT setval(
-    'auth_group_permissions_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.auth_group_permissions)
-);
-SELECT setval(
-    'auth_user_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.auth_user)
-);
-SELECT setval(
-    'auth_user_groups_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.auth_user_groups)
-);
-SELECT setval(
-    'auth_user_user_permissions_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.auth_user_user_permissions)
-);
-SELECT setval(
     'django_admin_log_id_seq'::regclass,
     (SELECT MAX(id) FROM ONLY public.django_admin_log)
 );
 SELECT setval(
-    'core_attribute_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_attribute)
-);
-SELECT setval(
-    'core_domain_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_domain)
-);
-SELECT setval(
-    'core_domain_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_domain_excluded_attributes)
-);
-SELECT setval(
-    'core_domain_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_domain_included_attributes)
-);
-SELECT setval(
-    'core_package_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_package)
-);
-SELECT setval(
-    'core_platform_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_platform)
-);
-SELECT setval(
-    'core_project_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_project)
-);
-SELECT setval(
-    'core_property_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_property)
-);
-SELECT setval(
-    'core_schedule_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_schedule)
-);
-SELECT setval(
-    'core_scope_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_scope)
-);
-SELECT setval(
-    'core_scope_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_scope_excluded_attributes)
-);
-SELECT setval(
-    'core_scope_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_scope_included_attributes)
-);
-SELECT setval(
-    'core_userprofile_domains_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_userprofile_domains)
-);
-SELECT setval(
-    'core_store_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_store)
-);
-SELECT setval(
-    'core_packageset_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_packageset)
-);
-SELECT setval(
     'core_packageset_packages_id_seq'::regclass,
     (SELECT MAX(id) FROM ONLY public.core_packageset_packages)
-);
-SELECT setval(
-    'core_deployment_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_deployment)
-);
-SELECT setval(
-    'core_deployment_available_package_sets_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_deployment_available_package_sets)
-);
-SELECT setval(
-    'core_deployment_available_packages_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_deployment_available_packages)
-);
-SELECT setval(
-    'core_deployment_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_deployment_excluded_attributes)
-);
-SELECT setval(
-    'core_deployment_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_deployment_included_attributes)
-);
-SELECT setval(
-    'core_attributeset_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_attributeset)
-);
-SELECT setval(
-    'core_attributeset_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_attributeset_excluded_attributes)
-);
-SELECT setval(
-    'core_attributeset_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_attributeset_included_attributes)
-);
-SELECT setval(
-    'core_scheduledelay_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_scheduledelay)
-);
-SELECT setval(
-    'core_scheduledelay_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_scheduledelay_attributes)
-);
-SELECT setval(
-    'core_domain_tags_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.core_domain_tags)
-);
-SELECT setval(
-    'app_catalog_application_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_application)
-);
-SELECT setval(
-    'app_catalog_application_available_for_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_application_available_for_attributes)
-);
-SELECT setval(
-    'app_catalog_policy_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policy)
-);
-SELECT setval(
-    'app_catalog_policy_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policy_excluded_attributes)
-);
-SELECT setval(
-    'app_catalog_policy_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policy_included_attributes)
-);
-SELECT setval(
-    'app_catalog_policygroup_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup)
-);
-SELECT setval(
-    'app_catalog_policygroup_applications_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_applications)
-);
-SELECT setval(
-    'app_catalog_policygroup_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_excluded_attributes)
-);
-SELECT setval(
-    'app_catalog_policygroup_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_included_attributes)
-);
-SELECT setval(
-    'app_catalog_packagesbyproject_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.app_catalog_packagesbyproject)
-);
-SELECT setval(
-    'device_capability_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_capability)
-);
-SELECT setval(
-    'device_connection_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_connection)
-);
-SELECT setval(
-    'device_manufacturer_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_manufacturer)
-);
-SELECT setval(
-    'device_type_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_type)
-);
-SELECT setval(
-    'device_model_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_model)
-);
-SELECT setval(
-    'device_model_connections_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_model_connections)
-);
-SELECT setval(
-    'device_device_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_device)
-);
-SELECT setval(
-    'device_device_available_for_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_device_available_for_attributes)
-);
-SELECT setval(
-    'device_logical_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_logical)
-);
-SELECT setval(
-    'device_logical_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_logical_attributes)
-);
-SELECT setval(
-    'device_driver_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.device_driver)
-);
-SELECT setval(
-    'client_computer_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_computer)
-);
-SELECT setval(
-    'client_computer_sync_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_computer_sync_attributes)
-);
-SELECT setval(
-    'client_notification_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_notification)
-);
-SELECT setval(
-    'client_user_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_user)
-);
-SELECT setval(
-    'client_synchronization_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_synchronization)
-);
-SELECT setval(
-    'client_statuslog_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_statuslog)
-);
-SELECT setval(
-    'client_packagehistory_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_packagehistory)
-);
-SELECT setval(
-    'client_migration_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_migration)
-);
-SELECT setval(
-    'client_faultdefinition_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_faultdefinition)
-);
-SELECT setval(
-    'client_faultdefinition_excluded_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_excluded_attributes)
-);
-SELECT setval(
-    'client_faultdefinition_included_attributes_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_included_attributes)
-);
-SELECT setval(
-    'client_faultdefinition_users_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_users)
-);
-SELECT setval(
-    'client_fault_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_fault)
-);
-SELECT setval(
-    'client_error_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_error)
-);
-SELECT setval(
-    'client_computer_tags_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.client_computer_tags)
-);
-SELECT setval(
-    'hardware_node_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.hardware_node)
-);
-SELECT setval(
-    'hardware_logicalname_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.hardware_logicalname)
-);
-SELECT setval(
-    'hardware_configuration_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.hardware_configuration)
-);
-SELECT setval(
-    'hardware_capability_id_seq'::regclass,
-    (SELECT MAX(id) FROM ONLY public.hardware_capability)
 );
 
 \echo 'migration to v5 finished!!!'
