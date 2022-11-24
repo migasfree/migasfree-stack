@@ -5,12 +5,15 @@
 */
 
 CREATE EXTENSION IF NOT EXISTS dblink;
-SELECT dblink_connect('REMOTE', 'host=@OLD_HOST@ port=@OLD_PORT@ dbname=@OLD_DB@ user=@OLD_USER@ password=@OLD_PWD@ tcp_keepalives_idle=86400 tcp_keepalives_interval=86400');
+SELECT dblink_connect(
+    'REMOTE',
+    'host=@OLD_HOST@ port=@OLD_PORT@ dbname=@OLD_DB@ user=@OLD_USER@ password=@OLD_PWD@ keepalives_idle=86400 keepalives_interval=86400'
+);
 
 \set FETCH_COUNT 1000
 
--- NORMALIZE V4 DATABASE
-\echo 'Normalize V4 database'
+-- NORMALIZE v4 DATABASE
+\echo 'Normalize v4 database'
 SELECT dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = '''' ');
 SELECT dblink_exec('REMOTE', 'UPDATE server_computer SET ip_address = NULL WHERE ip_address = ''unknown'' ');
 SELECT dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = NULL WHERE forwarded_ip_address = '''' ');
@@ -19,10 +22,11 @@ SELECT dblink_exec('REMOTE', 'UPDATE server_computer SET forwarded_ip_address = 
 -- TEMPORARILY DISABLE ALL TRIGGERS
 SET session_replication_role TO 'replica';
 
+\echo 'Migrating data to v5 database'
+
 -- APPLICATIONS
 \echo 'app_catalog_application'
 DELETE FROM app_catalog_application;
-SELECT dblink_exec('REMOTE', 'SELECT COUNT(*) FROM catalog_application');
 INSERT INTO app_catalog_application
     SELECT T.*
     FROM dblink(
@@ -1183,10 +1187,10 @@ INSERT INTO client_synchronization
     );
 
 SET session_replication_role TO 'origin';
-\echo 'reindex database'
+\echo 'Reindex Database'
 REINDEX DATABASE migasfree;
 
-\echo 'vacuum database'
+\echo 'Vacuum Database'
 VACUUM FULL FREEZE ANALYZE;
 
 /*
@@ -1208,92 +1212,313 @@ SELECT 'select '
                           and a.atthasdef
  WHERE relkind = 'r' and a.attnum > 0
        and pg_get_expr(d.adbin, d.adrelid) ~ '^nextval';
-
 */
 
-\echo 'resetting sequences'
+\echo 'Resetting Sequences'
 
 SELECT setval(
     'django_migrations_id_seq'::regclass,
-    (SELECT MAX(id) FROM only public.django_migrations)
+    (SELECT MAX(id) FROM ONLY public.django_migrations)
 );
 SELECT setval(
     'django_content_type_id_seq'::regclass,
-    (SELECT MAX(id) FROM only public.django_content_type)
+    (SELECT MAX(id) FROM ONLY public.django_content_type)
 );
-select setval('auth_permission_id_seq'::regclass, (select max( id) from only public.auth_permission));
-select setval('auth_group_id_seq'::regclass, (select max( id) from only public.auth_group));
-select setval('auth_group_permissions_id_seq'::regclass, (select max( id) from only public.auth_group_permissions));
-select setval('auth_user_id_seq'::regclass, (select max( id) from only public.auth_user));
-select setval('auth_user_groups_id_seq'::regclass, (select max( id) from only public.auth_user_groups));
-select setval('auth_user_user_permissions_id_seq'::regclass, (select max( id) from only public.auth_user_user_permissions));
-select setval('django_admin_log_id_seq'::regclass, (select max( id) from only public.django_admin_log));
-select setval('core_attribute_id_seq'::regclass, (select max( id) from only public.core_attribute));
-select setval('core_domain_id_seq'::regclass, (select max( id) from only public.core_domain));
-select setval('core_domain_excluded_attributes_id_seq'::regclass, (select max( id) from only public.core_domain_excluded_attributes));
-select setval('core_domain_included_attributes_id_seq'::regclass, (select max( id) from only public.core_domain_included_attributes));
-select setval('core_package_id_seq'::regclass, (select max( id) from only public.core_package));
-select setval('core_platform_id_seq'::regclass, (select max( id) from only public.core_platform));
-select setval('core_project_id_seq'::regclass, (select max( id) from only public.core_project));
-select setval('core_property_id_seq'::regclass, (select max( id) from only public.core_property));
-select setval('core_schedule_id_seq'::regclass, (select max( id) from only public.core_schedule));
-select setval('core_scope_id_seq'::regclass, (select max( id) from only public.core_scope));
-select setval('core_scope_excluded_attributes_id_seq'::regclass, (select max( id) from only public.core_scope_excluded_attributes));
-select setval('core_scope_included_attributes_id_seq'::regclass, (select max( id) from only public.core_scope_included_attributes));
-select setval('core_userprofile_domains_id_seq'::regclass, (select max( id) from only public.core_userprofile_domains));
-select setval('core_store_id_seq'::regclass, (select max( id) from only public.core_store));
-select setval('core_packageset_id_seq'::regclass, (select max( id) from only public.core_packageset));
-select setval('core_packageset_packages_id_seq'::regclass, (select max( id) from only public.core_packageset_packages));
-select setval('core_deployment_id_seq'::regclass, (select max( id) from only public.core_deployment));
-select setval('core_deployment_available_package_sets_id_seq'::regclass, (select max( id) from only public.core_deployment_available_package_sets));
-select setval('core_deployment_available_packages_id_seq'::regclass, (select max( id) from only public.core_deployment_available_packages));
-select setval('core_deployment_excluded_attributes_id_seq'::regclass, (select max( id) from only public.core_deployment_excluded_attributes));
-select setval('core_deployment_included_attributes_id_seq'::regclass, (select max( id) from only public.core_deployment_included_attributes));
-select setval('core_attributeset_id_seq'::regclass, (select max( id) from only public.core_attributeset));
-select setval('core_attributeset_excluded_attributes_id_seq'::regclass, (select max( id) from only public.core_attributeset_excluded_attributes));
-select setval('core_attributeset_included_attributes_id_seq'::regclass, (select max( id) from only public.core_attributeset_included_attributes));
-select setval('core_scheduledelay_id_seq'::regclass, (select max( id) from only public.core_scheduledelay));
-select setval('core_scheduledelay_attributes_id_seq'::regclass, (select max( id) from only public.core_scheduledelay_attributes));
-select setval('core_domain_tags_id_seq'::regclass, (select max( id) from only public.core_domain_tags));
-select setval('app_catalog_application_id_seq'::regclass, (select max( id) from only public.app_catalog_application));
-select setval('app_catalog_application_available_for_attributes_id_seq'::regclass, (select max( id) from only public.app_catalog_application_available_for_attributes));
-select setval('app_catalog_policy_id_seq'::regclass, (select max( id) from only public.app_catalog_policy));
-select setval('app_catalog_policy_excluded_attributes_id_seq'::regclass, (select max( id) from only public.app_catalog_policy_excluded_attributes));
-select setval('app_catalog_policy_included_attributes_id_seq'::regclass, (select max( id) from only public.app_catalog_policy_included_attributes));
-select setval('app_catalog_policygroup_id_seq'::regclass, (select max( id) from only public.app_catalog_policygroup));
-select setval('app_catalog_policygroup_applications_id_seq'::regclass, (select max( id) from only public.app_catalog_policygroup_applications));
-select setval('app_catalog_policygroup_excluded_attributes_id_seq'::regclass, (select max( id) from only public.app_catalog_policygroup_excluded_attributes));
-select setval('app_catalog_policygroup_included_attributes_id_seq'::regclass, (select max( id) from only public.app_catalog_policygroup_included_attributes));
-select setval('app_catalog_packagesbyproject_id_seq'::regclass, (select max( id) from only public.app_catalog_packagesbyproject));
-select setval('device_capability_id_seq'::regclass, (select max( id) from only public.device_capability));
-select setval('device_connection_id_seq'::regclass, (select max( id) from only public.device_connection));
-select setval('device_manufacturer_id_seq'::regclass, (select max( id) from only public.device_manufacturer));
-select setval('device_type_id_seq'::regclass, (select max( id) from only public.device_type));
-select setval('device_model_id_seq'::regclass, (select max( id) from only public.device_model));
-select setval('device_model_connections_id_seq'::regclass, (select max( id) from only public.device_model_connections));
-select setval('device_device_id_seq'::regclass, (select max( id) from only public.device_device));
-select setval('device_device_available_for_attributes_id_seq'::regclass, (select max( id) from only public.device_device_available_for_attributes));
-select setval('device_logical_id_seq'::regclass, (select max( id) from only public.device_logical));
-select setval('device_logical_attributes_id_seq'::regclass, (select max( id) from only public.device_logical_attributes));
-select setval('device_driver_id_seq'::regclass, (select max( id) from only public.device_driver));
-select setval('client_computer_id_seq'::regclass, (select max( id) from only public.client_computer));
-select setval('client_computer_sync_attributes_id_seq'::regclass, (select max( id) from only public.client_computer_sync_attributes));
-select setval('client_notification_id_seq'::regclass, (select max( id) from only public.client_notification));
-select setval('client_user_id_seq'::regclass, (select max( id) from only public.client_user));
-select setval('client_synchronization_id_seq'::regclass, (select max( id) from only public.client_synchronization));
-select setval('client_statuslog_id_seq'::regclass, (select max( id) from only public.client_statuslog));
-select setval('client_packagehistory_id_seq'::regclass, (select max( id) from only public.client_packagehistory));
-select setval('client_migration_id_seq'::regclass, (select max( id) from only public.client_migration));
-select setval('client_faultdefinition_id_seq'::regclass, (select max( id) from only public.client_faultdefinition));
-select setval('client_faultdefinition_excluded_attributes_id_seq'::regclass, (select max( id) from only public.client_faultdefinition_excluded_attributes));
-select setval('client_faultdefinition_included_attributes_id_seq'::regclass, (select max( id) from only public.client_faultdefinition_included_attributes));
-select setval('client_faultdefinition_users_id_seq'::regclass, (select max( id) from only public.client_faultdefinition_users));
-select setval('client_fault_id_seq'::regclass, (select max( id) from only public.client_fault));
-select setval('client_error_id_seq'::regclass, (select max( id) from only public.client_error));
-select setval('client_computer_tags_id_seq'::regclass, (select max( id) from only public.client_computer_tags));
-select setval('hardware_node_id_seq'::regclass, (select max( id) from only public.hardware_node));
-select setval('hardware_logicalname_id_seq'::regclass, (select max( id) from only public.hardware_logicalname));
-select setval('hardware_configuration_id_seq'::regclass, (select max( id) from only public.hardware_configuration));
-select setval('hardware_capability_id_seq'::regclass, (select max( id) from only public.hardware_capability));
+SELECT setval(
+    'auth_permission_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_permission)
+);
+SELECT setval(
+    'auth_group_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_group)
+);
+SELECT setval(
+    'auth_group_permissions_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_group_permissions)
+);
+SELECT setval(
+    'auth_user_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_user)
+);
+SELECT setval(
+    'auth_user_groups_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_user_groups)
+);
+SELECT setval(
+    'auth_user_user_permissions_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.auth_user_user_permissions)
+);
+SELECT setval(
+    'django_admin_log_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.django_admin_log)
+);
+SELECT setval(
+    'core_attribute_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attribute)
+);
+SELECT setval(
+    'core_domain_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain)
+);
+SELECT setval(
+    'core_domain_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain_excluded_attributes)
+);
+SELECT setval(
+    'core_domain_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain_included_attributes)
+);
+SELECT setval(
+    'core_package_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_package)
+);
+SELECT setval(
+    'core_platform_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_platform)
+);
+SELECT setval(
+    'core_project_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_project)
+);
+SELECT setval(
+    'core_property_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_property)
+);
+SELECT setval(
+    'core_schedule_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_schedule)
+);
+SELECT setval(
+    'core_scope_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scope)
+);
+SELECT setval(
+    'core_scope_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scope_excluded_attributes)
+);
+SELECT setval(
+    'core_scope_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scope_included_attributes)
+);
+SELECT setval(
+    'core_userprofile_domains_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_userprofile_domains)
+);
+SELECT setval(
+    'core_store_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_store)
+);
+SELECT setval(
+    'core_packageset_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_packageset)
+);
+SELECT setval(
+    'core_packageset_packages_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_packageset_packages)
+);
+SELECT setval(
+    'core_deployment_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment)
+);
+SELECT setval(
+    'core_deployment_available_package_sets_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_available_package_sets)
+);
+SELECT setval(
+    'core_deployment_available_packages_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_available_packages)
+);
+SELECT setval(
+    'core_deployment_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_excluded_attributes)
+);
+SELECT setval(
+    'core_deployment_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_deployment_included_attributes)
+);
+SELECT setval(
+    'core_attributeset_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attributeset)
+);
+SELECT setval(
+    'core_attributeset_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attributeset_excluded_attributes)
+);
+SELECT setval(
+    'core_attributeset_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_attributeset_included_attributes)
+);
+SELECT setval(
+    'core_scheduledelay_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scheduledelay)
+);
+SELECT setval(
+    'core_scheduledelay_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_scheduledelay_attributes)
+);
+SELECT setval(
+    'core_domain_tags_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.core_domain_tags)
+);
+SELECT setval(
+    'app_catalog_application_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_application)
+);
+SELECT setval(
+    'app_catalog_application_available_for_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_application_available_for_attributes)
+);
+SELECT setval(
+    'app_catalog_policy_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policy)
+);
+SELECT setval(
+    'app_catalog_policy_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policy_excluded_attributes)
+);
+SELECT setval(
+    'app_catalog_policy_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policy_included_attributes)
+);
+SELECT setval(
+    'app_catalog_policygroup_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup)
+);
+SELECT setval(
+    'app_catalog_policygroup_applications_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_applications)
+);
+SELECT setval(
+    'app_catalog_policygroup_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_excluded_attributes)
+);
+SELECT setval(
+    'app_catalog_policygroup_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_policygroup_included_attributes)
+);
+SELECT setval(
+    'app_catalog_packagesbyproject_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.app_catalog_packagesbyproject)
+);
+SELECT setval(
+    'device_capability_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_capability)
+);
+SELECT setval(
+    'device_connection_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_connection)
+);
+SELECT setval(
+    'device_manufacturer_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_manufacturer)
+);
+SELECT setval(
+    'device_type_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_type)
+);
+SELECT setval(
+    'device_model_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_model)
+);
+SELECT setval(
+    'device_model_connections_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_model_connections)
+);
+SELECT setval(
+    'device_device_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_device)
+);
+SELECT setval(
+    'device_device_available_for_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_device_available_for_attributes)
+);
+SELECT setval(
+    'device_logical_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_logical)
+);
+SELECT setval(
+    'device_logical_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_logical_attributes)
+);
+SELECT setval(
+    'device_driver_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.device_driver)
+);
+SELECT setval(
+    'client_computer_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_computer)
+);
+SELECT setval(
+    'client_computer_sync_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_computer_sync_attributes)
+);
+SELECT setval(
+    'client_notification_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_notification)
+);
+SELECT setval(
+    'client_user_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_user)
+);
+SELECT setval(
+    'client_synchronization_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_synchronization)
+);
+SELECT setval(
+    'client_statuslog_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_statuslog)
+);
+SELECT setval(
+    'client_packagehistory_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_packagehistory)
+);
+SELECT setval(
+    'client_migration_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_migration)
+);
+SELECT setval(
+    'client_faultdefinition_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition)
+);
+SELECT setval(
+    'client_faultdefinition_excluded_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_excluded_attributes)
+);
+SELECT setval(
+    'client_faultdefinition_included_attributes_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_included_attributes)
+);
+SELECT setval(
+    'client_faultdefinition_users_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_faultdefinition_users)
+);
+SELECT setval(
+    'client_fault_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_fault)
+);
+SELECT setval(
+    'client_error_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_error)
+);
+SELECT setval(
+    'client_computer_tags_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.client_computer_tags)
+);
+SELECT setval(
+    'hardware_node_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_node)
+);
+SELECT setval(
+    'hardware_logicalname_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_logicalname)
+);
+SELECT setval(
+    'hardware_configuration_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_configuration)
+);
+SELECT setval(
+    'hardware_capability_id_seq'::regclass,
+    (SELECT MAX(id) FROM ONLY public.hardware_capability)
+);
 
-\echo 'finished'
+\echo 'migration to v5 finished!!!'
