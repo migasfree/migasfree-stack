@@ -57,7 +57,7 @@ SET session_replication_role TO 'replica';
 
 -- APPLICATIONS
 \echo 'app_catalog_application'
-TRUNCATE app_catalog_application CASCADE;
+DELETE FROM app_catalog_application;
 INSERT INTO app_catalog_application
     SELECT T.*
     FROM dblink(
@@ -80,7 +80,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_application_available_for_attributes'
-TRUNCATE app_catalog_application_available_for_attributes CASCADE;
+DELETE FROM app_catalog_application_available_for_attributes;
 INSERT INTO app_catalog_application_available_for_attributes
     SELECT T.*
     FROM dblink(
@@ -98,7 +98,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_packagesbyproject'
-TRUNCATE app_catalog_packagesbyproject CASCADE;
+DELETE FROM app_catalog_packagesbyproject;
 INSERT INTO app_catalog_packagesbyproject
     SELECT T.*
     FROM dblink(
@@ -117,7 +117,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policy'
-TRUNCATE app_catalog_policy CASCADE;
+DELETE FROM app_catalog_policy;
 INSERT INTO app_catalog_policy
     SELECT T.*
     FROM dblink(
@@ -137,7 +137,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policy_excluded_attributes'
-TRUNCATE app_catalog_policy_excluded_attributes CASCADE;
+DELETE FROM app_catalog_policy_excluded_attributes;
 INSERT INTO app_catalog_policy_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -155,7 +155,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policy_included_attributes'
-TRUNCATE app_catalog_policy_included_attributes CASCADE;
+DELETE FROM app_catalog_policy_included_attributes;
 INSERT INTO app_catalog_policy_included_attributes
     SELECT T.*
     FROM dblink(
@@ -173,7 +173,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policygroup'
-TRUNCATE app_catalog_policygroup CASCADE;
+DELETE FROM app_catalog_policygroup;
 INSERT INTO app_catalog_policygroup
     SELECT T.*
     FROM dblink(
@@ -191,7 +191,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policygroup_applications'
-TRUNCATE app_catalog_policygroup_applications CASCADE;
+DELETE FROM app_catalog_policygroup_applications;
 INSERT INTO app_catalog_policygroup_applications
     SELECT T.*
     FROM dblink(
@@ -209,7 +209,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policygroup_excluded_attributes'
-TRUNCATE app_catalog_policygroup_excluded_attributes CASCADE;
+DELETE FROM app_catalog_policygroup_excluded_attributes;
 INSERT INTO app_catalog_policygroup_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -227,7 +227,7 @@ SELECT setval(
 );
 
 \echo 'app_catalog_policygroup_included_attributes'
-TRUNCATE app_catalog_policygroup_included_attributes CASCADE;
+DELETE FROM app_catalog_policygroup_included_attributes;
 INSERT INTO app_catalog_policygroup_included_attributes
     SELECT T.*
     FROM dblink(
@@ -246,7 +246,7 @@ SELECT setval(
 
 -- AUTH
 \echo 'auth_group'
-TRUNCATE auth_group CASCADE;
+DELETE FROM auth_group;
 INSERT INTO auth_group
     SELECT T.*
     FROM dblink(
@@ -263,7 +263,7 @@ SELECT setval(
 
 /*
 \echo 'auth_group_permissions'
-TRUNCATE auth_group_permissions CASCADE;
+DELETE FROM auth_group_permissions;
 INSERT INTO auth_group_permissions
     SELECT T.*
     FROM dblink('REMOTE',
@@ -282,7 +282,7 @@ SELECT setval(
 
 /*
 \echo 'auth_permission'
-TRUNCATE auth_permission CASCADE;
+DELETE FROM auth_permission;
 INSERT INTO auth_permission
     SELECT T.*
     FROM dblink(
@@ -302,7 +302,7 @@ SELECT setval(
 );
 
 \echo 'auth_user'
-TRUNCATE auth_user CASCADE;
+DELETE FROM auth_user;
 INSERT INTO auth_user
     SELECT T.*
     FROM dblink(
@@ -329,7 +329,7 @@ SELECT setval(
 );
 
 \echo 'auth_user_groups'
-TRUNCATE auth_user_groups CASCADE;
+DELETE FROM auth_user_groups;
 INSERT INTO auth_user_groups
     SELECT T.*
     FROM dblink(
@@ -347,7 +347,7 @@ SELECT setval(
 
 /*
 \echo 'auth_user_user_permissions'
-TRUNCATE auth_user_user_permissions CASCADE;
+DELETE FROM auth_user_user_permissions;
 INSERT INTO auth_user_user_permissions
     SELECT T.*
     FROM dblink(
@@ -365,7 +365,7 @@ SELECT setval(
 );
 
 \echo 'authtoken_token'
-TRUNCATE authtoken_token CASCADE;
+DELETE FROM authtoken_token;
 INSERT INTO authtoken_token
     SELECT T.*
     FROM dblink(
@@ -379,7 +379,7 @@ INSERT INTO authtoken_token
 
 -- CLIENT
 \echo 'client_computer'
-TRUNCATE client_computer CASCADE;
+DELETE FROM client_computer;
 INSERT INTO client_computer
     SELECT id, uuid, status, name, fqdn, created_at, updated_at,
     ip_address, forwarded_ip_address, last_hardware_capture,
@@ -426,7 +426,7 @@ SELECT setval(
 );
 
 \echo 'client_computer_tags'
-TRUNCATE client_computer_tags CASCADE;
+DELETE FROM client_computer_tags;
 INSERT INTO client_computer_tags
     SELECT T.*
     FROM dblink(
@@ -443,7 +443,7 @@ SELECT setval(
 );
 
 \echo 'client_error'
-TRUNCATE client_error CASCADE;
+DELETE FROM client_error;
 INSERT INTO client_error
     SELECT T.*
     FROM dblink(
@@ -464,7 +464,7 @@ SELECT setval(
 );
 
 \echo 'client_fault'
-TRUNCATE client_fault CASCADE;
+DELETE FROM client_fault;
 INSERT INTO client_fault
     SELECT T.*
     FROM dblink(
@@ -486,7 +486,7 @@ SELECT setval(
 );
 
 \echo 'client_faultdefinition'
-TRUNCATE client_faultdefinition CASCADE;
+DELETE FROM client_faultdefinition;
 INSERT INTO client_faultdefinition
     SELECT T.*
     FROM dblink(
@@ -507,7 +507,7 @@ SELECT setval(
 );
 
 \echo 'client_faultdefinition_excluded_attributes'
-TRUNCATE client_faultdefinition_excluded_attributes CASCADE;
+DELETE FROM client_faultdefinition_excluded_attributes;
 INSERT INTO client_faultdefinition_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -525,7 +525,7 @@ SELECT setval(
 );
 
 \echo 'client_faultdefinition_included_attributes'
-TRUNCATE client_faultdefinition_included_attributes CASCADE;
+DELETE FROM client_faultdefinition_included_attributes;
 INSERT INTO client_faultdefinition_included_attributes
     SELECT T.*
     FROM dblink(
@@ -543,7 +543,7 @@ SELECT setval(
 );
 
 \echo 'client_faultdefinition_users'
-TRUNCATE client_faultdefinition_users CASCADE;
+DELETE FROM client_faultdefinition_users;
 INSERT INTO client_faultdefinition_users
     SELECT T.*
     FROM dblink(
@@ -561,7 +561,7 @@ SELECT setval(
 );
 
 \echo 'client_migration'
-TRUNCATE client_migration CASCADE;
+DELETE FROM client_migration;
 INSERT INTO client_migration
     SELECT T.*
     FROM dblink(
@@ -579,7 +579,7 @@ SELECT setval(
 );
 
 \echo 'client_notification'
-TRUNCATE client_notification CASCADE;
+DELETE FROM client_notification;
 INSERT INTO client_notification
     SELECT T.*
     FROM dblink(
@@ -598,14 +598,14 @@ SELECT setval(
 
 -- ONLY DELETE client_packagehistory
 \echo 'client_packagehistory'
-TRUNCATE client_packagehistory CASCADE;
+DELETE FROM client_packagehistory;
 SELECT setval(
     'client_packagehistory_id_seq'::regclass,
     (SELECT MAX(id) FROM ONLY public.client_packagehistory)
 );
 
 \echo 'client_statuslog'
-TRUNCATE client_statuslog CASCADE;
+DELETE FROM client_statuslog;
 INSERT INTO client_statuslog
     SELECT T.*
     FROM dblink(
@@ -623,7 +623,7 @@ SELECT setval(
 );
 
 \echo 'client_user'
-TRUNCATE client_user CASCADE;
+DELETE FROM client_user;
 INSERT INTO client_user
     SELECT T.* FROM dblink(
         'REMOTE',
@@ -640,7 +640,7 @@ SELECT setval(
 
 -- CORE
 \echo 'core_attribute'
-TRUNCATE core_attribute CASCADE;
+DELETE FROM core_attribute;
 INSERT INTO core_attribute
     SELECT T.id, T.value, T.description, T.longitude, T.latitude, T.property_att
     FROM dblink(
@@ -662,7 +662,7 @@ SELECT setval(
 );
 
 \echo 'core_attributeset'
-TRUNCATE core_attributeset CASCADE;
+DELETE FROM core_attributeset;
 INSERT INTO core_attributeset
     SELECT T.*
     FROM dblink(
@@ -683,7 +683,7 @@ SELECT setval(
 );
 
 \echo 'core_attributeset_excluded_attributes'
-TRUNCATE core_attributeset_excluded_attributes CASCADE;
+DELETE FROM core_attributeset_excluded_attributes;
 INSERT INTO core_attributeset_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -700,7 +700,7 @@ SELECT setval(
 );
 
 \echo 'core_attributeset_included_attributes'
-TRUNCATE core_attributeset_included_attributes CASCADE;
+DELETE FROM core_attributeset_included_attributes;
 INSERT INTO core_attributeset_included_attributes
     SELECT T.*
     FROM dblink(
@@ -717,7 +717,7 @@ SELECT setval(
 );
 
 \echo 'core_deployment'
-TRUNCATE core_deployment CASCADE;
+DELETE FROM core_deployment;
 INSERT INTO core_deployment
     SELECT T.*
     FROM dblink(
@@ -756,7 +756,7 @@ SELECT setval(
 );
 
 \echo 'core_deployment_available_packages'
-TRUNCATE core_deployment_available_packages CASCADE;
+DELETE FROM core_deployment_available_packages;
 INSERT INTO core_deployment_available_packages
     SELECT T.*
     FROM dblink(
@@ -781,7 +781,7 @@ SELECT setval(
 );
 
 \echo 'core_deployment_available_package_sets'
-TRUNCATE core_deployment_available_package_sets CASCADE;
+DELETE FROM core_deployment_available_package_sets;
 INSERT INTO core_deployment_available_package_sets
     SELECT T.*
     FROM dblink(
@@ -806,7 +806,7 @@ SELECT setval(
 );
 
 \echo 'core_deployment_excluded_attributes'
-TRUNCATE core_deployment_excluded_attributes CASCADE;
+DELETE FROM core_deployment_excluded_attributes;
 INSERT INTO core_deployment_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -824,7 +824,7 @@ SELECT setval(
 );
 
 \echo 'core_deployment_included_attributes'
-TRUNCATE core_deployment_included_attributes CASCADE;
+DELETE FROM core_deployment_included_attributes;
 INSERT INTO core_deployment_included_attributes
     SELECT T.*
     FROM dblink(
@@ -842,7 +842,7 @@ SELECT setval(
 );
 
 \echo 'core_domain'
-TRUNCATE core_domain CASCADE;
+DELETE FROM core_domain;
 INSERT INTO core_domain
     SELECT T.*
     FROM dblink(
@@ -859,7 +859,7 @@ SELECT setval(
 );
 
 \echo 'core_domain_excluded_attributes'
-TRUNCATE core_domain_excluded_attributes CASCADE;
+DELETE FROM core_domain_excluded_attributes;
 INSERT INTO core_domain_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -876,7 +876,7 @@ SELECT setval(
 );
 
 \echo 'core_domain_included_attributes'
-TRUNCATE core_domain_included_attributes CASCADE;
+DELETE FROM core_domain_included_attributes;
 INSERT INTO core_domain_included_attributes
     SELECT T.*
     FROM dblink(
@@ -893,7 +893,7 @@ SELECT setval(
 );
 
 \echo 'core_domain_tags'
-TRUNCATE core_domain_tags CASCADE;
+DELETE FROM core_domain_tags;
 INSERT INTO core_domain_tags
     SELECT T.*
     FROM dblink(
@@ -910,7 +910,7 @@ SELECT setval(
 );
 
 \echo 'core_package'
-TRUNCATE core_package CASCADE;
+DELETE FROM core_package;
 INSERT INTO core_package
     SELECT T.*
     FROM dblink(
@@ -938,7 +938,7 @@ SELECT setval(
 );
 
 \echo 'core_packageset'
-TRUNCATE core_packageset CASCADE;
+DELETE FROM core_packageset;
 INSERT INTO core_packageset
     SELECT T.*
     FROM dblink(
@@ -963,7 +963,7 @@ SELECT setval(
 );
 
 \echo 'core_platform'
-TRUNCATE core_platform CASCADE;
+DELETE FROM core_platform;
 INSERT INTO core_platform
     SELECT T.* FROM dblink(
         'REMOTE',
@@ -978,7 +978,7 @@ SELECT setval(
 );
 
 \echo 'core_project'
-TRUNCATE core_project CASCADE;
+DELETE FROM core_project;
 INSERT INTO core_project
     SELECT T.id, T.name, slugify(T.name), T.pms, 'amd64', T.auto_register_computers, T.platform
     FROM dblink(
@@ -1002,7 +1002,7 @@ SELECT setval(
 );
 
 \echo 'core_property'
-TRUNCATE core_property CASCADE;
+DELETE FROM core_property;
 INSERT INTO core_property
     SELECT *
     FROM dblink(
@@ -1026,7 +1026,7 @@ SELECT setval(
 );
 
 \echo 'core_schedule'
-TRUNCATE core_schedule CASCADE;
+DELETE FROM core_schedule;
 INSERT INTO core_schedule
     SELECT T.*
     FROM dblink(
@@ -1043,7 +1043,7 @@ SELECT setval(
 );
 
 \echo 'core_scheduledelay'
-TRUNCATE core_scheduledelay CASCADE;
+DELETE FROM core_scheduledelay;
 INSERT INTO core_scheduledelay
     SELECT T.*
     FROM dblink(
@@ -1061,7 +1061,7 @@ SELECT setval(
 );
 
 \echo 'core_scheduledelay_attributes'
-TRUNCATE core_scheduledelay_attributes CASCADE;
+DELETE FROM core_scheduledelay_attributes;
 INSERT INTO core_scheduledelay_attributes
     SELECT T.*
     FROM dblink(
@@ -1079,7 +1079,7 @@ SELECT setval(
 );
 
 \echo 'core_scope'
-TRUNCATE core_scope CASCADE;
+DELETE FROM core_scope;
 INSERT INTO core_scope
     SELECT T.*
     FROM dblink(
@@ -1097,7 +1097,7 @@ SELECT setval(
 );
 
 \echo 'core_scope_excluded_attributes'
-TRUNCATE core_scope_excluded_attributes CASCADE;
+DELETE FROM core_scope_excluded_attributes;
 INSERT INTO core_scope_excluded_attributes
     SELECT T.*
     FROM dblink(
@@ -1114,7 +1114,7 @@ SELECT setval(
 );
 
 \echo 'core_scope_included_attributes'
-TRUNCATE core_scope_included_attributes CASCADE;
+DELETE FROM core_scope_included_attributes;
 INSERT INTO core_scope_included_attributes
     SELECT T.*
     FROM dblink(
@@ -1131,7 +1131,7 @@ SELECT setval(
 );
 
 \echo 'core_store'
-TRUNCATE core_store CASCADE;
+DELETE FROM core_store;
 INSERT INTO core_store
     SELECT T.id, T.name, slugify(T.name), T.project_id
     FROM dblink(
@@ -1149,7 +1149,7 @@ SELECT setval(
 );
 
 \echo 'core_userprofile'
-TRUNCATE core_userprofile CASCADE;
+DELETE FROM core_userprofile;
 INSERT INTO core_userprofile
     SELECT T.*
     FROM dblink(
@@ -1163,7 +1163,7 @@ INSERT INTO core_userprofile
     );
 
 \echo 'core_userprofile_domains'
-TRUNCATE core_userprofile_domains CASCADE;
+DELETE FROM core_userprofile_domains;
 INSERT INTO core_userprofile_domains
     SELECT T.*
     FROM dblink(
@@ -1181,7 +1181,7 @@ SELECT setval(
 
 -- DEVICES
 \echo 'device_capability'
-TRUNCATE device_capability CASCADE;
+DELETE FROM device_capability;
 INSERT INTO device_capability
     SELECT T.*
     FROM dblink(
@@ -1197,7 +1197,7 @@ SELECT setval(
 );
 
 \echo 'device_connection'
-TRUNCATE device_connection CASCADE;
+DELETE FROM device_connection;
 INSERT INTO device_connection
     SELECT T.*
     FROM dblink(
@@ -1215,7 +1215,7 @@ SELECT setval(
 );
 
 \echo 'device_device'
-TRUNCATE device_device CASCADE;
+DELETE FROM device_device;
 INSERT INTO device_device
     SELECT T.*
     FROM dblink(
@@ -1234,7 +1234,7 @@ SELECT setval(
 );
 
 \echo 'device_device_available_for_attributes'
-TRUNCATE device_device_available_for_attributes CASCADE;
+DELETE FROM device_device_available_for_attributes;
 INSERT INTO device_device_available_for_attributes
     SELECT T.*
     FROM dblink(
@@ -1251,7 +1251,7 @@ SELECT setval(
 );
 
 \echo 'device_driver'
-TRUNCATE device_driver CASCADE;
+DELETE FROM device_driver;
 INSERT INTO device_driver
     SELECT T.*
     FROM dblink(
@@ -1271,7 +1271,7 @@ SELECT setval(
 );
 
 \echo 'device_logical'
-TRUNCATE device_logical CASCADE;
+DELETE FROM device_logical;
 INSERT INTO device_logical
     SELECT T.*
     FROM dblink(
@@ -1289,7 +1289,7 @@ SELECT setval(
 );
 
 \echo 'device_logical_attributes'
-TRUNCATE device_logical_attributes CASCADE;
+DELETE FROM device_logical_attributes;
 INSERT INTO device_logical_attributes
     SELECT T.*
     FROM dblink(
@@ -1306,7 +1306,7 @@ SELECT setval(
 );
 
 \echo 'device_manufacturer'
-TRUNCATE device_manufacturer CASCADE;
+DELETE FROM device_manufacturer;
 INSERT INTO device_manufacturer
     SELECT T.*
     FROM dblink(
@@ -1322,7 +1322,7 @@ SELECT setval(
 );
 
 \echo 'device_model'
-TRUNCATE device_model CASCADE;
+DELETE FROM device_model;
 INSERT INTO device_model
     SELECT T.*
     FROM dblink(
@@ -1340,7 +1340,7 @@ SELECT setval(
 );
 
 \echo 'device_model_connections'
-TRUNCATE device_model_connections CASCADE;
+DELETE FROM device_model_connections;
 INSERT INTO device_model_connections
     SELECT T.*
     FROM dblink(
@@ -1357,7 +1357,7 @@ SELECT setval(
 );
 
 \echo 'device_type'
-TRUNCATE device_type CASCADE;
+DELETE FROM device_type;
 INSERT INTO device_type
     SELECT T.*
     FROM dblink(
@@ -1374,7 +1374,7 @@ SELECT setval(
 
 -- HARDWARE
 \echo 'hardware_capability'
-TRUNCATE hardware_capability CASCADE;
+DELETE FROM hardware_capability;
 INSERT INTO hardware_capability
     SELECT T.*
     FROM dblink(
@@ -1392,7 +1392,7 @@ SELECT setval(
 );
 
 \echo 'hardware_configuration'
-TRUNCATE hardware_configuration CASCADE;
+DELETE FROM hardware_configuration;
 INSERT INTO hardware_configuration
     SELECT T.*
     FROM dblink(
@@ -1410,7 +1410,7 @@ SELECT setval(
 );
 
 \echo 'hardware_logicalname'
-TRUNCATE hardware_logicalname CASCADE;
+DELETE FROM hardware_logicalname;
 INSERT INTO hardware_logicalname
     SELECT T.*
     FROM dblink(
@@ -1427,7 +1427,7 @@ SELECT setval(
 );
 
 \echo 'hardware_node'
-TRUNCATE hardware_node CASCADE;
+DELETE FROM hardware_node;
 INSERT INTO hardware_node
     SELECT T.*
     FROM dblink(
@@ -1465,7 +1465,7 @@ SELECT setval(
 
 /* massive data */
 \echo 'client_computer_sync_attributes'
-TRUNCATE client_computer_sync_attributes CASCADE;
+DELETE FROM client_computer_sync_attributes;
 INSERT INTO client_computer_sync_attributes
     SELECT T.*
     FROM dblink(
@@ -1482,7 +1482,7 @@ SELECT setval(
 );
 
 \echo 'client_synchronization'
-TRUNCATE client_synchronization CASCADE;
+DELETE FROM client_synchronization;
 INSERT INTO client_synchronization
     SELECT T.*
     FROM dblink(
