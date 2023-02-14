@@ -261,35 +261,41 @@ SELECT setval(
     (SELECT MAX(id) FROM ONLY public.auth_group)
 );
 
+/*
 \echo 'auth_group_permissions'
 DELETE FROM auth_group_permissions;
 INSERT INTO auth_group_permissions
     SELECT T.*
     FROM dblink('REMOTE',
-    'SELECT id, group_id, permission_id FROM auth_group_permissions'
+    'SELECT id, group_id, permission_id
+    FROM auth_group_permissions'
     ) AS T(
         id int,
         group_id int,
         permission_id int
     );
+*/
 SELECT setval(
     'auth_group_permissions_id_seq'::regclass,
     (SELECT MAX(id) FROM ONLY public.auth_group_permissions)
 );
 
+/*
 \echo 'auth_permission'
 DELETE FROM auth_permission;
 INSERT INTO auth_permission
     SELECT T.*
     FROM dblink(
         'REMOTE',
-        'SELECT id, name, content_type_id, codename FROM auth_permission'
+        'SELECT id, name, content_type_id, codename
+        FROM auth_permission'
     ) AS T(
         id int,
         name varchar(255),
         content_type_id int,
         codename varchar(250)
     );
+*/
 SELECT setval(
     'auth_permission_id_seq'::regclass,
     (SELECT MAX(id) FROM ONLY public.auth_permission)
@@ -339,6 +345,7 @@ SELECT setval(
     (SELECT MAX(id) FROM ONLY public.auth_user_groups)
 );
 
+/*
 \echo 'auth_user_user_permissions'
 DELETE FROM auth_user_user_permissions;
 INSERT INTO auth_user_user_permissions
@@ -351,6 +358,7 @@ INSERT INTO auth_user_user_permissions
         user_id int,
         permission_id int
     );
+*/
 SELECT setval(
     'auth_user_user_permissions_id_seq'::regclass,
     (SELECT MAX(id) FROM ONLY public.auth_user_user_permissions)
