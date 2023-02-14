@@ -58,14 +58,14 @@ then
 
     _REPLICAS_BE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' ${STACK}_backend)
     _REPLICAS_FE=$(docker service inspect --format='{{.Spec.Mode.Replicated.Replicas}}' ${STACK}_frontend)
-    bash ../run/scale.sh ${STACK}_backend 0
-    bash ../run/scale.sh ${STACK}_frontend 0
+    bash ../run/scale ${STACK}_backend 0
+    bash ../run/scale ${STACK}_frontend 0
     echo "***** BACKEND & FRONTEND: DISABLED *****"
 
     /usr/bin/time -f "Time DATA MIGRATION: %E" docker exec ${DB_V5} bash -c "echo yes| bash /usr/share/migration/migrate_from_v4 $OLD_HOST $OLD_PORT $OLD_DB $OLD_USER $OLD_PWD"
 
-    bash ../run/scale.sh ${STACK}_backend $_REPLICAS_BE
-    bash ../run/scale.sh ${STACK}_frontend $_REPLICAS_FE
+    bash ../run/scale ${STACK}_backend $_REPLICAS_BE
+    bash ../run/scale ${STACK}_frontend $_REPLICAS_FE
     echo "***** BACKEND & FRONTEND: ENABLED *****"
 
     BE_V5=$(docker ps | grep ${STACK}_backend | awk '{print $1}' | head -n 1)
