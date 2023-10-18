@@ -132,4 +132,4 @@ CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = ['*']
 
 # Uncomment and fill with FQDN value
-# CSRF_TRUSTED_ORIGINS = ['fill_FQDN_value']
+# CSRF_TRUSTED_ORIGINS = ['http or https://fill_FQDN_value']
