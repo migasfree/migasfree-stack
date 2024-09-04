@@ -1,8 +1,10 @@
+#!/bin/bash
+
 QUEUES="pms-pacman"
 BROKER_URL=redis://datastore:6379/0
-BACKEND_URL=$BROKER_URL
 export MIGASFREE_FQDN=$FQDN
 export MIGASFREE_SECRET_DIR=/var/run/secrets
+export CELERY_BROKER_URL=$BROKER_URL
 
 function wait {
     local _SERVER=$1
@@ -83,5 +85,5 @@ echo "
 cd /pms
 reload_loadbalancer
 send_message ""
-celery -A migasfree.core.tasks -b $BROKER_URL --result-backend=$BROKER_URL \
+celery -A migasfree.core.pms.tasks -b $BROKER_URL --result-backend=$BROKER_URL \
     worker -l INFO --uid=890 -Q $QUEUES --concurrency=1
