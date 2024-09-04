@@ -1,4 +1,4 @@
-FROM debian:buster-slim as builder
+FROM debian:buster-slim AS builder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl nano git ca-certificates gnupg wget git make cmake clang libicu-dev && \
     git clone https://github.com/microsoft/msix-packaging  && \
@@ -26,18 +26,18 @@ ENV TERM=xterm \
     _UID=890 \
     _GID=890 
 
-# python3 -m pip install --no-cache-dir  --upgrade pyyaml
+# python3 -m pip install --no-cache-dir --upgrade pyyaml
 
 RUN _TAG=$(cat /VERSION) && \
-    _BUILD_DEPENDS=' python3-setuptools python3-pip wget' && \
+    _BUILD_DEPENDS='python3-setuptools python3-pip wget' && \
     _DEPENDS='gnupg dpkg-dev gzip python3 netcat libicu63 curl' && \
     _PIP_DEPENDS='requests celery[redis] pyyaml' && \
     usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
     chsh -s /bin/bash www-data && \
     apt-get update && \
-    apt-get install -y --no-install-recommends  $_DEPENDS && \
-    apt-get install -y --no-install-recommends  $_BUILD_DEPENDS && \
+    apt-get install -y --no-install-recommends $_DEPENDS && \
+    apt-get install -y --no-install-recommends $_BUILD_DEPENDS && \
     pip3 install $_PIP_DEPENDS && \
     mkdir /pms && \
     apt-get -y purge $_BUILD_DEPENDS && \
