@@ -144,13 +144,13 @@ function create_keys {
 
 function is_db_empty() {
     send_message "checking database is empty"
-    local _RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(*) FROM information_schema.tables WHERE table_type='BASE TABLE' and table_schema='$_NAME ' ; ")
+    local _RET=$(PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER $_NAME -tAc "SELECT count(*) FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema='$_NAME ' ; ")
     test $_RET -eq "$(echo "0")"
 }
 
 function is_db_exists() {
     send_message "checking is exists database"
-    PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 from pg_database WHERE datname='$_NAME'" 2> /dev/null | grep -q 1
+    PGPASSWORD=$_PASSWORD psql -h $_HOST -p $_PORT -U $_USER -tAc "SELECT 1 FROM pg_database WHERE datname='$_NAME'" 2> /dev/null | grep -q 1
     test $? -eq 0
 }
 
