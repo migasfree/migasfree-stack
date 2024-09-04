@@ -14,15 +14,15 @@ ENV TERM=xterm \
     _GID=890
 
 RUN _TAG=$(cat /VERSION) && \
-    _BUILD_DEPENDS=' python3-setuptools python3-pip wget' && \
+    _BUILD_DEPENDS='python3-setuptools python3-pip wget' && \
     _DEPENDS='gnupg dpkg-dev gzip python3 netcat-openbsd curl apt-utils' && \
     _PIP_DEPENDS='requests celery[redis]' && \
     usermod -u $_UID www-data && \
     groupmod -g $_GID www-data && \
     chsh -s /bin/bash www-data && \
     apt-get update && \
-    apt-get install -y --no-install-recommends  $_DEPENDS && \
-    apt-get install -y --no-install-recommends  $_BUILD_DEPENDS && \
+    apt-get install -y --no-install-recommends $_DEPENDS && \
+    apt-get install -y --no-install-recommends $_BUILD_DEPENDS && \
     pip3 install $_PIP_DEPENDS && \
     mkdir /pms && \
     apt-get -y purge $_BUILD_DEPENDS && \
