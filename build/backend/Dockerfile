@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as builder
+FROM debian:bullseye-slim AS builder
 LABEL maintainer="Alberto Gacías <alberto@migasfree.org>"
 
 COPY VERSION /VERSION
